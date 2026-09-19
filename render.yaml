@@ -1,11 +1,11 @@
 services:
   - type: web
     name: vantagem-api
-    runtime: node
+    runtime: docker
     plan: free
     rootDir: backend
-    buildCommand: npm ci && npm run build
-    startCommand: npm run migrate && npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
