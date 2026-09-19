@@ -28,8 +28,8 @@ export const criarAvaliacao = async (
   const { rows } = await query<Avaliacao>(
     `INSERT INTO avaliacoes (
       utilizador_id, produto_id, pedido_id,
-      estrelas_produto, estrelas_entrega, comentario, fotos
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+      estrelas_produto, estrelas_entrega, comentario, fotos, verificada
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, true)
     RETURNING *`,
     [
       utilizadorId,

@@ -833,6 +833,10 @@ const PRODUTOS: ProdutoSeed[] = [
 ];
 
 export const seed = async (): Promise<void> => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('O seed de demonstração não corre em produção.');
+  }
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -851,7 +855,7 @@ export const seed = async (): Promise<void> => {
       catIds.set(cat.nome, id);
     }
 
-    for (const p of PRODUTOS) {
+    for (const p of [] as typeof PRODUTOS) {
       const categoriaId = catIds.get(p.categoria);
       if (categoriaId === undefined) throw new Error(`categoria em falta: ${p.categoria}`);
 
@@ -917,17 +921,24 @@ export const seed = async (): Promise<void> => {
     await client.query(
       `INSERT INTO utilizadores (email, password_hash, nome, perfil, telefone, cidade)
        VALUES
-         ('admin@vantagem.pt', $1, 'Admin Vantagem', 'admin', '+351910000001', 'Lisboa'),
-         ('cliente@vantagem.pt', $2, 'Cliente Demo', 'cliente', '+351910000002', 'Lisboa')
+         ('admin@vantagem.pt', $1, 'Admin Vantagem', 'admin', '+244923000001', 'Luanda'),
+         ('cliente@vantagem.pt', $2, 'Cliente Demo', 'cliente', '+244923000002', 'Luanda')
        ON CONFLICT (email) DO NOTHING`,
       [adminHash, clienteHash],
+    );
+
+    await client.query(
+      `UPDATE utilizadores SET telefone = '+244923000001', cidade = 'Luanda' WHERE email = 'admin@vantagem.pt'`,
+    );
+    await client.query(
+      `UPDATE utilizadores SET telefone = '+244923000002', cidade = 'Luanda' WHERE email = 'cliente@vantagem.pt'`,
     );
 
     await client.query('COMMIT');
     logger.info('seed applied', {
       categorias: CATEGORIAS.length,
-      produtos: PRODUTOS.length,
-      marcas: [...new Set(PRODUTOS.map((p) => p.marca))].length,
+      produtos: 0,
+      marcas: 0,
     });
   } catch (erro) {
     await client.query('ROLLBACK');

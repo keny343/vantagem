@@ -1,8 +1,13 @@
-# Blueprint for Render. Open:
-# https://dashboard.render.com/blueprint/new?repo=https://github.com/keny343/vantagem
+# Blueprint: https://dashboard.render.com/blueprint/new?repo=https://github.com/keny343/vantagem
 #
-# DATABASE_URL: paste your Aiven Postgres URI (SSL).
-# CORS_ORIGINS: set after the Vercel URL exists, then redeploy.
+# Postgres fica no Render (vantagem-db). Uploads vão para o Supabase Storage.
+# Depois do frontend no Vercel, define CORS_ORIGINS e FRONTEND_URL e faz redeploy.
+
+databases:
+  - name: vantagem-db
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: '16'
 
 services:
   - type: web
@@ -19,12 +24,30 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: vantagem-db
+          property: connectionString
       - key: DATABASE_SSL
         value: 'true'
       - key: CORS_ORIGINS
         sync: false
+      - key: FRONTEND_URL
+        sync: false
       - key: SESSION_COOKIE_NAME
         value: vantagem_session
+      - key: CSRF_SECRET
+        generateValue: true
       - key: LOG_LEVEL
         value: info
+      - key: PAGAMENTO_MODO
+        value: demo
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: artigos
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

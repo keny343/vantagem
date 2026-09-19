@@ -34,3 +34,21 @@ export const requerPapel =
     }
     next();
   };
+
+/** Visitantes e clientes podem comprar; a conta de administrador só gere a loja. */
+export const bloquearComprasDeAdmin: RequestHandler = (req, _res, next) => {
+  void lerSessao(req)
+    .then((sessao) => {
+      if (sessao?.perfil === 'admin') {
+        next(
+          new AppError(
+            'FORBIDDEN',
+            'A conta de administrador não faz compras. Entra com uma conta de cliente para encomendar.',
+          ),
+        );
+        return;
+      }
+      next();
+    })
+    .catch(next);
+};

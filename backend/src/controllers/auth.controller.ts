@@ -4,7 +4,14 @@ import { env } from '../config/env.js';
 import { lerSessao } from '../middleware/authenticate.js';
 import { emitirCsrf, COOKIE_CSRF } from '../middleware/csrf.js';
 import * as authRepo from '../repositories/auth.repository.js';
-import { COOKIE_SESSAO, iniciarSessao, terminarSessao } from '../services/auth.service.js';
+import {
+  COOKIE_SESSAO,
+  iniciarSessao,
+  pedirRecuperacao,
+  redefinirPassword,
+  registarCliente,
+  terminarSessao,
+} from '../services/auth.service.js';
 
 const esquemaLogin = z.object({
   email: z.string().trim().min(3).max(200).email('Email inválido.'),
@@ -68,6 +75,50 @@ export const me = async (req: Request, res: Response): Promise<void> => {
       city: perfil?.cidade ?? null,
     },
   });
+};
+
+const esquemaRegisto = z.object({
+  nome: z.string().trim().min(2, 'Indica o teu nome.').max(160),
+  email: z.string().trim().min(3).max(200).email('Email inválido.'),
+  password: z
+    .string()
+    .min(8, 'A palavra-passe precisa de pelo menos 8 caracteres.')
+    .max(200)
+    .regex(/[A-Za-z]/, 'A palavra-passe precisa de uma letra.')
+    .regex(/\d/, 'A palavra-passe precisa de um número.'),
+  telefone: z.string().trim().max(40).optional(),
+});
+
+export const registo = async (req: Request, res: Response): Promise<void> => {
+  const dados = esquemaRegisto.parse(req.body);
+  const sessao = await registarCliente({
+    nome: dados.nome,
+    email: dados.email,
+    password: dados.password,
+    telefone: dados.telefone?.trim() ? dados.telefone : null,
+    ip: clienteIp(req),
+    userAgent: req.header('user-agent') ?? null,
+  });
+  res.cookie(COOKIE_SESSAO, sessao.token, opcoesCookie(sessao.expiresAt));
+  emitirCsrf(res);
+  res.status(201).json({ user: sessao.user });
+};
+
+export const recuperar = async (req: Request, res: Response): Promise<void> => {
+  const { email } = z.object({ email: z.string().trim().email('Email inválido.') }).parse(req.body);
+  await pedirRecuperacao(email);
+  res.json({ ok: true });
+};
+
+export const redefinir = async (req: Request, res: Response): Promise<void> => {
+  const dados = z
+    .object({
+      token: z.string().trim().min(20),
+      password: esquemaRegisto.shape.password,
+    })
+    .parse(req.body);
+  await redefinirPassword(dados.token, dados.password);
+  res.json({ ok: true });
 };
 
 export const csrf = (req: Request, res: Response): void => {

@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import * as contaController from '../controllers/conta.controller.js';
-import { requerAutenticacao } from '../middleware/authenticate.js';
+import { requerAutenticacao, requerPapel } from '../middleware/authenticate.js';
 
 const router = Router();
 
-// Todas as rotas exigem autenticação
-router.use(requerAutenticacao);
+router.use(requerAutenticacao, requerPapel('cliente'));
 
 // Dashboard
 router.get('/dashboard', contaController.obterDashboard);

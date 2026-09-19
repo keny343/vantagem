@@ -1,25 +1,32 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api, type Product } from '../api/client';
+import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
+import { ErroBloco } from '../ui/ErroBloco';
 import { ProductCard, ProductSkeleton } from '../ui/ProductCard';
 import { formatEuro } from '../utils/format';
+
+const MAX_SLIDER = 500_000;
 
 export function CatalogoPage() {
   const [params, setParams] = useSearchParams();
   const [q, setQ] = useState(params.get('q') ?? '');
   const [categoria, setCategoria] = useState(params.get('categoria') ?? '');
   const [marca, setMarca] = useState(params.get('marca') ?? '');
-  const [max, setMax] = useState(Number(params.get('max') ?? 3500));
-  const [categorias, setCategorias] = useState<string[]>([]);
+  const [max, setMax] = useState(Number(params.get('max') ?? MAX_SLIDER));
+  const [sort, setSort] = useState(params.get('sort') ?? 'relevancia');
+  const [categorias, setCategorias] = useState<{ slug: string; name: string }[]>([]);
   const [marcas, setMarcas] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState('');
+  useTitulo(q ? `Pesquisa: ${q}` : 'Catálogo');
 
   useEffect(() => {
     void (async () => {
       const [c, m] = await Promise.all([api.categorias(), api.marcas()]);
-      setCategorias(c.categorias.map((x) => x.name));
+      setCategorias(c.categorias);
       setMarcas(m.brands);
     })();
   }, []);
@@ -28,6 +35,7 @@ export function CatalogoPage() {
     setQ(params.get('q') ?? '');
     setCategoria(params.get('categoria') ?? '');
     setMarca(params.get('marca') ?? '');
+    setSort(params.get('sort') ?? 'relevancia');
   }, [params]);
 
   useEffect(() => {
@@ -39,24 +47,29 @@ export function CatalogoPage() {
             q: q || undefined,
             categoria: categoria || undefined,
             marca: marca || undefined,
-            max,
+            max: max < MAX_SLIDER ? max : undefined,
+            sort,
           });
           setProducts(res.products);
+          setErro('');
+        } catch {
+          setErro('Não foi possível carregar o catálogo.');
         } finally {
           setLoading(false);
         }
       })();
     }, 200);
     return () => clearTimeout(t);
-  }, [q, categoria, marca, max]);
+  }, [q, categoria, marca, max, sort]);
 
-  const countLabel = useMemo(() => `${products.length} referências`, [products.length]);
+  const countLabel = useMemo(() => `${products.length} artigos`, [products.length]);
 
   function limpar() {
     setQ('');
     setCategoria('');
     setMarca('');
-    setMax(3500);
+    setMax(MAX_SLIDER);
+    setSort('relevancia');
     setParams({});
   }
 
@@ -69,15 +82,28 @@ export function CatalogoPage() {
             {countLabel}
           </p>
         </div>
-        <div className="flex h-10 w-full max-w-xs items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60">
-          <span className="font-mono text-xs text-steel">⌕</span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Pesquisar no catálogo…"
-            aria-label="Pesquisar no catálogo"
-            className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-steel/70"
-          />
+        <div className="flex w-full max-w-xl flex-wrap items-center gap-2">
+          <div className="flex h-10 min-w-[12rem] flex-1 items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60">
+            <span className="font-mono text-xs text-steel">⌕</span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Pesquisar no catálogo…"
+              aria-label="Pesquisar no catálogo"
+              className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-steel/70"
+            />
+          </div>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="h-10 rounded-md border border-line bg-panel px-3 font-mono text-[11px] text-zinc-200"
+            aria-label="Ordenar"
+          >
+            <option value="relevancia">Relevância</option>
+            <option value="preco_asc">Preço ↑</option>
+            <option value="preco_desc">Preço ↓</option>
+            <option value="novos">Novos</option>
+          </select>
         </div>
       </div>
 
@@ -99,16 +125,16 @@ export function CatalogoPage() {
               <div className="space-y-1">
                 {categorias.map((c) => (
                   <button
-                    key={c}
+                    key={c.slug}
                     type="button"
-                    onClick={() => setCategoria(categoria === c ? '' : c)}
+                    onClick={() => setCategoria(categoria === c.slug ? '' : c.slug)}
                     className={`block w-full rounded px-2 py-1.5 text-left text-sm transition-colors ${
-                      categoria === c
+                      categoria === c.slug
                         ? 'bg-acid/15 text-acid'
                         : 'text-zinc-300 hover:bg-panel2 hover:text-white'
                     }`}
                   >
-                    {c}
+                    {c.name}
                   </button>
                 ))}
               </div>
@@ -117,17 +143,19 @@ export function CatalogoPage() {
               <div className="mb-2 font-display text-sm font-medium text-white">Preço máximo</div>
               <input
                 type="range"
-                min={40}
-                max={3500}
-                step={10}
+                min={1_000}
+                max={MAX_SLIDER}
+                step={1_000}
                 value={max}
                 onChange={(e) => setMax(Number(e.target.value))}
                 className="w-full accent-acid"
                 aria-label="Preço máximo"
               />
               <div className="mt-1 flex justify-between font-mono text-[10px] text-steel">
-                <span>40 €</span>
-                <span className="text-acid">{formatEuro(max)}</span>
+                <span>1 000 Kz</span>
+                <span className="text-acid">
+                  {max >= MAX_SLIDER ? 'Sem tecto' : formatEuro(max)}
+                </span>
               </div>
             </div>
             <div className="border-t border-line pt-4">
@@ -153,7 +181,24 @@ export function CatalogoPage() {
         </aside>
 
         <div>
-          {loading ? (
+          {(q || categoria || marca || max < MAX_SLIDER) && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {q && <Chip texto={`Pesquisa: ${q}`} onLimpar={() => setQ('')} />}
+              {categoria && (
+                <Chip
+                  texto={categorias.find((c) => c.slug === categoria)?.name ?? categoria}
+                  onLimpar={() => setCategoria('')}
+                />
+              )}
+              {marca && <Chip texto={marca} onLimpar={() => setMarca('')} />}
+              {max < MAX_SLIDER && (
+                <Chip texto={`Até ${formatEuro(max)}`} onLimpar={() => setMax(MAX_SLIDER)} />
+              )}
+            </div>
+          )}
+          {erro ? (
+            <ErroBloco mensagem={erro} onTentar={() => setSort((s) => s)} extra={<Link to="/ajuda" className="font-mono text-[11px] text-acid">Ajuda</Link>} />
+          ) : loading ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <ProductSkeleton key={i} />
@@ -161,10 +206,25 @@ export function CatalogoPage() {
             </div>
           ) : products.length === 0 ? (
             <div className="rounded-[14px] border border-line bg-panel p-10 text-center">
-              <p className="font-display text-lg text-white">Sem resultados</p>
-              <p className="mt-2 font-mono text-[11px] text-steel">
-                Ajusta os filtros ou limpa a pesquisa.
+              <p className="font-display text-lg text-white">
+                {q || categoria || marca || max < MAX_SLIDER
+                  ? 'Sem resultados'
+                  : 'Ainda não há artigos'}
               </p>
+              <p className="mt-2 font-mono text-[11px] text-steel">
+                {q || categoria || marca || max < MAX_SLIDER
+                  ? 'Ajusta os filtros ou limpa a pesquisa.'
+                  : 'O catálogo está vazio. Os artigos publicados no painel aparecem aqui.'}
+              </p>
+              {(q || categoria || marca || max < MAX_SLIDER) && (
+                <button
+                  type="button"
+                  onClick={limpar}
+                  className="mt-4 h-10 rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -176,5 +236,17 @@ export function CatalogoPage() {
         </div>
       </div>
     </StoreShell>
+  );
+}
+
+function Chip({ texto, onLimpar }: { texto: string; onLimpar: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onLimpar}
+      className="rounded-full bg-acid/15 px-3 py-1 font-mono text-[10px] tracking-[0.08em] text-acid uppercase"
+    >
+      {texto} ✕
+    </button>
   );
 }

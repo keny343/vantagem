@@ -1,117 +1,126 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { type Product } from '../api/client';
-import { ProductCard } from '../ui/ProductCard';
-import { StoreShell } from '../layout/StoreShell';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import { api, type Product } from '../api/client';
 import { useSession } from '../auth/SessionContext';
-
-interface FavoritosResponse {
-  products: Product[];
-}
+import { useTitulo } from '../hooks/useTitulo';
+import { StoreShell } from '../layout/StoreShell';
+import { useAvisos } from '../ui/Avisos';
+import { ErroBloco } from '../ui/ErroBloco';
+import { ProductCard } from '../ui/ProductCard';
 
 export default function FavoritosPage() {
   const { user, loading: sessionLoading } = useSession();
-  const navigate = useNavigate();
+  const { avisar } = useAvisos();
   const [produtos, setProdutos] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState('');
+  useTitulo('Favoritos');
 
-  const carregarFavoritos = () => {
-    if (!user) return;
-    
+  const carregar = useCallback(async () => {
     setLoading(true);
-    fetch('/api/conta/favoritos', {
-      credentials: 'include',
-    })
-      .then((res) => {
-        if (!res.ok) {
-          if (res.status === 401) {
-            navigate('/login');
-            return;
-          }
-          throw new Error('Erro ao carregar favoritos');
-        }
-        return res.json();
-      })
-      .then((data: FavoritosResponse | undefined) => data && setProdutos(data.products))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
+    setErro('');
+    try {
+      const res = await api.favoritos();
+      setProdutos(res.products);
+    } catch {
+      setErro('Não foi possível carregar os favoritos.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!sessionLoading && !user) {
-      navigate('/login');
-      return;
-    }
-    if (user) {
-      carregarFavoritos();
-    }
-  }, [user, sessionLoading, navigate]);
+    if (!user) return;
+    void carregar();
+  }, [user, carregar]);
 
-  const removerFavorito = (produtoId: string) => {
-    fetch(`/api/conta/favoritos/${produtoId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-      .then(() => {
-        setProdutos((prev) => prev.filter((p) => p.id !== produtoId));
-      })
-      .catch(console.error);
-  };
+  async function remover(produto: Product) {
+    try {
+      await api.removerFavorito(produto.slug);
+      setProdutos((prev) => prev.filter((p) => p.id !== produto.id));
+      avisar(`${produto.name} saiu dos favoritos.`, {
+        tipo: 'info',
+        acao: {
+          label: 'Anular',
+          onClick: () => {
+            void api.adicionarFavorito(produto.slug).then(() => {
+              setProdutos((prev) =>
+                prev.some((p) => p.id === produto.id) ? prev : [produto, ...prev],
+              );
+            });
+          },
+        },
+      });
+    } catch {
+      setErro('Não foi possível remover o favorito.');
+    }
+  }
 
-  if (loading) {
+  if (sessionLoading) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 py-12">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-64 bg-steel/20 rounded" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-96 bg-steel/20 rounded" />
-            ))}
-        </div>
-      </div>
-    </StoreShell>
-  );
-}
+      <StoreShell>
+        <div className="mt-16 text-center font-mono text-steel">A carregar…</div>
+      </StoreShell>
+    );
+  }
+
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <StoreShell>
-      <div className="min-h-screen bg-vault">
-        <div className="container mx-auto max-w-7xl px-4 py-12">
-        <h1 className="text-3xl font-bold text-acid mb-8">❤️ Favoritos</h1>
-
-        {produtos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-steel mb-4">Ainda não tens produtos favoritos.</p>
-            <a
-              href="/catalogo"
-              className="inline-block px-6 py-3 bg-acid text-vault font-bold rounded hover:bg-acid/90 transition-colors"
-            >
-              Explorar catálogo
-            </a>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {produtos.map((produto) => (
-              <div key={produto.id} className="relative group">
-                <ProductCard product={produto} />
-                <button
-                  onClick={() => removerFavorito(produto.id)}
-                  className="absolute top-2 right-2 bg-red-500/90 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  aria-label="Remover favorito"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="mt-8 flex items-end justify-between gap-4">
+        <div>
+          <div className="label-mono">Conta</div>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Favoritos</h1>
+        </div>
+        <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
+          ← Voltar
+        </Link>
       </div>
-    </div>
+
+      {erro && (
+        <div className="mt-6">
+          <ErroBloco
+            mensagem={erro}
+            onTentar={() => void carregar()}
+            extra={
+              <Link to="/ajuda" className="grid h-10 place-items-center font-mono text-[11px] text-acid">
+                Ajuda
+              </Link>
+            }
+          />
+        </div>
+      )}
+
+      {loading ? (
+        <p className="mt-10 font-mono text-[11px] text-steel">A carregar favoritos…</p>
+      ) : produtos.length === 0 && !erro ? (
+        <div className="mt-10 rounded-[14px] border border-line bg-panel p-8 text-center">
+          <p className="font-mono text-[11px] text-steel">Ainda não tens artigos favoritos.</p>
+          <Link
+            to="/catalogo"
+            className="mt-4 inline-grid h-10 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+          >
+            Explorar catálogo
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {produtos.map((produto) => (
+            <div key={produto.id} className="relative">
+              <ProductCard product={produto} />
+              <button
+                type="button"
+                onClick={() => void remover(produto)}
+                className="absolute top-3 right-3 rounded-md bg-ink/80 px-2 py-1 font-mono text-[10px] tracking-[0.12em] text-white uppercase ring-1 ring-line hover:text-acid"
+                aria-label={`Retirar ${produto.name} dos favoritos`}
+              >
+                Retirar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </StoreShell>
   );
 }

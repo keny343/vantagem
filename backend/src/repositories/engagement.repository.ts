@@ -87,6 +87,12 @@ export const listarNotificacoes = async (
   return rows;
 };
 
+export const marcarTodasLidas = async (utilizadorId: string): Promise<void> => {
+  await query(`UPDATE notificacoes SET lida = true WHERE utilizador_id = $1 AND lida = false`, [
+    utilizadorId,
+  ]);
+};
+
 export const marcarComoLida = async (id: string, utilizadorId: string): Promise<boolean> => {
   const { rowCount } = await query(
     `UPDATE notificacoes SET lida = true WHERE id = $1 AND utilizador_id = $2`,

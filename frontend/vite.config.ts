@@ -13,6 +13,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': paraApi,
+      '/uploads': paraApi,
       '/health': paraApi,
       '/ready': paraApi,
     },

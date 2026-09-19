@@ -4,14 +4,17 @@ import express, { type Express } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { env } from './config/env.js';
+import { PASTA_UPLOADS, garantirPastasUpload } from './config/uploads.js';
 import { getHealth, getReady } from './controllers/catalog.controller.js';
 import { garantirCsrf, requerCsrf } from './middleware/csrf.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { requestContext } from './middleware/requestContext.js';
 import { apiRouter } from './routes/index.js';
 import { AppError } from './utils/errors.js';
+import './utils/zodPt.js';
 
 export const createApp = (): Express => {
+  garantirPastasUpload();
   const app = express();
 
   app.set('trust proxy', 1);
@@ -46,6 +49,7 @@ export const createApp = (): Express => {
   app.use(express.json({ limit: '256kb' }));
   app.use(express.urlencoded({ extended: false, limit: '256kb' }));
   app.use(cookieParser());
+  app.use('/uploads', express.static(PASTA_UPLOADS, { maxAge: '7d', index: false }));
 
   app.use(
     '/api',

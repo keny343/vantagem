@@ -63,3 +63,16 @@ export const marcarNotificacaoLida = async (
     next(erro);
   }
 };
+
+export const marcarTodasLidas = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    await engagement.marcarTodasLidas(req.auth!.userId);
+    res.json({ ok: true });
+  } catch (erro) {
+    next(erro);
+  }
+};

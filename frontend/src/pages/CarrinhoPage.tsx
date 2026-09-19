@@ -1,10 +1,24 @@
 import { Link } from 'react-router-dom';
+import { urlMedia } from '../api/client';
 import { useCart } from '../cart/CartContext';
+import { LOJA, faltaParaEnvioGratis, ivaIncluidoDe } from '../config/loja';
+import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
+import { useAvisos } from '../ui/Avisos';
 import { formatEuro } from '../utils/format';
 
 export function CarrinhoPage() {
   const cart = useCart();
+  const { avisar } = useAvisos();
+  useTitulo('Carrinho');
+
+  function retirar(id: string, variant: string) {
+    cart.remove(id, variant);
+    avisar('Artigo retirado do carrinho.', {
+      tipo: 'info',
+      acao: { label: 'Anular', onClick: () => cart.desfazer() },
+    });
+  }
 
   return (
     <StoreShell>
@@ -32,7 +46,7 @@ export function CarrinhoPage() {
                 className="flex items-center gap-4 border-b border-line p-4 last:border-b-0"
               >
                 <img
-                  src={line.image}
+                  src={urlMedia(line.image)}
                   alt={line.name}
                   className="size-20 rounded-lg border border-line object-cover"
                 />
@@ -45,8 +59,13 @@ export function CarrinhoPage() {
                 <div className="flex h-9 items-center rounded-md border border-line">
                   <button
                     type="button"
-                    onClick={() => cart.setQty(line.id, line.variant, line.qty - 1)}
+                    onClick={() =>
+                      line.qty <= 1
+                        ? retirar(line.id, line.variant)
+                        : cart.setQty(line.id, line.variant, line.qty - 1)
+                    }
                     className="px-2.5 font-mono text-xs text-steel hover:text-acid"
+                    aria-label="Diminuir quantidade"
                   >
                     −
                   </button>
@@ -55,6 +74,7 @@ export function CarrinhoPage() {
                     type="button"
                     onClick={() => cart.setQty(line.id, line.variant, line.qty + 1)}
                     className="px-2.5 font-mono text-xs text-steel hover:text-acid"
+                    aria-label="Aumentar"
                   >
                     +
                   </button>
@@ -64,10 +84,11 @@ export function CarrinhoPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => cart.remove(line.id, line.variant)}
+                  onClick={() => retirar(line.id, line.variant)}
                   className="font-mono text-[10px] tracking-[0.1em] text-steel uppercase hover:text-destructive"
+                  aria-label={`Retirar ${line.name}`}
                 >
-                  ✕
+                  Retirar
                 </button>
               </div>
             ))}
@@ -85,7 +106,16 @@ export function CarrinhoPage() {
                   {cart.shipping === 0 ? 'Grátis' : formatEuro(cart.shipping)}
                 </dd>
               </div>
+              <div className="flex justify-between">
+                <dt>IVA incluído</dt>
+                <dd className="text-zinc-200">{formatEuro(ivaIncluidoDe(cart.total))}</dd>
+              </div>
             </dl>
+            {faltaParaEnvioGratis(cart.subtotal) > 0 && (
+              <p className="mt-3 font-mono text-[10px] text-steel">
+                Faltam {formatEuro(faltaParaEnvioGratis(cart.subtotal))} para envio grátis.
+              </p>
+            )}
             <div className="mt-4 flex items-center justify-between border-t border-line pt-4 font-display text-lg text-white">
               <span>Total</span>
               <span>{formatEuro(cart.total)}</span>
@@ -96,7 +126,15 @@ export function CarrinhoPage() {
             >
               Finalizar compra
             </Link>
-            <p className="mt-2 text-center font-mono text-[10px] text-steel">2 passos · seguro</p>
+            <Link
+              to="/catalogo"
+              className="mt-2 block text-center font-mono text-[10px] text-steel uppercase hover:text-acid"
+            >
+              Continuar a ver artigos
+            </Link>
+            <p className="mt-2 text-center font-mono text-[10px] text-steel">
+              IVA {Math.round(LOJA.taxaIva * 100)}% incluído · Envio em Angola
+            </p>
           </aside>
         </div>
       )}

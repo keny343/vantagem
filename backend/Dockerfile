@@ -16,5 +16,6 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY migrations ./migrations
+RUN mkdir -p /app/uploads/produtos
 EXPOSE 10000
 CMD ["sh", "-c", "npm run prestart:migrate && npm start"]

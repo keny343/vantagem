@@ -16,12 +16,11 @@ bloquear e actualizar a linha sem misturar com o catálogo.
 | `pedidos` | Encomendas |
 | `itens_de_pedido` | Linhas do pedido (preço congelado) |
 
-## Contas de demo (seed)
+## Contas
 
-| Email | Password | Perfil |
-|---|---|---|
-| `admin@vantagem.pt` | `AdminDemo!2026` | admin |
-| `cliente@vantagem.pt` | `ClienteDemo!2026` | cliente |
+Em desenvolvimento o seed pode criar contas locais. Em produção o primeiro
+administrador nasce de `ADMIN_EMAIL` + `ADMIN_PASSWORD` no arranque da API.
+O seed recusa-se a correr com `NODE_ENV=production`.
 
 ## Migrações
 

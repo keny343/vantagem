@@ -115,6 +115,61 @@ export const revogarSessao = async (tokenHash: string): Promise<void> => {
   );
 };
 
+export const criarCliente = async (dados: {
+  email: string;
+  passwordHash: string;
+  nome: string;
+  telefone: string | null;
+}): Promise<UtilizadorRow> => {
+  const { rows } = await query<UtilizadorRow>(
+    `INSERT INTO utilizadores (email, password_hash, nome, telefone, perfil)
+     VALUES ($1, $2, $3, $4, 'cliente')
+     RETURNING id, email, password_hash, nome, perfil, activo`,
+    [dados.email, dados.passwordHash, dados.nome, dados.telefone],
+  );
+  return rows[0]!;
+};
+
+export const guardarTokenRecuperacao = async (
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date,
+): Promise<void> => {
+  await query(
+    `UPDATE tokens_recuperacao SET used_at = now()
+     WHERE utilizador_id = $1 AND used_at IS NULL`,
+    [userId],
+  );
+  await query(
+    `INSERT INTO tokens_recuperacao (utilizador_id, token_hash, expires_at)
+     VALUES ($1, $2, $3)`,
+    [userId, tokenHash, expiresAt],
+  );
+};
+
+export const encontrarTokenRecuperacao = async (
+  tokenHash: string,
+): Promise<{ id: string; utilizador_id: string } | null> => {
+  const { rows } = await query<{ id: string; utilizador_id: string }>(
+    `SELECT id, utilizador_id FROM tokens_recuperacao
+     WHERE token_hash = $1 AND used_at IS NULL AND expires_at > now()
+     LIMIT 1`,
+    [tokenHash],
+  );
+  return rows[0] ?? null;
+};
+
+export const gastarTokenRecuperacao = async (id: string): Promise<void> => {
+  await query(`UPDATE tokens_recuperacao SET used_at = now() WHERE id = $1`, [id]);
+};
+
+export const actualizarPassword = async (userId: string, passwordHash: string): Promise<void> => {
+  await query(
+    `UPDATE utilizadores SET password_hash = $1, updated_at = now() WHERE id = $2`,
+    [passwordHash, userId],
+  );
+};
+
 export const obterUtilizador = async (
   id: string,
 ): Promise<{

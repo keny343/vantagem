@@ -1,10 +1,12 @@
 import { migrate } from './migrate.js';
+import { garantirAdminInicial } from './bootstrap.js';
 import { closePool } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 
 try {
   const { aplicadas } = await migrate();
   logger.info('prestart migrations done', { count: aplicadas.length });
+  await garantirAdminInicial();
 } catch (erro) {
   logger.error('prestart migration failed', {
     message: erro instanceof Error ? erro.message : String(erro),

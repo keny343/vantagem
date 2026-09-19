@@ -2,9 +2,9 @@
 
 ## Checklist (ordem)
 
-1. **Aiven** — criar Postgres, copiar URI SSL → `DATABASE_URL`
-2. **GitHub** — publicar este repo (precisa de token com scope `repo`)
-3. **Render** — Web Service Docker (`backend/`), blueprint `render.yaml`
+1. **GitHub** — publicar este repo na branch `main`
+2. **Render** — Blueprint `render.yaml` (API Docker + Postgres gerido)
+3. **Supabase** — bucket público `artigos` para fotografias e comprovativos
 4. **Vercel** — importar repo, root `frontend/`
 5. Ligar URLs cruzadas (`CORS_ORIGINS` ↔ `VITE_API_BASE`) e redeploy
 
@@ -20,25 +20,34 @@
 
 1. Blueprint `render.yaml` ou Web Service Docker com root `backend`
 2. Dockerfile incluído; health check: `/health`
-3. Env obrigatórias:
-   - `DATABASE_URL` — URI Aiven (com `?sslmode=require` se necessário)
+3. Env:
+   - `DATABASE_URL` — vem do Postgres Render (`fromDatabase`)
    - `DATABASE_SSL=true`
    - `CORS_ORIGINS=https://<frontend>.vercel.app`
+   - `FRONTEND_URL=https://<frontend>.vercel.app`
+   - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET=artigos`
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — cria o primeiro administrador no arranque
    - `NODE_ENV=production`
-   - `SESSION_COOKIE_NAME=vantagem_session`
 4. Bind: `0.0.0.0:$PORT` (já no código)
-5. Após o primeiro deploy: `npm run seed` uma vez (shell Render ou local com a URI de produção) para catálogo + contas demo
+5. Não corras `npm run seed` em produção. O catálogo começa vazio.
 
-## Base de dados → Aiven
+## Base de dados → Render Postgres
 
-1. Serviço PostgreSQL
-2. Copiar connection string para `DATABASE_URL`
+1. Instância `vantagem-db` (mesmo região da API: Frankfurt)
+2. A API usa a connection string interna
 3. Migrações correm no arranque do contentor (`prestart:migrate`)
+
+## Uploads → Supabase Storage
+
+1. Project Settings → API: `SUPABASE_URL` e service role key
+2. Storage: criar bucket público `artigos`
+3. Pastas usadas pela API: `produtos/` e `comprovativos/`
 
 ## Fluxo
 
 ```
-Browser (Vercel) --HTTPS--> API (Render) --TLS--> Postgres (Aiven)
+Browser (Vercel) --HTTPS--> API (Render) --TLS interno--> Postgres (Render)
+API --HTTPS--> Supabase Storage (fotografias)
 ```
 
 Cookies de sessão e CSRF usam `SameSite=None; Secure` em produção.

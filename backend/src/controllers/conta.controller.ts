@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import * as enderecosRepo from '../repositories/enderecos.repository.js';
 import * as favoritosRepo from '../repositories/favoritos.repository.js';
 import { query } from '../config/database.js';
@@ -172,28 +173,35 @@ export const criarEndereco = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const {
-      nome,
-      destinatario,
-      telefone,
-      morada,
-      codigo_postal,
-      cidade,
-      ponto_referencia,
-      observacoes,
-      principal,
-    } = req.body;
+    const dados = z
+      .object({
+        nome: z.string().trim().max(80).optional(),
+        destinatario: z.string().trim().min(2, 'Indica o nome de quem recebe.').max(160),
+        telefone: z.string().trim().min(9, 'Indica o telemóvel.').max(40),
+        morada: z.string().trim().min(3, 'Indica a morada.').max(300),
+        codigo_postal: z.string().trim().max(40).optional(),
+        cidade: z.string().trim().min(2, 'Indica a cidade ou município.').max(100),
+        ponto_referencia: z.string().trim().max(200).optional(),
+        observacoes: z.string().trim().max(400).optional(),
+        principal: z.boolean().optional(),
+      })
+      .parse(req.body);
+
+    const telefone = dados.telefone.replace(/[\s-]/g, '');
+    if (!/^(\+244)?9\d{8}$/.test(telefone)) {
+      throw new AppError('VALIDATION_ERROR', 'Telemóvel angolano inválido (9 dígitos a começar por 9).');
+    }
 
     const endereco = await enderecosRepo.criarEndereco(req.auth!.userId, {
-      nome: nome || 'Novo',
-      destinatario,
+      nome: dados.nome && dados.nome.length > 0 ? dados.nome : 'Novo',
+      destinatario: dados.destinatario,
       telefone,
-      morada,
-      codigo_postal: codigo_postal || null,
-      cidade,
-      ponto_referencia: ponto_referencia || null,
-      observacoes: observacoes || null,
-      principal: principal ?? false,
+      morada: dados.morada,
+      codigo_postal: dados.codigo_postal && dados.codigo_postal.length > 0 ? dados.codigo_postal : null,
+      cidade: dados.cidade,
+      ponto_referencia: dados.ponto_referencia && dados.ponto_referencia.length > 0 ? dados.ponto_referencia : null,
+      observacoes: dados.observacoes && dados.observacoes.length > 0 ? dados.observacoes : null,
+      principal: dados.principal ?? false,
     });
 
     res.status(201).json({ endereco });
@@ -287,8 +295,8 @@ export const adicionarFavorito = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { produtoId } = req.body;
-    await favoritosRepo.adicionarFavorito(req.auth!.userId, produtoId);
+    const slug = z.string().trim().min(1).max(80).parse(req.body.slug ?? req.body.produtoId);
+    await favoritosRepo.adicionarFavorito(req.auth!.userId, slug);
     res.json({ ok: true });
   } catch (erro) {
     next(erro);

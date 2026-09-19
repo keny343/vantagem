@@ -19,7 +19,9 @@ export interface ProdutoRow {
   descricao: string;
   badge: string | null;
   featured: boolean;
+  hero: boolean;
   vendidos: number;
+  garantia_meses: number | null;
 }
 
 const asStringArray = (valor: string[] | string): string[] => {
@@ -56,7 +58,9 @@ export const mapearProduto = (row: ProdutoRow): ProdutoPublico => ({
   description: row.descricao,
   badge: row.badge,
   featured: row.featured,
+  hero: row.hero,
   sold: row.vendidos,
+  warrantyMonths: row.garantia_meses,
 });
 
 const SELECT_BASE = `
@@ -78,7 +82,9 @@ const SELECT_BASE = `
     p.descricao,
     p.badge,
     p.featured,
-    p.vendidos
+    p.hero,
+    p.vendidos,
+    p.garantia_meses
   FROM produtos p
   INNER JOIN categorias c ON c.id = p.categoria_id
   INNER JOIN stock s ON s.produto_id = p.id
@@ -91,6 +97,8 @@ export interface FiltrosCatalogo {
   marca?: string;
   maxEuros?: number;
   featured?: boolean;
+  hero?: boolean;
+  sort?: 'relevancia' | 'preco_asc' | 'preco_desc' | 'novos';
 }
 
 export const listarCategorias = async (): Promise<{ slug: string; nome: string; ordem: number }[]> => {
@@ -141,9 +149,21 @@ export const listarProdutos = async (filtros: FiltrosCatalogo = {}): Promise<Pro
     clausulas.push(`p.featured = true`);
   }
 
+  if (filtros.hero === true) {
+    clausulas.push(`p.hero = true`);
+  }
+
   const whereExtra = clausulas.length > 0 ? ` AND ${clausulas.join(' AND ')}` : '';
+  const ordem =
+    filtros.sort === 'preco_asc'
+      ? 'p.preco_centimos ASC, p.nome ASC'
+      : filtros.sort === 'preco_desc'
+        ? 'p.preco_centimos DESC, p.nome ASC'
+        : filtros.sort === 'novos'
+          ? 'p.created_at DESC'
+          : 'p.hero DESC, p.featured DESC, p.vendidos DESC, p.nome ASC';
   const { rows } = await query<ProdutoRow>(
-    `${SELECT_BASE}${whereExtra} ORDER BY p.featured DESC, p.vendidos DESC, p.nome ASC`,
+    `${SELECT_BASE}${whereExtra} ORDER BY ${ordem}`,
     params,
   );
   return rows.map(mapearProduto);
@@ -164,7 +184,7 @@ export const relacionados = async (
     `${SELECT_BASE}
       AND c.nome = $1
       AND p.slug <> $2
-     ORDER BY p.featured DESC, p.vendidos DESC
+     ORDER BY p.hero DESC, p.featured DESC, p.vendidos DESC
      LIMIT $3`,
     [categoria, slug, limite],
   );

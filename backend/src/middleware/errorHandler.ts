@@ -31,6 +31,12 @@ const traduzir = (erro: unknown): AppError => {
   if (erro instanceof Error && 'type' in erro && erro.type === 'entity.too.large') {
     return new AppError('PAYLOAD_TOO_LARGE', 'Corpo do pedido demasiado grande.');
   }
+  if (erro instanceof Error && erro.message.startsWith('Só são aceites fotografias')) {
+    return new AppError('VALIDATION_ERROR', erro.message);
+  }
+  if (erro instanceof Error && 'code' in erro && (erro as { code: string }).code === 'LIMIT_FILE_SIZE') {
+    return new AppError('PAYLOAD_TOO_LARGE', 'A fotografia não pode ter mais de 5 MB.');
+  }
   return new AppError('INTERNAL_ERROR', 'Erro interno.', { cause: erro });
 };
 

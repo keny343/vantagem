@@ -7,11 +7,16 @@ const filtrosSchema = z.object({
   q: z.string().trim().max(120).optional(),
   categoria: z.string().trim().max(80).optional(),
   marca: z.string().trim().max(80).optional(),
-  max: z.coerce.number().min(0).max(100_000).optional(),
+  max: z.coerce.number().min(0).max(50_000_000).optional(),
   featured: z
     .enum(['true', 'false'])
     .optional()
     .transform((v) => (v === undefined ? undefined : v === 'true')),
+  hero: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
+  sort: z.enum(['relevancia', 'preco_asc', 'preco_desc', 'novos']).optional(),
 });
 
 export const getCategorias = async (_req: Request, res: Response): Promise<void> => {
@@ -34,6 +39,8 @@ export const getProdutos = async (req: Request, res: Response): Promise<void> =>
     ...(filtros.marca !== undefined ? { marca: filtros.marca } : {}),
     ...(filtros.max !== undefined ? { maxEuros: filtros.max } : {}),
     ...(filtros.featured !== undefined ? { featured: filtros.featured } : {}),
+    ...(filtros.hero !== undefined ? { hero: filtros.hero } : {}),
+    ...(filtros.sort !== undefined ? { sort: filtros.sort } : {}),
   });
   res.json({ products: produtos, count: produtos.length });
 };

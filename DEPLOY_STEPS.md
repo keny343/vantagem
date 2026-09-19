@@ -1,55 +1,32 @@
 # Vantagem Deploy — Ordem de Passos
 
-## 1️⃣ Render: Criar serviço API
+## 1️⃣ Render: API + Postgres
 **Link:** https://dashboard.render.com/blueprint/new?repo=https://github.com/keny343/vantagem
 
 1. **Blueprint Name:** vantagem
 2. **Branch:** main
-3. Clica **Apply**
-4. ⚠️ **Não funciona ainda** — falta DATABASE_URL
+3. Clica **Apply** — cria `vantagem-api` e `vantagem-db` (Frankfurt)
+4. Environment do serviço API:
+   - `CORS_ORIGINS` e `FRONTEND_URL` → URL da Vercel
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=artigos`
+   - `ADMIN_EMAIL` e `ADMIN_PASSWORD` (primeiro administrador)
+5. Aguarda até **Live** e copia a URL (`https://vantagem-api-….onrender.com`)
 
----
+## 2️⃣ Supabase: bucket de uploads
 
-## 2️⃣ Aiven: Criar PostgreSQL
-**Link:** https://console.aiven.io
+1. Storage → New bucket → `artigos` → **Public**
+2. Project Settings → API → copiar URL e **service_role** para o Render
 
-1. **Create service**
-2. **PostgreSQL** → Free plan → **Frankfurt**
-3. Aguarda até ficar **Running**
-4. **Overview** → **Connection information**
-5. **Copia o Service URI** (postgres://...)
+## 3️⃣ Vercel: frontend
+**Link:** https://vercel.com/new
 
----
+1. Importar `keny343/vantagem`
+2. Root Directory: `frontend`
+3. Env: `VITE_API_BASE=https://vantagem-api-….onrender.com` (sem barra final)
+4. Deploy
 
-## 3️⃣ Render: Configurar DATABASE_URL
-**Link:** https://dashboard.render.com (serviço vantagem-api)
+## ✅ Verificação
 
-1. **Environment** tab
-2. **Edit** `DATABASE_URL` → cola o URI do Aiven
-3. **Edit** `CORS_ORIGINS` → `https://vantagem-one.vercel.app`
-4. **Save Changes** (Render redeploy automático)
-5. Aguarda até **Live** (~3-5 min)
-6. **Copia a URL** do serviço (ex: https://vantagem-api-xyz.onrender.com)
-
----
-
-## 4️⃣ Vercel: Configurar VITE_API_BASE
-**Link:** https://vercel.com/keny343s-projects/vantagem/settings/environment-variables
-
-1. **Add New** → **Environment Variable**
-2. **Name:** `VITE_API_BASE`
-3. **Value:** `https://vantagem-api-xyz.onrender.com` (URL do Render)
-4. **Environments:** Production ✓
-5. **Save**
-6. **Deployments** → última deploy → **⋯** → **Redeploy**
-
----
-
-## ✅ Verificação final
-- Frontend: https://vantagem-one.vercel.app
-- API: https://vantagem-api-xyz.onrender.com/health
-- Testa login + catálogo na loja
-
-**Contas demo:**
-- Admin: `admin@vantagem.pt` / `AdminDemo!2026`
-- Cliente: `cliente@vantagem.pt` / `ClienteDemo!2026`
+- Frontend: URL da Vercel
+- API: `https://vantagem-api-….onrender.com/health`
+- Entrar com o email/palavra-passe definidos em `ADMIN_*` (não há contas demo no site)

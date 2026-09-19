@@ -35,7 +35,9 @@ export interface ProdutoPublico {
   description: string;
   badge: string | null;
   featured: boolean;
+  hero: boolean;
   sold: number;
+  warrantyMonths: number | null;
 }
 
 /** Frontend prices are euros; DB stores cêntimos. */

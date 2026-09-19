@@ -94,10 +94,6 @@ npm run dev
 # → http://localhost:5173
 ```
 
-**Login demo:**
-- Cliente: `cliente@vantagem.pt` / `ClienteDemo!2026`
-- Admin: `admin@vantagem.pt` / `AdminDemo!2026`
-
 **Endpoints prontos:**
 - Ver `API_RESUMO.md` para lista completa de rotas
 - Todos os endpoints de Fases 6-9 estão funcionais e testáveis via Postman/Thunder Client

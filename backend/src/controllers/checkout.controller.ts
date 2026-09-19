@@ -2,6 +2,13 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { lerSessao } from '../middleware/authenticate.js';
 import * as pedidos from '../services/pedidos.service.js';
+import { env } from '../config/env.js';
+import { descontoDeCupao, LOJA } from '../config/loja.js';
+import { eurosDeCentimos } from '../types/domain.js';
+import * as engagement from '../repositories/engagement.repository.js';
+import { emailEncomenda, emailEstadoPedido } from '../services/email.service.js';
+import { guardarFicheiro } from '../services/storage.service.js';
+import { AppError } from '../utils/errors.js';
 
 const itemSchema = z.object({
   productId: z.string().trim().min(1).max(80),
@@ -9,36 +16,113 @@ const itemSchema = z.object({
   quantity: z.number().int().min(1).max(99),
 });
 
+const nifAo = /^\d{9,10}$/;
+const telefoneAo = /^(\+244)?9\d{8}$/;
+
 const checkoutSchema = z.object({
-  items: z.array(itemSchema).min(1).max(40),
+  items: z.array(itemSchema).min(1, 'O cesto está vazio.').max(40),
   customer: z.object({
-    name: z.string().trim().min(2).max(160),
-    email: z.string().trim().email().max(200),
-    phone: z.string().trim().max(40).optional(),
-    address: z.string().trim().min(3).max(300),
-    postalCode: z.string().trim().min(4).max(20),
-    city: z.string().trim().min(2).max(100),
+    name: z.string().trim().min(2, 'Indica o nome completo.').max(160),
+    email: z.string().trim().email('Indica um email válido.').max(200),
+    phone: z.string().trim().min(9, 'Indica o telemóvel.').max(40),
+    address: z.string().trim().min(3, 'Indica a morada.').max(300),
+    postalCode: z.string().trim().max(40).optional(),
+    city: z.string().trim().min(2, 'Indica a cidade ou município.').max(100),
+    nif: z.string().trim().max(10).optional(),
   }),
-  paymentMethod: z.enum(['cartao', 'mbway', 'multibanco']),
+  paymentMethod: z.enum(['cartao', 'mbway', 'multibanco'], {
+    errorMap: () => ({ message: 'Escolhe uma forma de pagamento.' }),
+  }),
+  couponCode: z.string().trim().max(40).optional(),
+  idempotencyKey: z.string().trim().min(8).max(80).optional(),
 });
 
 export const criarPedido = async (req: Request, res: Response): Promise<void> => {
   const dados = checkoutSchema.parse(req.body);
+  const postal = (dados.customer.postalCode ?? '').trim();
+  const phone = dados.customer.phone.replace(/[\s-]/g, '');
+  if (!telefoneAo.test(phone)) {
+    throw new AppError('VALIDATION_ERROR', 'Telemóvel angolano inválido (9 dígitos a começar por 9, com ou sem +244).', {
+      details: [{ field: 'phone', message: phone }],
+    });
+  }
+  if (dados.paymentMethod === 'mbway' && !telefoneAo.test(phone)) {
+    throw new AppError('VALIDATION_ERROR', 'O Express exige um telemóvel angolano válido.');
+  }
+  const nif = dados.customer.nif?.replace(/\s/g, '');
+  if (nif !== undefined && nif.length > 0 && !nifAo.test(nif)) {
+    throw new AppError('VALIDATION_ERROR', 'O NIF deve ter 9 ou 10 dígitos.', {
+      details: [{ field: 'nif', message: nif }],
+    });
+  }
+
   const sessao = await lerSessao(req);
+  if (sessao?.perfil === 'admin') {
+    throw new AppError(
+      'FORBIDDEN',
+      'A conta de administrador não faz compras. Entra com uma conta de cliente para encomendar.',
+    );
+  }
   const pedido = await pedidos.criarPedido({
     items: dados.items,
     customer: {
       name: dados.customer.name,
       email: dados.customer.email.toLowerCase(),
-      ...(dados.customer.phone !== undefined ? { phone: dados.customer.phone } : {}),
+      phone,
       address: dados.customer.address,
-      postalCode: dados.customer.postalCode,
+      postalCode: postal.length > 0 ? postal : '—',
       city: dados.customer.city,
+      ...(nif !== undefined && nif.length > 0 ? { nif } : {}),
     },
     paymentMethod: dados.paymentMethod,
     userId: sessao?.userId ?? null,
+    ...(dados.couponCode !== undefined && dados.couponCode.length > 0
+      ? { couponCode: dados.couponCode }
+      : {}),
+    ...(dados.idempotencyKey !== undefined ? { idempotencyKey: dados.idempotencyKey } : {}),
   });
+  const totalTxt = `${pedido.total.toLocaleString('pt-AO')} Kz`;
+  void emailEncomenda(pedido.customer.email, pedido.customer.name, pedido.reference, totalTxt);
+  if (sessao?.userId) {
+    void engagement.criarNotificacao(
+      sessao.userId,
+      'pedido',
+      'Encomenda criada',
+      `${pedido.reference} · ${totalTxt}`,
+      `/pedido/${pedido.reference}`,
+    );
+  }
   res.status(201).json({ order: pedido });
+};
+
+export const confirmarPagamento = async (req: Request, res: Response): Promise<void> => {
+  if (env.PAGAMENTO_MODO === 'producao') {
+    throw new AppError(
+      'FORBIDDEN',
+      'Em produção o pagamento é confirmado pelo operador ou pelo administrador.',
+    );
+  }
+  const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
+  const pedido = await pedidos.confirmarPagamento(referencia);
+  void emailEstadoPedido(pedido.customer.email, pedido.customer.name, pedido.reference, 'Pago');
+  res.json({ order: pedido });
+};
+
+export const enviarComprovativo = async (req: Request, res: Response): Promise<void> => {
+  const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
+  if (req.file === undefined || !req.file.buffer) {
+    throw new AppError('VALIDATION_ERROR', 'Envia a fotografia do comprovativo.');
+  }
+  const url = await guardarFicheiro(
+    {
+      buffer: req.file.buffer,
+      mimetype: req.file.mimetype,
+      originalname: req.file.originalname,
+    },
+    'comprovativos',
+  );
+  const pedido = await pedidos.guardarComprovativo(referencia, url);
+  res.json({ order: pedido });
 };
 
 export const meusPedidos = async (req: Request, res: Response): Promise<void> => {
@@ -52,7 +136,60 @@ export const meusPedidos = async (req: Request, res: Response): Promise<void> =>
 
 export const obterPedido = async (req: Request, res: Response): Promise<void> => {
   const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
-  const sessao = await lerSessao(req);
-  const pedido = await pedidos.obterPorReferencia(referencia, sessao);
+  const pedido = await pedidos.obterPorReferencia(referencia);
   res.json({ order: pedido });
+};
+
+const cupaoSchema = z.object({
+  codigo: z.string().trim().min(2).max(40),
+  subtotal: z.number().min(0).optional(),
+});
+
+export const validarCupao = async (req: Request, res: Response): Promise<void> => {
+  const { codigo, subtotal } = cupaoSchema.parse(req.body);
+  const cupao = await engagement.validarCupao(codigo);
+  if (cupao === null) {
+    throw new AppError('NOT_FOUND', 'Cupão inválido ou expirado.');
+  }
+  const subtotalCentimos = Math.round((subtotal ?? 0) * 100);
+  if (subtotal !== undefined && subtotalCentimos < cupao.minimo_centimos) {
+    throw new AppError(
+      'VALIDATION_ERROR',
+      `Mínimo de compra ${eurosDeCentimos(cupao.minimo_centimos).toLocaleString('pt-AO')} Kz.`,
+    );
+  }
+  const discount = eurosDeCentimos(
+    descontoDeCupao(cupao.tipo, cupao.valor, subtotalCentimos || cupao.minimo_centimos),
+  );
+  res.json({
+    cupao: {
+      code: cupao.codigo,
+      type: cupao.tipo,
+      value: cupao.valor,
+      discount,
+      minEuros: eurosDeCentimos(cupao.minimo_centimos),
+    },
+  });
+};
+
+export const dadosLoja = (_req: Request, res: Response): void => {
+  res.json({
+    name: LOJA.nome,
+    legalName: LOJA.nomeLegal,
+    nif: LOJA.nif,
+    address: LOJA.morada,
+    email: LOJA.email,
+    phone: LOJA.telefone,
+    country: LOJA.pais,
+    shipping: {
+      flat: eurosDeCentimos(LOJA.custoEnvioCentimos),
+      freeFrom: eurosDeCentimos(LOJA.envioGratisAPartirCentimos),
+    },
+    vatRate: LOJA.taxaIva,
+    vatIncluded: true,
+    returnsDays: LOJA.diasDevolucao,
+    defaultWarrantyMonths: LOJA.garantiaMesesPadrao,
+    paymentMode: LOJA.pagamentoModo,
+    iban: LOJA.iban || null,
+  });
 };

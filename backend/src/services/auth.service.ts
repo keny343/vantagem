@@ -4,6 +4,8 @@ import { env } from '../config/env.js';
 import * as repo from '../repositories/auth.repository.js';
 import type { Autenticado, Perfil } from '../types/domain.js';
 import { AppError } from '../utils/errors.js';
+import { isUniqueViolation } from '../utils/postgres.js';
+import { emailBoasVindas, emailRecuperacao } from './email.service.js';
 
 export const COOKIE_SESSAO = env.SESSION_COOKIE_NAME;
 
@@ -125,4 +127,70 @@ export const tokensIguais = (a: string, b: string): boolean => {
   const bb = Buffer.from(b);
   if (ba.length !== bb.length) return false;
   return timingSafeEqual(ba, bb);
+};
+
+const telefoneAo = /^(\+244)?9\d{8}$/;
+
+export const registarCliente = async (dados: {
+  nome: string;
+  email: string;
+  password: string;
+  telefone: string | null;
+  ip: string | null;
+  userAgent: string | null;
+}): Promise<SessaoCriada> => {
+  const email = dados.email.trim().toLowerCase();
+  const existente = await repo.encontrarPorEmail(email);
+  if (existente !== null) {
+    throw new AppError('CONFLICT', 'Já existe uma conta com este email. Entra ou recupera a palavra-passe.');
+  }
+  let telefone = dados.telefone?.replace(/[\s-]/g, '') ?? null;
+  if (telefone && !telefoneAo.test(telefone)) {
+    throw new AppError('VALIDATION_ERROR', 'Telemóvel angolano inválido (9 dígitos a começar por 9).');
+  }
+  if (telefone && !telefone.startsWith('+244')) telefone = `+244${telefone.replace(/^\+?244/, '')}`;
+  const passwordHash = await hashDePassword(dados.password);
+  let criado;
+  try {
+    criado = await repo.criarCliente({
+      email,
+      passwordHash,
+      nome: dados.nome.trim(),
+      telefone,
+    });
+  } catch (erro) {
+    if (isUniqueViolation(erro)) {
+      throw new AppError('CONFLICT', 'Já existe uma conta com este email. Entra ou recupera a palavra-passe.');
+    }
+    throw erro;
+  }
+  void emailBoasVindas(email, criado.nome);
+  return iniciarSessao({
+    email,
+    password: dados.password,
+    ip: dados.ip,
+    userAgent: dados.userAgent,
+  });
+};
+
+export const pedirRecuperacao = async (emailBruto: string): Promise<void> => {
+  const email = emailBruto.trim().toLowerCase();
+  const utilizador = await repo.encontrarPorEmail(email);
+  if (utilizador === null || !utilizador.activo) return;
+  const token = randomBytes(32).toString('base64url');
+  await repo.guardarTokenRecuperacao(
+    utilizador.id,
+    hashDeToken(token),
+    new Date(Date.now() + 60 * 60 * 1000),
+  );
+  await emailRecuperacao(email, utilizador.nome, token);
+};
+
+export const redefinirPassword = async (token: string, password: string): Promise<void> => {
+  const encontrado = await repo.encontrarTokenRecuperacao(hashDeToken(token));
+  if (encontrado === null) {
+    throw new AppError('VALIDATION_ERROR', 'Este link já não é válido. Pede um novo.');
+  }
+  await repo.actualizarPassword(encontrado.utilizador_id, await hashDePassword(password));
+  await repo.gastarTokenRecuperacao(encontrado.id);
 };

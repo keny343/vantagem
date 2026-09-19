@@ -43,6 +43,10 @@ export const requerCsrf = (req: Request, _res: Response, next: NextFunction): vo
     next();
     return;
   }
+  if (req.originalUrl.startsWith('/api/pagamentos/webhook')) {
+    next();
+    return;
+  }
 
   const cookies = (req as Request & { cookies?: Record<string, string> }).cookies;
   const cookieToken = cookies?.[COOKIE_CSRF];

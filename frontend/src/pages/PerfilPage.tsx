@@ -1,7 +1,12 @@
-import { useEffect, useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { StoreShell } from '../layout/StoreShell';
+import { FormEvent, useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import { request } from '../api/client';
 import { useSession } from '../auth/SessionContext';
+import { useTitulo } from '../hooks/useTitulo';
+import { StoreShell } from '../layout/StoreShell';
+import { useAvisos } from '../ui/Avisos';
+import { ErroBloco } from '../ui/ErroBloco';
+import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 
 interface Perfil {
   id: string;
@@ -15,8 +20,9 @@ interface Perfil {
 }
 
 export default function PerfilPage() {
-  const { user, loading: sessionLoading } = useSession();
-  const navigate = useNavigate();
+  const { user, loading: sessionLoading, refresh } = useSession();
+  const { avisar } = useAvisos();
+  useTitulo('Perfil');
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [editing, setEditing] = useState(false);
   const [nome, setNome] = useState('');
@@ -25,206 +31,183 @@ export default function PerfilPage() {
   const [codigoPostal, setCodigoPostal] = useState('');
   const [cidade, setCidade] = useState('');
   const [saving, setSaving] = useState(false);
+  const [erro, setErro] = useState('');
 
   useEffect(() => {
-    if (!sessionLoading && !user) {
-      navigate('/login');
-      return;
-    }
-
-    if (user) {
-      fetch('/api/conta/perfil', {
-        credentials: 'include',
+    if (!user) return;
+    void request<{ utilizador: Perfil }>('/api/conta/perfil')
+      .then(({ utilizador }) => {
+        setPerfil(utilizador);
+        setNome(utilizador.nome);
+        setTelefone(utilizador.telefone ?? '');
+        setMorada(utilizador.morada ?? '');
+        setCodigoPostal(utilizador.codigo_postal ?? '');
+        setCidade(utilizador.cidade ?? '');
       })
-        .then((res) => {
-          if (!res.ok) {
-            if (res.status === 401) {
-              navigate('/login');
-              return;
-            }
-            throw new Error('Erro ao carregar perfil');
-          }
-          return res.json();
-        })
-        .then((data: { utilizador: Perfil } | undefined) => {
-          if (data) {
-            setPerfil(data.utilizador);
-            setNome(data.utilizador.nome);
-            setTelefone(data.utilizador.telefone || '');
-            setMorada(data.utilizador.morada || '');
-            setCodigoPostal(data.utilizador.codigo_postal || '');
-            setCidade(data.utilizador.cidade || '');
-          }
-        })
-        .catch(console.error);
-    }
-  }, [user, sessionLoading, navigate]);
+      .catch(() => setErro('Não foi possível carregar o perfil.'));
+  }, [user]);
 
-  const handleSubmit = (e: FormEvent) => {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    fetch('/api/conta/perfil', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ nome, telefone, morada, codigo_postal: codigoPostal, cidade }),
-    })
-      .then(() => {
-        setEditing(false);
-        setPerfil((prev) => (prev ? { ...prev, nome, telefone, morada, codigo_postal: codigoPostal, cidade } : null));
-      })
-      .catch(console.error)
-      .finally(() => setSaving(false));
-  };
+    setErro('');
+    try {
+      await request('/api/conta/perfil', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          nome,
+          telefone,
+          morada,
+          codigo_postal: codigoPostal,
+          cidade,
+        }),
+      });
+      setPerfil((prev) =>
+        prev
+          ? {
+              ...prev,
+              nome,
+              telefone,
+              morada,
+              codigo_postal: codigoPostal,
+              cidade,
+            }
+          : prev,
+      );
+      setEditing(false);
+      await refresh();
+      avisar('Perfil actualizado.');
+    } catch {
+      setErro('Não foi possível guardar as alterações.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  if (!perfil) {
+  if (sessionLoading) {
     return (
-      <div className="container mx-auto max-w-3xl px-4 py-12">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-64 bg-steel/20 rounded" />
-          <div className="h-64 bg-steel/20 rounded" />
-        </div>
-      </div>
+      <StoreShell>
+        <div className="mt-16 text-center font-mono text-steel">A carregar…</div>
+      </StoreShell>
     );
   }
 
+  if (!user) return <Navigate to="/login" replace />;
+
   return (
     <StoreShell>
-      <div className="min-h-screen bg-vault">
-        <div className="container mx-auto max-w-3xl px-4 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-acid">👤 Perfil</h1>
-          {!editing && (
-            <button
-              onClick={() => setEditing(true)}
-              className="px-4 py-2 bg-acid text-vault font-bold rounded hover:bg-acid/90 transition-colors"
-            >
-              Editar
-            </button>
-          )}
+      <div className="mt-8 flex items-end justify-between gap-4">
+        <div>
+          <div className="label-mono">Conta</div>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Perfil</h1>
         </div>
+        <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
+          ← Voltar
+        </Link>
+      </div>
 
-        <div className="bg-shadow border border-steel/20 p-6 rounded-lg">
+      {erro && (
+        <div className="mt-6">
+          <ErroBloco
+            mensagem={erro}
+            extra={
+              <Link to="/ajuda" className="grid h-10 place-items-center font-mono text-[11px] text-acid">
+                Ajuda
+              </Link>
+            }
+          />
+        </div>
+      )}
+
+      {!perfil ? (
+        <p className="mt-10 font-mono text-[11px] text-steel">A carregar perfil…</p>
+      ) : (
+        <section className="mt-8 max-w-xl rounded-[14px] border border-line bg-panel p-6">
           {!editing ? (
             <div className="space-y-4">
-              <div>
-                <p className="text-steel text-sm">Nome</p>
-                <p className="text-acid font-semibold">{perfil.nome}</p>
-              </div>
-              <div>
-                <p className="text-steel text-sm">Email</p>
-                <p className="text-acid">{perfil.email}</p>
-              </div>
-              <div>
-                <p className="text-steel text-sm">Telefone</p>
-                <p className="text-acid">{perfil.telefone || '—'}</p>
-              </div>
-              <div>
-                <p className="text-steel text-sm">Morada</p>
-                <p className="text-acid">{perfil.morada || '—'}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-steel text-sm">Código Postal</p>
-                  <p className="text-acid">{perfil.codigo_postal || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-steel text-sm">Cidade</p>
-                  <p className="text-acid">{perfil.cidade || '—'}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-steel text-sm">Membro desde</p>
-                <p className="text-acid">
-                  {new Date(perfil.created_at).toLocaleDateString('pt-PT', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
+              <Campo label="Nome" valor={perfil.nome} />
+              <Campo label="Email" valor={perfil.email} />
+              <Campo label="Telefone" valor={perfil.telefone ?? '—'} />
+              <Campo label="Morada" valor={perfil.morada ?? '—'} />
+              <Campo label="Código postal" valor={perfil.codigo_postal ?? '—'} />
+              <Campo label="Cidade" valor={perfil.cidade ?? '—'} />
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="mt-4 h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+              >
+                Editar
+              </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-steel text-sm mb-1">Nome</label>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
-                  className="w-full px-4 py-2 bg-vault border border-steel/20 rounded text-acid focus:outline-none focus:border-acid"
-                />
-              </div>
-              <div>
-                <label className="block text-steel text-sm mb-1">Email</label>
-                <input
-                  type="email"
-                  value={perfil.email}
-                  disabled
-                  className="w-full px-4 py-2 bg-vault/50 border border-steel/20 rounded text-steel cursor-not-allowed"
-                />
-                <p className="text-steel text-xs mt-1">O email não pode ser alterado</p>
-              </div>
-              <div>
-                <label className="block text-steel text-sm mb-1">Telefone</label>
-                <input
-                  type="tel"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  className="w-full px-4 py-2 bg-vault border border-steel/20 rounded text-acid focus:outline-none focus:border-acid"
-                />
-              </div>
-              <div>
-                <label className="block text-steel text-sm mb-1">Morada</label>
-                <input
-                  type="text"
-                  value={morada}
-                  onChange={(e) => setMorada(e.target.value)}
-                  className="w-full px-4 py-2 bg-vault border border-steel/20 rounded text-acid focus:outline-none focus:border-acid"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-steel text-sm mb-1">Código Postal</label>
-                  <input
-                    type="text"
-                    value={codigoPostal}
-                    onChange={(e) => setCodigoPostal(e.target.value)}
-                    className="w-full px-4 py-2 bg-vault border border-steel/20 rounded text-acid focus:outline-none focus:border-acid"
-                  />
-                </div>
-                <div>
-                  <label className="block text-steel text-sm mb-1">Cidade</label>
-                  <input
-                    type="text"
-                    value={cidade}
-                    onChange={(e) => setCidade(e.target.value)}
-                    className="w-full px-4 py-2 bg-vault border border-steel/20 rounded text-acid focus:outline-none focus:border-acid"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
+            <form
+              className="space-y-4"
+              onSubmit={(e) => void onSubmit(e)}
+              onInvalidCapture={onInvalidPt}
+              onInput={onInputPt}
+            >
+              <Input label="Nome" value={nome} onChange={setNome} required />
+              <Input label="Email" value={perfil.email} disabled />
+              <Input label="Telefone" value={telefone} onChange={setTelefone} />
+              <Input label="Morada" value={morada} onChange={setMorada} />
+              <Input label="Código postal (opcional)" value={codigoPostal} onChange={setCodigoPostal} />
+              <Input label="Cidade ou município" value={cidade} onChange={setCidade} />
+              <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 bg-acid text-vault font-bold rounded hover:bg-acid/90 transition-colors disabled:opacity-50"
+                  className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
                 >
-                  {saving ? 'A guardar...' : 'Guardar'}
+                  {saving ? 'A guardar…' : 'Guardar'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="px-6 py-2 bg-steel/20 text-steel font-bold rounded hover:bg-steel/30 transition-colors"
+                  className="h-10 rounded-lg px-5 font-mono text-[11px] text-steel ring-1 ring-line"
                 >
                   Cancelar
                 </button>
               </div>
             </form>
           )}
-        </div>
-        </div>
-      </div>
+        </section>
+      )}
     </StoreShell>
+  );
+}
+
+function Campo({ label, valor }: { label: string; valor: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">{label}</p>
+      <p className="mt-1 text-white">{valor}</p>
+    </div>
+  );
+}
+
+function Input({
+  label,
+  value,
+  onChange,
+  required,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">{label}</span>
+      <input
+        value={value}
+        required={required}
+        disabled={disabled}
+        onChange={(e) => onChange?.(e.target.value)}
+        className="mt-1 h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm outline-none focus:border-acid/60 disabled:text-steel"
+      />
+    </label>
   );
 }

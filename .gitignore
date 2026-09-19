@@ -16,3 +16,4 @@ coverage/
 cookies.txt
 cookies-test.txt
 *.cookies
+backend/uploads/

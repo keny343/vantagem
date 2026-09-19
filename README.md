@@ -1,6 +1,6 @@
 # Vantagem · Marketplace de electrónica
 
-Loja + painel administrativo. Frontend React (Vercel), API Node/Express (Render), PostgreSQL (Aiven).
+Loja + painel administrativo. Frontend React (Vercel), API Node/Express (Render), PostgreSQL (Render), fotografias no Supabase Storage.
 
 A base visual veio do Lovable (`gleam-gear-market`); esta fase liga dados reais, autenticação e checkout seguros.
 
@@ -26,7 +26,7 @@ npm run dev
 
 - Loja: http://localhost:5174  
 - API: http://localhost:4200  
-- Contas de demo (após seed): ver `docs/database.md`
+- Cria a tua conta em `/registo`. Em produção o primeiro admin nasce de `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
 Se o Docker Desktop estiver offline, podes apontar `DATABASE_URL` para um Postgres local já existente (o role precisa de poder criar tabelas).
 
@@ -37,7 +37,7 @@ Se o Docker Desktop estiver offline, podes apontar `DATABASE_URL` para um Postgr
 2. **Autenticação** — bcrypt, sessões com expiração, rate limit no login  
 3. **Checkout** — pedido + stock em transacção  
 4. **Segurança** — validação, CSRF, rotas admin  
-5. **Deploy** — Vercel + Render + Aiven  
+5. **Deploy** — Vercel + Render (API + Postgres) + Supabase Storage  
 
 ## Estrutura
 

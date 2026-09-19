@@ -93,13 +93,12 @@
 
 ## Deploy
 
-### Aiven (PostgreSQL)
-- Free plan, Frankfurt
-- `DATABASE_URL` no Render
+### Render (PostgreSQL + API)
+- Blueprint: `render.yaml` cria `vantagem-db` e `vantagem-api` em Frankfurt
+- Env: `DATABASE_URL` (fromDatabase), `CORS_ORIGINS`, `FRONTEND_URL`, `SUPABASE_*`, `ADMIN_*`
 
-### Render (API Backend)
-- Blueprint: `render.yaml`
-- Env vars: `DATABASE_URL`, `CORS_ORIGINS`, `SESSION_SECRET`
+### Supabase Storage
+- Bucket público `artigos` (pastas `produtos/` e `comprovativos/`)
 
 ### Vercel (Frontend)
 - Env var: `VITE_API_BASE=https://vantagem-api-xyz.onrender.com`
