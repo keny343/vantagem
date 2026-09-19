@@ -24,7 +24,7 @@ export default function ContaDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${(import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? ''}/conta/dashboard`, {
+    fetch('/api/conta/dashboard', {
       credentials: 'include',
     })
       .then((res) => res.json())

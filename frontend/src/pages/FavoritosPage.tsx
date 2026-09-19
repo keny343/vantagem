@@ -12,7 +12,7 @@ export default function FavoritosPage() {
 
   const carregarFavoritos = () => {
     setLoading(true);
-    fetch(`${(import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? ''}/conta/favoritos`, {
+    fetch('/api/conta/favoritos', {
       credentials: 'include',
     })
       .then((res) => res.json())
@@ -26,7 +26,7 @@ export default function FavoritosPage() {
   }, []);
 
   const removerFavorito = (produtoId: string) => {
-    fetch(`${(import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? ''}/conta/favoritos/${produtoId}`, {
+    fetch(`/api/conta/favoritos/${produtoId}`, {
       method: 'DELETE',
       credentials: 'include',
     })

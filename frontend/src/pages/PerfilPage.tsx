@@ -22,7 +22,7 @@ export default function PerfilPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`${(import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? ''}/conta/perfil`, {
+    fetch('/api/conta/perfil', {
       credentials: 'include',
     })
       .then((res) => res.json())
@@ -40,7 +40,7 @@ export default function PerfilPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    fetch(`${(import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? ''}/conta/perfil`, {
+    fetch('/api/conta/perfil', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
