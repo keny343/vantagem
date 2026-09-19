@@ -1,5 +1,7 @@
 import { useEffect, useState, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StoreShell } from '../layout/StoreShell';
+import { useSession } from '../auth/SessionContext';
 
 interface Perfil {
   id: string;
@@ -13,6 +15,8 @@ interface Perfil {
 }
 
 export default function PerfilPage() {
+  const { user, loading: sessionLoading } = useSession();
+  const navigate = useNavigate();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [editing, setEditing] = useState(false);
   const [nome, setNome] = useState('');
@@ -23,20 +27,38 @@ export default function PerfilPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/conta/perfil', {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data: { utilizador: Perfil }) => {
-        setPerfil(data.utilizador);
-        setNome(data.utilizador.nome);
-        setTelefone(data.utilizador.telefone || '');
-        setMorada(data.utilizador.morada || '');
-        setCodigoPostal(data.utilizador.codigo_postal || '');
-        setCidade(data.utilizador.cidade || '');
+    if (!sessionLoading && !user) {
+      navigate('/login');
+      return;
+    }
+
+    if (user) {
+      fetch('/api/conta/perfil', {
+        credentials: 'include',
       })
-      .catch(console.error);
-  }, []);
+        .then((res) => {
+          if (!res.ok) {
+            if (res.status === 401) {
+              navigate('/login');
+              return;
+            }
+            throw new Error('Erro ao carregar perfil');
+          }
+          return res.json();
+        })
+        .then((data: { utilizador: Perfil } | undefined) => {
+          if (data) {
+            setPerfil(data.utilizador);
+            setNome(data.utilizador.nome);
+            setTelefone(data.utilizador.telefone || '');
+            setMorada(data.utilizador.morada || '');
+            setCodigoPostal(data.utilizador.codigo_postal || '');
+            setCidade(data.utilizador.cidade || '');
+          }
+        })
+        .catch(console.error);
+    }
+  }, [user, sessionLoading, navigate]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

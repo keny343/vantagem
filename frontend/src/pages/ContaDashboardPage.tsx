@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { StoreShell } from '../layout/StoreShell';
+import { useSession } from '../auth/SessionContext';
 
 interface DashboardData {
   utilizador: {
@@ -21,20 +22,38 @@ interface DashboardData {
 }
 
 export default function ContaDashboardPage() {
+  const { user, loading: sessionLoading } = useSession();
+  const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/conta/dashboard', {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data) => setData(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    if (!sessionLoading && !user) {
+      navigate('/login');
+      return;
+    }
 
-  if (loading) {
+    if (user) {
+      fetch('/api/conta/dashboard', {
+        credentials: 'include',
+      })
+        .then((res) => {
+          if (!res.ok) {
+            if (res.status === 401) {
+              navigate('/login');
+              return;
+            }
+            throw new Error('Erro ao carregar dashboard');
+          }
+          return res.json();
+        })
+        .then((data) => data && setData(data))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [user, sessionLoading, navigate]);
+
+  if (sessionLoading || loading) {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-12">
         <div className="animate-pulse space-y-4">

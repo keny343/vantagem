@@ -1,30 +1,51 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type Product } from '../api/client';
 import { ProductCard } from '../ui/ProductCard';
 import { StoreShell } from '../layout/StoreShell';
+import { useSession } from '../auth/SessionContext';
 
 interface FavoritosResponse {
   products: Product[];
 }
 
 export default function FavoritosPage() {
+  const { user, loading: sessionLoading } = useSession();
+  const navigate = useNavigate();
   const [produtos, setProdutos] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const carregarFavoritos = () => {
+    if (!user) return;
+    
     setLoading(true);
     fetch('/api/conta/favoritos', {
       credentials: 'include',
     })
-      .then((res) => res.json())
-      .then((data: FavoritosResponse) => setProdutos(data.products))
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 401) {
+            navigate('/login');
+            return;
+          }
+          throw new Error('Erro ao carregar favoritos');
+        }
+        return res.json();
+      })
+      .then((data: FavoritosResponse | undefined) => data && setProdutos(data.products))
       .catch(console.error)
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    carregarFavoritos();
-  }, []);
+    if (!sessionLoading && !user) {
+      navigate('/login');
+      return;
+    }
+    if (user) {
+      carregarFavoritos();
+    }
+  }, [user, sessionLoading, navigate]);
 
   const removerFavorito = (produtoId: string) => {
     fetch(`/api/conta/favoritos/${produtoId}`, {
