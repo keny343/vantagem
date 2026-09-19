@@ -76,14 +76,22 @@ const lerCookie = (nome: string): string | undefined => {
   return undefined;
 };
 
+let csrfMemoria: string | undefined;
 let csrfPronto: Promise<void> | null = null;
 
-/** Fetches a CSRF cookie before the first mutating request. */
+const tokenCsrf = (): string | undefined => csrfMemoria ?? lerCookie('vantagem_csrf');
+
+/** Obtém o CSRF via JSON — o cookie da API não é visível noutro domínio (Vercel). */
 export const ensureCsrf = async (): Promise<void> => {
-  if (lerCookie('vantagem_csrf')) return;
+  if (tokenCsrf()) return;
   if (csrfPronto === null) {
     csrfPronto = xhr(urlAbsoluto('/api/auth/csrf'), { method: 'GET' })
-      .then(() => undefined)
+      .then(({ text }) => {
+        const corpo = parseJson(text) as { csrfToken?: string } | null;
+        if (typeof corpo?.csrfToken === 'string' && corpo.csrfToken.length >= 20) {
+          csrfMemoria = corpo.csrfToken;
+        }
+      })
       .finally(() => {
         csrfPronto = null;
       });
@@ -105,7 +113,7 @@ export const request = async <T>(caminho: string, init: RequestInit = {}): Promi
     await ensureCsrf();
   }
 
-  const csrf = lerCookie('vantagem_csrf');
+  const csrf = tokenCsrf();
   const multipart = init.body instanceof FormData;
   const headers: Record<string, string> = {
     Accept: 'application/json',
