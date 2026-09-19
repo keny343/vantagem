@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { type Product } from '../api/client';
 import { ProductCard } from '../ui/ProductCard';
+import { StoreShell } from '../layout/StoreShell';
 
 interface FavoritosResponse {
   products: Product[];
@@ -45,15 +46,16 @@ export default function FavoritosPage() {
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-96 bg-steel/20 rounded" />
             ))}
-          </div>
         </div>
       </div>
-    );
-  }
+    </StoreShell>
+  );
+}
 
   return (
-    <div className="min-h-screen bg-vault">
-      <div className="container mx-auto max-w-7xl px-4 py-12">
+    <StoreShell>
+      <div className="min-h-screen bg-vault">
+        <div className="container mx-auto max-w-7xl px-4 py-12">
         <h1 className="text-3xl font-bold text-acid mb-8">❤️ Favoritos</h1>
 
         {produtos.length === 0 ? (

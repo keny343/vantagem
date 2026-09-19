@@ -1,4 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
+import { StoreShell } from '../layout/StoreShell';
 
 interface Perfil {
   id: string;
@@ -66,8 +67,9 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-vault">
-      <div className="container mx-auto max-w-3xl px-4 py-12">
+    <StoreShell>
+      <div className="min-h-screen bg-vault">
+        <div className="container mx-auto max-w-3xl px-4 py-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-acid">👤 Perfil</h1>
           {!editing && (
@@ -200,6 +202,6 @@ export default function PerfilPage() {
           )}
         </div>
       </div>
-    </div>
+    </StoreShell>
   );
 }

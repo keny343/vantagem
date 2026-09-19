@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { StoreShell } from '../layout/StoreShell';
 
 interface DashboardData {
   utilizador: {
@@ -66,8 +67,9 @@ export default function ContaDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-vault">
-      <div className="container mx-auto max-w-7xl px-4 py-12">
+    <StoreShell>
+      <div className="min-h-screen bg-vault">
+        <div className="container mx-auto max-w-7xl px-4 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-acid mb-2">
             Olá, {data.utilizador.nome} 👋
@@ -177,6 +179,6 @@ export default function ContaDashboardPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </StoreShell>
   );
 }
