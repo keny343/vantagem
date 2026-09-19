@@ -1,6 +1,6 @@
-import { migrate } from './db/migrate.js';
-import { closePool } from './config/database.js';
-import { logger } from './utils/logger.js';
+import { migrate } from './migrate.js';
+import { closePool } from '../config/database.js';
+import { logger } from '../utils/logger.js';
 
 try {
   const { aplicadas } = await migrate();
