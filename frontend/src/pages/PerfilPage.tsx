@@ -201,6 +201,7 @@ export default function PerfilPage() {
             </form>
           )}
         </div>
+        </div>
       </div>
     </StoreShell>
   );
