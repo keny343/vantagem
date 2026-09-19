@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: vantagem-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run migrate && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: 'true'
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SESSION_COOKIE_NAME
+        value: vantagem_session
+      - key: LOG_LEVEL
+        value: info

@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0e0f12;
+  --color-panel: #16171c;
+  --color-panel2: #1c1e25;
+  --color-line: #2a2c35;
+  --color-acid: #c9f24a;
+  --color-steel: #8b90a0;
+  --color-warn: #f0b429;
+  --color-destructive: #ef5a4e;
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-ink);
+    color: #e4e4e7;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: color-mix(in oklab, var(--color-panel) 82%, transparent);
+    backdrop-filter: blur(16px);
+  }
+  .diagonal-wash {
+    background:
+      linear-gradient(115deg, color-mix(in oklab, var(--color-acid) 8%, transparent), transparent 42%),
+      radial-gradient(circle at 80% 20%, color-mix(in oklab, var(--color-acid) 12%, transparent), transparent 50%);
+  }
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-steel);
+  }
+  .skel {
+    background: linear-gradient(90deg, #1c1e25 25%, #252833 50%, #1c1e25 75%);
+    background-size: 200% 100%;
+    animation: skel 1.2s ease-in-out infinite;
+  }
+  @keyframes skel {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .rise {
+    animation: rise 280ms ease-out;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .cart-bump {
+    animation: bump 320ms ease;
+  }
+  @keyframes bump {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+}
