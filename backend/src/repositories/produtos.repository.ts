@@ -1,7 +1,7 @@
 import { query } from '../config/database.js';
 import { eurosDeCentimos, type ProdutoPublico } from '../types/domain.js';
 
-interface ProdutoRow {
+export interface ProdutoRow {
   id: string;
   slug: string;
   sku: string;

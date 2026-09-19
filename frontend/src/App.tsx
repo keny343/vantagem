@@ -5,11 +5,13 @@ import { AdminPage } from './pages/AdminPage';
 import { CarrinhoPage } from './pages/CarrinhoPage';
 import { CatalogoPage } from './pages/CatalogoPage';
 import { CheckoutPage } from './pages/CheckoutPage';
-import { ContaPage } from './pages/ContaPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProdutoPage } from './pages/ProdutoPage';
+import ContaDashboardPage from './pages/ContaDashboardPage';
+import FavoritosPage from './pages/FavoritosPage';
+import PerfilPage from './pages/PerfilPage';
 
 export function App() {
   return (
@@ -23,7 +25,9 @@ export function App() {
             <Route path="/carrinho" element={<CarrinhoPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/conta" element={<ContaPage />} />
+            <Route path="/conta" element={<ContaDashboardPage />} />
+            <Route path="/conta/favoritos" element={<FavoritosPage />} />
+            <Route path="/conta/perfil" element={<PerfilPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
