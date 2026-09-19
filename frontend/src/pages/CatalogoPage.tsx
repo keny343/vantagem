@@ -10,7 +10,7 @@ export function CatalogoPage() {
   const [q, setQ] = useState(params.get('q') ?? '');
   const [categoria, setCategoria] = useState(params.get('categoria') ?? '');
   const [marca, setMarca] = useState(params.get('marca') ?? '');
-  const [max, setMax] = useState(Number(params.get('max') ?? 1500));
+  const [max, setMax] = useState(Number(params.get('max') ?? 3500));
   const [categorias, setCategorias] = useState<string[]>([]);
   const [marcas, setMarcas] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,7 +56,7 @@ export function CatalogoPage() {
     setQ('');
     setCategoria('');
     setMarca('');
-    setMax(1500);
+    setMax(3500);
     setParams({});
   }
 
@@ -118,7 +118,7 @@ export function CatalogoPage() {
               <input
                 type="range"
                 min={40}
-                max={1500}
+                max={3500}
                 step={10}
                 value={max}
                 onChange={(e) => setMax(Number(e.target.value))}
