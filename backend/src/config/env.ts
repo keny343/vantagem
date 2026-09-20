@@ -15,6 +15,8 @@ const schema = z.object({
   SESSION_COOKIE_NAME: z.string().min(1).default('vantagem_session'),
   CSRF_SECRET: z.string().optional().default(''),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info'),
+  /** Webhook opcional para erros 5xx (Sentry ingest, Discord, etc.). */
+  ERROR_WEBHOOK_URL: z.string().optional().default(''),
   FRONTEND_URL: z.string().default('http://localhost:5174'),
   SMTP_HOST: z.string().optional().default(''),
   SMTP_PORT: z.coerce.number().int().positive().default(587),

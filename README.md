@@ -44,5 +44,5 @@ Se o Docker Desktop estiver offline, podes apontar `DATABASE_URL` para um Postgr
 ```
 backend/     API Express + pg
 frontend/    React + Vite (paleta Lovable)
-docs/        esquema, API, segurança, deploy
+docs/        esquema, API, segurança, deploy, backup, EXPLAIN
 ```

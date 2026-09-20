@@ -1,35 +1,36 @@
-# Vantagem Hardening v1
+# Vantagem Hardening
 
-Estado após o endurecimento inicial — provar o que já existe sob condições reais, sem adicionar features.
+Endurecer o que já existe sob condições reais — sem adicionar features de produto.
 
-## Já endurecido
+## v1 (feito)
 
 | Área | Medida |
 |------|--------|
-| Checkout | Preços e stock lidos da BD; `FOR UPDATE`; `UPDATE … WHERE quantidade >= n` |
-| Idempotência | `idempotencyKey` **obrigatória** em `POST /api/pedidos` |
+| Checkout | Preços e stock da BD; `FOR UPDATE`; `UPDATE … WHERE quantidade >= n` |
+| Idempotência | `idempotencyKey` obrigatória em `POST /api/pedidos` |
 | IDOR | Pedido e comprovativo só para dono ou admin |
 | Upload | Magic bytes (JPEG/PNG/WEBP/GIF), rejeição de path traversal |
 | Rate limit | Global `/api` + login/registo/recuperar + checkout + upload + cupão |
 | CSRF | Token HMAC no cabeçalho (proxy Vercel) |
-| Observabilidade | `X-Request-Id`, logs estruturados por pedido, `/health` e `/ready` (DB) |
-| Testes | Vitest: cupões/envio/IVA, MIME, CSRF assinado, códigos de erro |
-| CI | GitHub Actions: typecheck + test + build (backend e frontend) |
+| Observabilidade | `X-Request-Id`, logs estruturados, `/health` e `/ready` (DB) |
+| Testes unitários | Cupões/envio/IVA, MIME, CSRF assinado, códigos de erro |
+| CI | GitHub Actions: typecheck + test + build |
+
+## v2 (feito / em curso)
+
+| Área | Medida |
+|------|--------|
+| Integração Postgres | CI com Postgres 16; teste de **checkout concorrente** + idempotência |
+| Backup | [docs/backup.md](docs/backup.md) — `pg_dump` / Render / Aiven |
+| Error webhook | `ERROR_WEBHOOK_URL` para 5xx (Sentry Relay ou equivalente) |
+| Catálogo | [docs/catalogo-explain.md](docs/catalogo-explain.md) — EXPLAIN e índices |
 
 ## Fora de âmbito (de propósito)
 
 - Redis / filas / microserviços
 - Rastreio de transportadora (removido)
 - Redesign visual completo (fase seguinte: identidade própria)
-
-## Próximos passos (Hardening v2)
-
-1. Testes de integração com Postgres de CI (checkout concorrente)
-2. E2E Playwright (registo → checkout → comprovativo → admin confirma)
-3. Backup/restore documentado da Aiven
-4. Error tracking (Sentry ou equivalente)
-5. Lighthouse + EXPLAIN nas queries do catálogo
-6. Design system / consistência visual
+- E2E Playwright completo (próximo quando o fluxo admin/cliente estabilizar)
 
 ## Como correr localmente
 
@@ -38,3 +39,13 @@ cd backend
 npm test
 npm run typecheck
 ```
+
+Integração com Postgres local (opcional):
+
+```bash
+# Postgres a escutar em 5432 com user/pass/db vantagem/vantagem/vantagem_test
+# ou define DATABASE_URL e:
+npm test
+```
+
+Em CI o serviço Postgres é provisionado automaticamente.

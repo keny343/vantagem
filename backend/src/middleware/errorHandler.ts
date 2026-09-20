@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { env } from '../config/env.js';
 import { AppError, ERROR_CODES, type ErrorCode, type ErrorDetail } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
+import { reportarErro } from '../utils/reportarErro.js';
 
 interface CorpoErro {
   error: {
@@ -61,6 +62,16 @@ export const errorHandler = (
     code: app.code,
     status: app.status,
     stack: original instanceof Error ? original.stack : String(original),
+  });
+
+  reportarErro({
+    requestId: req.requestId,
+    method: req.method,
+    path: req.originalUrl,
+    code: app.code,
+    status: app.status,
+    message: app.message,
+    ...(original instanceof Error && original.stack ? { stack: original.stack } : {}),
   });
 
   const corpo: CorpoErro = {

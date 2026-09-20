@@ -31,7 +31,15 @@
 
 ## Autorização
 - Rotas `/api/admin/*` exigem sessão + perfil `admin`.
-- Pedidos por referência só para dono, email do pedido, ou admin.
+- Pedido e comprovativo por referência: só o **dono** (utilizador do pedido) ou **admin** (anti-IDOR).
+
+## Uploads
+- Content-Type do browser não basta: validação por **magic bytes** (JPEG/PNG/WEBP/GIF).
+- Nomes com `..` / `/` / `\` rejeitados.
+
+## Observabilidade
+- `X-Request-Id` em cada pedido; erros 5xx podem ir para `ERROR_WEBHOOK_URL` (opcional).
+- `/health` (processo) e `/ready` (ping à BD).
 
 ## Segredos
 - `DATABASE_URL`, `CORS_ORIGINS`, etc. só em variáveis de ambiente.

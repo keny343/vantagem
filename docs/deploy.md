@@ -51,3 +51,7 @@ API --HTTPS--> Supabase Storage (fotografias)
 ```
 
 Cookies de sessão e CSRF usam `SameSite=None; Secure` em produção.
+
+## Backup
+
+Ver [backup.md](./backup.md) — dumps `pg_dump`, restauro, e o que fica fora da BD (Supabase).
