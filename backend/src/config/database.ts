@@ -2,8 +2,19 @@ import pg from 'pg';
 import { env } from './env.js';
 import { logger } from '../utils/logger.js';
 
+/** Aiven/Render put sslmode in the URI; Node pg then verifies the CA and fails. */
+const connectionString = (() => {
+  try {
+    const uri = new URL(env.DATABASE_URL);
+    uri.searchParams.delete('sslmode');
+    return uri.toString();
+  } catch {
+    return env.DATABASE_URL.replace(/[?&]sslmode=[^&]*/g, '');
+  }
+})();
+
 export const pool = new pg.Pool({
-  connectionString: env.DATABASE_URL,
+  connectionString,
   ...(env.DATABASE_SSL ? { ssl: { rejectUnauthorized: false } } : {}),
   max: env.isTest ? 4 : 10,
   idleTimeoutMillis: 30_000,
