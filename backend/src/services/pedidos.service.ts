@@ -90,6 +90,7 @@ interface PedidoRow {
 
 interface ItemRow {
   produto_id: string | null;
+  produto_slug: string | null;
   sku: string;
   nome: string;
   variante: string;
@@ -167,7 +168,8 @@ const mapearPedido = (pedido: PedidoRow, items: ItemRow[]): PedidoPublico => ({
   total: eurosDeCentimos(pedido.total_centimos),
   createdAt: pedido.created_at.toISOString(),
   items: items.map((i) => ({
-    productId: i.produto_id,
+    // Público: slug (igual a product.id na API de catálogo)
+    productId: i.produto_slug ?? i.produto_id,
     sku: i.sku,
     name: i.nome,
     variant: i.variante,
@@ -182,8 +184,11 @@ const carregarItems = async (
   pedidoId: string,
 ): Promise<ItemRow[]> => {
   const { rows } = await client.query<ItemRow>(
-    `SELECT produto_id, sku, nome, variante, quantidade, preco_unitario_centimos, total_centimos
-     FROM itens_de_pedido WHERE pedido_id = $1`,
+    `SELECT i.produto_id, p.slug AS produto_slug, i.sku, i.nome, i.variante,
+            i.quantidade, i.preco_unitario_centimos, i.total_centimos
+     FROM itens_de_pedido i
+     LEFT JOIN produtos p ON p.id = i.produto_id
+     WHERE i.pedido_id = $1`,
     [pedidoId],
   );
   return rows;

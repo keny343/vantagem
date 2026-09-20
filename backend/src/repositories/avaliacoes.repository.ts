@@ -1,4 +1,5 @@
 import { query } from '../config/database.js';
+import { notFound } from '../utils/errors.js';
 
 export interface Avaliacao {
   id: string;
@@ -14,9 +15,22 @@ export interface Avaliacao {
   updated_at: string;
 }
 
+/** A API pública expõe o slug como `id`; na BD o FK é UUID. */
+const resolverProdutoId = async (slugOuId: string): Promise<string> => {
+  const { rows } = await query<{ id: string }>(
+    `SELECT id FROM produtos
+     WHERE slug = $1 OR id::text = $1
+     LIMIT 1`,
+    [slugOuId],
+  );
+  const produto = rows[0];
+  if (produto === undefined) throw notFound('Produto');
+  return produto.id;
+};
+
 export const criarAvaliacao = async (
   utilizadorId: string,
-  produtoId: string,
+  produtoRef: string,
   pedidoId: string,
   dados: {
     estrelas_produto: number;
@@ -25,6 +39,7 @@ export const criarAvaliacao = async (
     fotos?: string[];
   },
 ): Promise<Avaliacao> => {
+  const produtoId = await resolverProdutoId(produtoRef);
   const { rows } = await query<Avaliacao>(
     `INSERT INTO avaliacoes (
       utilizador_id, produto_id, pedido_id,
@@ -45,7 +60,7 @@ export const criarAvaliacao = async (
 };
 
 export const listarAvaliacoesProduto = async (
-  produtoId: string,
+  produtoRef: string,
 ): Promise<
   Array<
     Avaliacao & {
@@ -61,19 +76,20 @@ export const listarAvaliacoesProduto = async (
     `SELECT a.*, u.nome AS utilizador_nome
      FROM avaliacoes a
      INNER JOIN utilizadores u ON u.id = a.utilizador_id
-     WHERE a.produto_id = $1 AND a.verificada = true
+     INNER JOIN produtos p ON p.id = a.produto_id
+     WHERE (p.slug = $1 OR p.id::text = $1) AND a.verificada = true
      ORDER BY a.created_at DESC`,
-    [produtoId],
+    [produtoRef],
   );
   return rows;
 };
 
 export const verificarPodeAvaliar = async (
   utilizadorId: string,
-  produtoId: string,
+  produtoRef: string,
   pedidoId: string,
 ): Promise<boolean> => {
-  // Verifica se o pedido foi entregue e se o produto faz parte do pedido
+  const produtoId = await resolverProdutoId(produtoRef);
   const { rows } = await query<{ pode: boolean }>(
     `SELECT EXISTS(
       SELECT 1
