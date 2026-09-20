@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, type Order } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -47,7 +47,7 @@ export default function PedidosPage() {
       <div className="mt-8 flex items-end justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Pedidos</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Pedidos</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -76,7 +76,7 @@ export default function PedidosPage() {
             <p className="font-mono text-[11px] text-steel">Ainda não há pedidos nesta conta.</p>
             <Link
               to="/catalogo"
-              className="mt-4 inline-grid h-10 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+              className="mt-4 inline-grid h-10 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
             >
               Ir ao catálogo
             </Link>
@@ -87,11 +87,11 @@ export default function PedidosPage() {
               <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div>
                   <div className="font-mono text-[11px] text-acid">{o.reference}</div>
-                  <div className="mt-1 font-display text-white">{formatEuro(o.total)}</div>
+                  <div className="mt-1 font-display text-ink">{formatEuro(o.total)}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">
                     {new Date(o.createdAt).toLocaleString('pt-PT')}
                   </div>
-                  <div className="mt-2 inline-flex rounded-md bg-panel2 px-2 py-1 font-mono text-[10px] text-zinc-200 ring-1 ring-line">
+                  <div className="mt-2 inline-flex rounded-md bg-panel2 px-2 py-1 font-mono text-[10px] text-ink/80 ring-1 ring-line">
                     {estadoEncomenda(o)}
                   </div>
                 </div>

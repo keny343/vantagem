@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -42,7 +42,7 @@ export function AdminTicketsPage() {
   return (
     <div>
       <p className="label-mono">Loja</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Mensagens dos clientes</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Mensagens dos clientes</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         Reclamações, encomendas em atraso, artigos danificados. Abre a conversa para responder.
       </p>
@@ -63,7 +63,7 @@ export function AdminTicketsPage() {
             className="block border-b border-line p-4 last:border-0 hover:bg-white/5"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-display text-white">{t.subject}</h2>
+              <h2 className="font-display text-ink">{t.subject}</h2>
               <span className="font-mono text-[10px] text-steel uppercase">
                 {ROTULO_TICKET[t.status] ?? t.status}
               </span>
@@ -72,7 +72,7 @@ export function AdminTicketsPage() {
               {t.customerName} · {t.customerEmail} · {ROTULO_CATEGORIA_TICKET[t.category] ?? t.category}
               {t.pedidoReferencia ? ` · ${t.pedidoReferencia}` : ''}
             </p>
-            <p className="mt-2 line-clamp-2 text-sm text-zinc-300">
+            <p className="mt-2 line-clamp-2 text-sm text-ink/70">
               {t.lastFrom === 'cliente' ? 'Cliente: ' : 'Tu: '}
               {t.lastMessage}
             </p>

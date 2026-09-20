@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+﻿import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { urlMedia } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -55,7 +55,7 @@ function CartDrawer() {
         aria-label="Carrinho"
         aria-hidden={!cart.open}
         inert={!cart.open ? true : undefined}
-        className={`glass fixed top-0 right-0 z-50 flex h-full w-[360px] max-w-[88vw] flex-col border-l border-line transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 z-50 flex h-full w-[360px] max-w-[88vw] flex-col border-l border-line bg-panel shadow-[-12px_0_40px_-20px_rgba(20,33,38,0.35)] transition-transform duration-300 ease-out ${
           cart.open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -90,7 +90,7 @@ function CartDrawer() {
                 className="size-16 shrink-0 rounded-lg border border-line object-cover"
               />
               <div className="flex-1">
-                <div className="font-display text-sm text-white">{line.name}</div>
+                <div className="font-display text-sm text-ink">{line.name}</div>
                 <div className="mt-0.5 font-mono text-[10px] text-steel">{line.variant}</div>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="flex items-center rounded-md border border-line">
@@ -106,7 +106,7 @@ function CartDrawer() {
                     >
                       −
                     </button>
-                    <span className="min-w-6 text-center font-mono text-xs text-zinc-200">
+                    <span className="min-w-6 text-center font-mono text-xs text-ink/80">
                       {line.qty}
                     </span>
                     <button
@@ -139,14 +139,14 @@ function CartDrawer() {
             <span>Envio</span>
             <span>{cart.shipping === 0 ? 'Grátis' : formatEuro(cart.shipping)}</span>
           </div>
-          <div className="mb-3 flex items-center justify-between font-display text-lg text-white">
+          <div className="mb-3 flex items-center justify-between font-display text-lg text-ink">
             <span>Total</span>
             <span>{formatEuro(cart.total)}</span>
           </div>
           <Link
             to={user ? '/checkout' : '/login'}
             onClick={() => cart.setOpen(false)}
-            className="grid h-11 w-full place-items-center rounded-lg bg-acid font-display text-sm font-semibold text-ink transition-transform hover:brightness-105 active:scale-[0.98]"
+            className="grid h-11 w-full place-items-center rounded-lg bg-acid font-display text-sm font-semibold text-canvas transition-transform hover:brightness-105 active:scale-[0.98]"
           >
             {user ? 'Finalizar compra' : 'Entrar para comprar'}
           </Link>
@@ -178,16 +178,16 @@ function Header() {
   }
 
   return (
-    <header className="glass sticky top-0 z-30 border-b border-line/70">
+    <header className="sticky top-0 z-30 border-b border-line/80 bg-canvas/90 backdrop-blur-md">
       {admin && (
-        <div className="border-b border-acid/30 bg-acid/10">
+        <div className="border-b border-acid/25 bg-acid/10">
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-2 px-5 py-2 sm:px-8">
             <p className="font-mono text-[11px] tracking-[0.08em] text-acid uppercase">
               A ver a loja como administrador — não podes comprar
             </p>
             <Link
               to="/admin"
-              className="font-mono text-[10px] tracking-[0.14em] text-white uppercase hover:text-acid"
+              className="font-mono text-[10px] tracking-[0.14em] text-ink uppercase hover:text-acid"
             >
               Ir para o painel →
             </Link>
@@ -195,21 +195,17 @@ function Header() {
         </div>
       )}
       <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-5 sm:px-8">
-        <Link to="/" className="flex items-center gap-2 font-display font-semibold text-white">
-          <span className="inline-block size-2.5 rounded-[2px] bg-acid" />
-          <span className="text-lg tracking-tight">VANTAGEM</span>
-          <span className="hidden font-mono text-[10px] tracking-[0.2em] text-steel uppercase sm:inline">
-            / electrónica
-          </span>
+        <Link to="/" className="flex items-baseline gap-2 font-display font-semibold text-ink">
+          <span className="text-lg tracking-[-0.03em]">Vantagem</span>
         </Link>
-        <nav className="ml-4 hidden items-center gap-7 font-mono text-[11px] tracking-[0.15em] text-steel uppercase md:flex">
+        <nav className="ml-4 hidden items-center gap-7 font-mono text-[11px] tracking-[0.14em] text-steel uppercase md:flex">
           {nav.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               {...(item.end ? { end: true } : {})}
               className={({ isActive }) =>
-                `transition-colors hover:text-acid ${isActive ? 'text-white' : ''}`
+                `transition-colors hover:text-acid ${isActive ? 'text-ink' : ''}`
               }
             >
               {item.label}
@@ -226,7 +222,7 @@ function Header() {
               id="pesquisa-loja"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-steel/70"
+              className="w-full bg-transparent text-sm text-ink/80 outline-none placeholder:text-steel/70"
               placeholder="Pesquisar artigos…"
               aria-label="Pesquisar produtos"
               aria-keyshortcuts="/"
@@ -254,7 +250,7 @@ function Header() {
           ) : admin ? (
             <Link
               to="/admin"
-              className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] leading-9 tracking-[0.12em] text-zinc-300 uppercase ring-1 ring-line transition-colors hover:text-acid"
+              className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] leading-9 tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line transition-colors hover:text-acid"
             >
               Painel
             </Link>
@@ -262,13 +258,13 @@ function Header() {
             <button
               type="button"
               onClick={() => cart.setOpen(true)}
-              className="relative h-9 rounded-md bg-panel px-3 font-mono text-[11px] tracking-[0.12em] text-zinc-300 uppercase ring-1 ring-line transition-colors hover:text-acid"
+              className="relative h-9 rounded-md bg-panel px-3 font-mono text-[11px] tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line transition-colors hover:text-acid"
             >
               Carrinho
               {cart.count > 0 && (
                 <span
                   key={cart.bump}
-                  className="cart-bump absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-acid px-1 text-[10px] font-semibold text-ink"
+                  className="cart-bump absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-acid px-1 text-[10px] font-semibold text-canvas"
                 >
                   {cart.count}
                 </span>
@@ -278,7 +274,7 @@ function Header() {
           <button
             type="button"
             onClick={() => setMenu((m) => !m)}
-            className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] text-zinc-300 ring-1 ring-line md:hidden"
+            className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] text-ink/70 ring-1 ring-line md:hidden"
             aria-label="Menu"
           >
             ☰
@@ -309,7 +305,7 @@ function Footer() {
     <footer className="mt-16 border-t border-line">
       <div className="mx-auto grid max-w-[1400px] gap-8 px-5 py-10 sm:grid-cols-3 sm:px-8">
         <div>
-          <div className="flex items-center gap-2 font-display font-semibold text-white">
+          <div className="flex items-center gap-2 font-display font-semibold text-ink">
             <span className="inline-block size-2.5 rounded-[2px] bg-acid" />
             {LOJA.nome}
           </div>
@@ -353,7 +349,13 @@ function Footer() {
   );
 }
 
-export function StoreShell({ children }: { children: ReactNode }) {
+export function StoreShell({
+  children,
+  flush = false,
+}: {
+  children: ReactNode;
+  flush?: boolean;
+}) {
   const cart = useCart();
 
   useEffect(() => {
@@ -376,15 +378,15 @@ export function StoreShell({ children }: { children: ReactNode }) {
   }, [cart.setOpen]);
 
   return (
-    <div className="min-h-screen bg-ink text-zinc-200 selection:bg-acid/30 selection:text-white">
+    <div className="min-h-screen bg-canvas text-ink/80 selection:bg-acid/30 selection:text-canvas">
       <a
         href="#conteudo"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:bg-acid focus:px-3 focus:py-2 focus:font-display focus:text-sm focus:text-ink"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-acid focus:px-3 focus:py-2 focus:text-canvas"
       >
         Saltar para o conteúdo
       </a>
       <Header />
-      <main id="conteudo" className="mx-auto max-w-[1400px] px-5 pb-10 sm:px-8">
+      <main id="conteudo" className={flush ? 'pb-0' : 'mx-auto max-w-[1400px] px-5 pb-10 sm:px-8'}>
         {children}
       </main>
       <Footer />

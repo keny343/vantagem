@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+﻿import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -93,7 +93,7 @@ export default function SuportePage() {
       <div className="mt-8 flex items-end justify-between">
         <div>
           <p className="label-mono">Conta</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Conversas com a loja</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Conversas com a loja</h1>
           <p className="mt-1 max-w-[52ch] font-mono text-[11px] text-steel">
             Reclamações, encomenda em atraso, artigo danificado ou qualquer problema. A loja responde aqui.
           </p>
@@ -150,7 +150,7 @@ export default function SuportePage() {
         </label>
         <button
           disabled={busy}
-          className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
+          className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas disabled:opacity-60"
         >
           {busy ? 'A enviar…' : 'Começar conversa'}
         </button>
@@ -163,7 +163,7 @@ export default function SuportePage() {
             className="block rounded-[14px] border border-line bg-panel p-4 hover:border-acid/40"
           >
             <div className="flex justify-between gap-3">
-              <p className="font-display text-white">{t.assunto}</p>
+              <p className="font-display text-ink">{t.assunto}</p>
               <span className="font-mono text-[10px] text-steel uppercase">
                 {ROTULO_TICKET[t.estado] ?? t.estado}
               </span>

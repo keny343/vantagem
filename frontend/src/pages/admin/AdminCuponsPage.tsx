@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { ApiError, api, type AdminCoupon } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
@@ -75,7 +75,7 @@ export function AdminCuponsPage() {
   return (
     <div>
       <p className="label-mono">Promoções</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Cupons</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Cupons</h1>
       {erro && (
         <div className="mt-4">
           <ErroBloco mensagem={erro} onTentar={() => void carregar()} />
@@ -138,7 +138,7 @@ export function AdminCuponsPage() {
         />
         <button
           disabled={aCriar}
-          className="h-10 max-w-xs rounded-lg bg-acid font-display text-sm font-semibold text-ink disabled:opacity-60"
+          className="h-10 max-w-xs rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
         >
           {aCriar ? 'A criar…' : 'Criar cupão'}
         </button>

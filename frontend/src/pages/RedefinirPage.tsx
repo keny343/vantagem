@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+﻿import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -32,11 +32,11 @@ export function RedefinirPage() {
   return (
     <StoreShell>
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
-        <h1 className="font-display text-2xl font-semibold text-white">Nova palavra-passe</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink">Nova palavra-passe</h1>
         {!token ? (
           <p className="mt-4 text-sm text-zinc-400">Este link está incompleto. Pede um novo em Recuperar.</p>
         ) : ok ? (
-          <p className="mt-4 text-sm text-zinc-300">
+          <p className="mt-4 text-sm text-ink/70">
             Palavra-passe actualizada.{' '}
             <Link to="/login" className="text-acid">
               Entrar
@@ -66,7 +66,7 @@ export function RedefinirPage() {
             />
             <button
               disabled={busy}
-              className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-ink disabled:opacity-60"
+              className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
             >
               {busy ? 'A gravar…' : 'Guardar'}
             </button>

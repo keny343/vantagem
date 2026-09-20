@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, mensagemParaUtilizador, urlMedia, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
@@ -93,7 +93,7 @@ export function PedidoPage() {
               <>
                 <Link
                   to="/conta/pedidos"
-                  className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+                  className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
                 >
                   Os meus pedidos
                 </Link>
@@ -122,7 +122,7 @@ export function PedidoPage() {
     <StoreShell>
       <div className="mt-8 max-w-2xl">
         <p className="label-mono">Encomenda</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-white">{order.reference}</h1>
+        <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{order.reference}</h1>
         <p className="mt-2 font-mono text-[11px] text-steel">
           {estadoEncomenda(order)}
           {order.paidAt ? ` · ${new Date(order.paidAt).toLocaleString('pt-PT')}` : ''}
@@ -130,7 +130,7 @@ export function PedidoPage() {
 
         {pendente && !admin && order.comprovativoUrl && (
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
-            <h2 className="font-display text-white">Comprovativo recebido</h2>
+            <h2 className="font-display text-ink">Comprovativo recebido</h2>
             <p className="mt-2 text-sm text-zinc-400">
               A loja está a verificar a transferência. Quando confirmar, o estado passa a pago —
               acompanhas isso na tua conta, em Os meus pedidos.
@@ -142,7 +142,7 @@ export function PedidoPage() {
             />
             <Link
               to="/conta/pedidos"
-              className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+              className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
             >
               Acompanhar na tua conta
             </Link>
@@ -151,13 +151,13 @@ export function PedidoPage() {
 
         {order.status === 'pago' && !admin && (
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
-            <h2 className="font-display text-white">Pagamento confirmado</h2>
+            <h2 className="font-display text-ink">Pagamento confirmado</h2>
             <p className="mt-2 text-sm text-zinc-400">
               A loja verificou o comprovativo e marcou a encomenda como paga.
             </p>
             <Link
               to="/conta/pedidos"
-              className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+              className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
             >
               Ver na tua conta
             </Link>
@@ -166,11 +166,11 @@ export function PedidoPage() {
 
         {pendente && !admin && !order.comprovativoUrl && (
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
-            <h2 className="font-display text-white">Envia o comprovativo</h2>
+            <h2 className="font-display text-ink">Envia o comprovativo</h2>
             <p className="mt-2 text-sm text-zinc-400">
               Transfere o valor e anexa a fotografia. Só a loja marca a encomenda como paga.
             </p>
-            <div className="mt-3 rounded-lg border border-line bg-panel2 p-3 font-mono text-sm text-zinc-200">
+            <div className="mt-3 rounded-lg border border-line bg-panel2 p-3 font-mono text-sm text-ink/80">
               <div>Método {ROTULO_PAGAMENTO.cartao}</div>
               {iban ? <div className="mt-1 break-all">IBAN {iban}</div> : (
                 <div className="mt-1 text-steel">
@@ -229,7 +229,7 @@ export function PedidoPage() {
               <span className="text-steel">
                 {i.quantity}× {i.name} ({i.variant})
               </span>
-              <span className="text-zinc-200">{formatEuro(i.total)}</span>
+              <span className="text-ink/80">{formatEuro(i.total)}</span>
             </div>
           ))}
           <dl className="mt-3 space-y-1 border-t border-line pt-3 font-mono text-[11px] text-steel">
@@ -251,7 +251,7 @@ export function PedidoPage() {
               <dt>IVA incluído</dt>
               <dd>{formatEuro(order.vat)}</dd>
             </div>
-            <div className="flex justify-between font-display text-base text-white">
+            <div className="flex justify-between font-display text-base text-ink">
               <dt>Total</dt>
               <dd>{formatEuro(order.total)}</dd>
             </div>
@@ -259,7 +259,7 @@ export function PedidoPage() {
         </section>
 
         <section className="mt-6 rounded-[14px] border border-line bg-panel p-5 font-mono text-[12px] text-steel">
-          <div className="label-mono mb-3 text-zinc-200">Factura / entrega</div>
+          <div className="label-mono mb-3 text-ink/80">Factura / entrega</div>
           <p>{order.customer.name}</p>
           <p>{order.customer.email}</p>
           <p>{order.customer.phone}</p>

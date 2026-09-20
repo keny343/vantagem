@@ -1,4 +1,4 @@
-import {
+﻿import {
   createContext,
   useCallback,
   useContext,
@@ -66,7 +66,7 @@ export function ConfirmarProvider({ children }: { children: ReactNode }) {
             aria-labelledby={tituloId}
             className="relative w-full max-w-md rounded-[14px] border border-line bg-panel p-6"
           >
-            <h2 id={tituloId} className="font-display text-lg font-semibold text-white">
+            <h2 id={tituloId} className="font-display text-lg font-semibold text-ink">
               {pedido.titulo}
             </h2>
             <p className="mt-2 text-sm text-zinc-400">{pedido.mensagem}</p>
@@ -74,7 +74,7 @@ export function ConfirmarProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => fechar(false)}
-                className="h-11 rounded-lg px-4 font-mono text-[11px] tracking-[0.12em] text-zinc-300 uppercase ring-1 ring-line"
+                className="h-11 rounded-lg px-4 font-mono text-[11px] tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line"
               >
                 Cancelar
               </button>
@@ -83,7 +83,7 @@ export function ConfirmarProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => fechar(true)}
                 className={`h-11 rounded-lg px-4 font-display text-sm font-semibold ${
-                  pedido.perigo ? 'bg-destructive text-white' : 'bg-acid text-ink'
+                  pedido.perigo ? 'bg-destructive text-ink' : 'bg-acid text-canvas'
                 }`}
               >
                 {pedido.confirmarLabel ?? 'Confirmar'}

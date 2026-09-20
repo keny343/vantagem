@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, type Product } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -71,7 +71,7 @@ export default function FavoritosPage() {
       <div className="mt-8 flex items-end justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Favoritos</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Favoritos</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -99,7 +99,7 @@ export default function FavoritosPage() {
           <p className="font-mono text-[11px] text-steel">Ainda não tens artigos favoritos.</p>
           <Link
             to="/catalogo"
-            className="mt-4 inline-grid h-10 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+            className="mt-4 inline-grid h-10 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
           >
             Explorar catálogo
           </Link>
@@ -112,7 +112,7 @@ export default function FavoritosPage() {
               <button
                 type="button"
                 onClick={() => void remover(produto)}
-                className="absolute top-3 right-3 rounded-md bg-ink/80 px-2 py-1 font-mono text-[10px] tracking-[0.12em] text-white uppercase ring-1 ring-line hover:text-acid"
+                className="absolute top-3 right-3 rounded-md bg-canvas/80 px-2 py-1 font-mono text-[10px] tracking-[0.12em] text-ink uppercase ring-1 ring-line hover:text-acid"
                 aria-label={`Retirar ${produto.name} dos favoritos`}
               >
                 Retirar

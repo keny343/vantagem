@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/SessionContext';
 
@@ -19,7 +19,7 @@ export function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-ink font-mono text-steel">
+      <div className="grid min-h-screen place-items-center bg-canvas font-mono text-steel">
         A carregar…
       </div>
     );
@@ -39,8 +39,8 @@ export function AdminLayout() {
           className={({ isActive }) =>
             `relative flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
               isActive
-                ? 'bg-acid/15 font-semibold text-white before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-[3px] before:rounded-r before:bg-acid'
-                : 'text-zinc-300 hover:bg-white/5 hover:text-white'
+                ? 'bg-acid/15 font-semibold text-ink before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-[3px] before:rounded-r before:bg-acid'
+                : 'text-ink/70 hover:bg-white/5 hover:text-canvas'
             }`
           }
         >
@@ -51,7 +51,7 @@ export function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-ink text-zinc-200">
+    <div className="min-h-screen bg-canvas text-ink/80">
       {menu && (
         <button
           type="button"
@@ -65,11 +65,11 @@ export function AdminLayout() {
         <button
           type="button"
           onClick={() => setMenu(true)}
-          className="h-9 rounded-md px-3 font-mono text-xs text-zinc-300 ring-1 ring-line"
+          className="h-9 rounded-md px-3 font-mono text-xs text-ink/70 ring-1 ring-line"
         >
           Menu
         </button>
-        <span className="font-display text-sm font-semibold text-white">Painel</span>
+        <span className="font-display text-sm font-semibold text-ink">Painel</span>
         <Link to="/" className="font-mono text-[10px] tracking-[0.12em] text-steel uppercase">
           Loja
         </Link>
@@ -81,11 +81,11 @@ export function AdminLayout() {
         }`}
       >
         <div className="mb-4 flex items-center gap-3 px-1 py-2">
-          <div className="grid size-10 place-items-center rounded-md bg-acid font-display text-sm font-bold text-ink">
+          <div className="grid size-10 place-items-center rounded-md bg-acid font-display text-sm font-bold text-canvas">
             VT
           </div>
           <div>
-            <div className="font-display text-sm font-semibold text-white">Vantagem</div>
+            <div className="font-display text-sm font-semibold text-ink">Vantagem</div>
             <div className="font-mono text-[10px] tracking-[0.12em] text-steel uppercase">
               Painel administrativo
             </div>
@@ -93,7 +93,7 @@ export function AdminLayout() {
         </div>
 
           <div className="mb-3 border-b border-white/10 px-1 pb-3">
-          <p className="font-display text-sm text-white">{user.name}</p>
+          <p className="font-display text-sm text-ink">{user.name}</p>
           <p className="font-mono text-[10px] text-steel">{user.email}</p>
           <p className="mt-1 font-mono text-[10px] tracking-[0.14em] text-acid uppercase">
             Administrador · não compra
@@ -105,13 +105,13 @@ export function AdminLayout() {
         <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
           <Link
             to="/"
-            className="flex min-h-9 items-center rounded-md px-3 text-sm text-zinc-300 hover:bg-white/5 hover:text-white"
+            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-white/5 hover:text-ink"
           >
             Ver loja
           </Link>
           <Link
             to="/ajuda"
-            className="flex min-h-9 items-center rounded-md px-3 text-sm text-zinc-300 hover:bg-white/5 hover:text-white"
+            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-white/5 hover:text-ink"
           >
             Ajuda
           </Link>
@@ -120,7 +120,7 @@ export function AdminLayout() {
             onClick={() => {
               void logout().then(() => navigate('/login'));
             }}
-            className="flex min-h-9 w-full items-center rounded-md border border-white/15 px-3 text-sm text-zinc-200 hover:bg-white/10"
+            className="flex min-h-9 w-full items-center rounded-md border border-white/15 px-3 text-sm text-ink/80 hover:bg-white/10"
           >
             Sair
           </button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, type Order } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -29,7 +29,7 @@ export function ContaPage() {
       <div className="mt-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">{user.name}</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{user.name}</h1>
           <p className="mt-1 font-mono text-[11px] text-steel">{user.email}</p>
         </div>
         <div className="flex gap-2">
@@ -52,7 +52,7 @@ export function ContaPage() {
       </div>
 
       <section className="mt-8 rounded-[14px] border border-line bg-panel p-6">
-        <h2 className="font-display text-lg text-white">Os teus pedidos</h2>
+        <h2 className="font-display text-lg text-ink">Os teus pedidos</h2>
         {orders.length === 0 ? (
           <p className="mt-4 font-mono text-[11px] text-steel">Ainda não há pedidos nesta conta.</p>
         ) : (
@@ -61,7 +61,7 @@ export function ContaPage() {
               <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div>
                   <div className="font-mono text-[11px] text-acid">{o.reference}</div>
-                  <div className="mt-1 font-display text-white">{formatEuro(o.total)}</div>
+                  <div className="mt-1 font-display text-ink">{formatEuro(o.total)}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">
                     {new Date(o.createdAt).toLocaleString('pt-PT')} · {o.status}
                   </div>

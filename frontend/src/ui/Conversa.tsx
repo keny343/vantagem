@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+﻿import { FormEvent, useEffect, useRef, useState } from 'react';
 
 export type MensagemChat = {
   id: string;
@@ -51,7 +51,7 @@ export function Conversa({
             <article
               key={m.id}
               className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                minha ? 'ml-auto bg-acid/15 text-white' : 'bg-panel2 text-zinc-200'
+                minha ? 'ml-auto bg-acid/15 text-ink' : 'bg-panel2 text-canvas/80'
               }`}
             >
               <p className="font-mono text-[10px] tracking-[0.12em] text-steel uppercase">
@@ -87,7 +87,7 @@ export function Conversa({
           />
           <button
             disabled={aEnviar}
-            className="h-11 self-end rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink disabled:opacity-60"
+            className="h-11 self-end rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
             {aEnviar ? '…' : 'Enviar'}
           </button>

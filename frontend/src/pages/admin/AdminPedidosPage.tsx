@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, urlMedia } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -98,7 +98,7 @@ export function AdminPedidosPage() {
   return (
     <div>
       <p className="label-mono">Operações</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Pedidos</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Pedidos</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         Verifica o comprovativo e confirma o pagamento — o cliente vê o mesmo estado na conta.
       </p>
@@ -117,7 +117,7 @@ export function AdminPedidosPage() {
       >
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="font-display text-lg text-white">Pagamentos por verificar</h2>
+            <h2 className="font-display text-lg text-ink">Pagamentos por verificar</h2>
             <p className="mt-1 font-mono text-[11px] text-steel">
               Comprovativo recebido — confirma aqui depois de ver a fotografia.
             </p>
@@ -160,9 +160,9 @@ export function AdminPedidosPage() {
                   >
                     {o.reference}
                   </Link>
-                  <div className="font-display text-white">{o.customerName}</div>
+                  <div className="font-display text-ink">{o.customerName}</div>
                   <div className="font-mono text-[10px] text-steel">{o.customerEmail}</div>
-                  <div className="mt-2 font-display text-white">{formatEuro(o.total)}</div>
+                  <div className="mt-2 font-display text-ink">{formatEuro(o.total)}</div>
                   <div className="font-mono text-[10px] text-steel">
                     {ROTULO_PAGAMENTO[o.paymentMethod] ?? o.paymentMethod}
                   </div>
@@ -172,7 +172,7 @@ export function AdminPedidosPage() {
                     type="button"
                     disabled={aConfirmar === o.id}
                     onClick={() => void confirmarPagamento(o)}
-                    className="h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
+                    className="h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas disabled:opacity-60"
                   >
                     {aConfirmar === o.id ? 'A confirmar…' : 'Confirmar pagamento'}
                   </button>
@@ -189,7 +189,7 @@ export function AdminPedidosPage() {
         )}
       </section>
 
-      <h2 className="mt-8 font-display text-lg text-white">Todos os pedidos</h2>
+      <h2 className="mt-8 font-display text-lg text-ink">Todos os pedidos</h2>
       <div className="mt-3 overflow-hidden rounded-[14px] border border-line bg-panel">
         {orders.length === 0 && (
           <p className="p-6 font-mono text-[11px] text-steel">Ainda não há pedidos.</p>
@@ -206,7 +206,7 @@ export function AdminPedidosPage() {
               >
                 {o.reference}
               </Link>
-              <div className="font-display text-white">{o.customerName}</div>
+              <div className="font-display text-ink">{o.customerName}</div>
               <div className="font-mono text-[10px] text-steel">{o.customerEmail}</div>
               {o.status === 'pendente' && !o.hasProof && (
                 <div className="mt-1 font-mono text-[10px] text-steel uppercase">
@@ -215,7 +215,7 @@ export function AdminPedidosPage() {
               )}
             </div>
             <div className="text-right">
-              <div className="font-display text-white">{formatEuro(o.total)}</div>
+              <div className="font-display text-ink">{formatEuro(o.total)}</div>
               <div className="font-mono text-[10px] text-steel">
                 {ROTULO_PAGAMENTO[o.paymentMethod] ?? o.paymentMethod}
               </div>
@@ -228,7 +228,7 @@ export function AdminPedidosPage() {
               <select
                 value={o.status}
                 onChange={(e) => void mudarEstado(o.id, e.target.value)}
-                className="ml-2 h-9 rounded-md border border-line bg-panel2 px-2 font-mono text-[11px] text-zinc-200"
+                className="ml-2 h-9 rounded-md border border-line bg-panel2 px-2 font-mono text-[11px] text-ink/80"
                 aria-label={`Estado de ${o.reference}`}
               >
                 {ESTADOS.map((s) => (

@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+﻿import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -30,7 +30,7 @@ export function RecuperarPage() {
   return (
     <StoreShell>
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
-        <h1 className="font-display text-2xl font-semibold text-white">Recuperar palavra-passe</h1>
+        <h1 className="font-display text-2xl font-semibold text-ink">Recuperar palavra-passe</h1>
         {ok ? (
           <p className="mt-4 text-sm text-zinc-400">
             Se existir uma conta com este email, enviámos um link válido por uma hora. Sem servidor
@@ -58,7 +58,7 @@ export function RecuperarPage() {
             />
             <button
               disabled={busy}
-              className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-ink disabled:opacity-60"
+              className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
             >
               {busy ? 'A enviar…' : 'Enviar link'}
             </button>

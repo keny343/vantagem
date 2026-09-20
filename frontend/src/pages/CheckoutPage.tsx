@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, api, mensagemParaUtilizador } from '../api/client';
 import { useCart } from '../cart/CartContext';
@@ -12,7 +12,7 @@ import { formatEuro } from '../utils/format';
 import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 
 const field =
-  'h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm text-zinc-100 outline-none placeholder:text-steel/60 focus:border-acid/60';
+  'h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm text-ink outline-none placeholder:text-steel/70 focus:border-acid/60';
 
 type Endereco = {
   id: string;
@@ -192,7 +192,7 @@ export function CheckoutPage() {
     <StoreShell>
       <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-white">Finalizar compra</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink">Finalizar compra</h1>
           <p className="mt-1 font-mono text-[11px] text-steel">
             Entrega em {LOJA.pais} · preços em Kwanzas, com IVA incluído
           </p>
@@ -210,7 +210,7 @@ export function CheckoutPage() {
               aria-current={step === i + 1 ? 'step' : undefined}
               className={`flex h-9 items-center gap-2 rounded-md px-3 font-mono text-[10px] tracking-[0.12em] uppercase ${
                 step === i + 1
-                  ? 'bg-acid text-ink'
+                  ? 'bg-acid text-canvas'
                   : step > i + 1
                     ? 'text-acid ring-1 ring-acid/40'
                     : 'text-steel ring-1 ring-line'
@@ -238,7 +238,7 @@ export function CheckoutPage() {
 
       {cart.lines.length === 0 ? (
         <div className="mt-6 rounded-[14px] border border-line bg-panel p-8 text-center">
-          <p className="font-display text-white">Não há artigos para pagar.</p>
+          <p className="font-display text-ink">Não há artigos para pagar.</p>
           <Link to="/catalogo" className="mt-4 inline-block font-mono text-[11px] text-acid">
             Voltar ao catálogo
           </Link>
@@ -267,7 +267,7 @@ export function CheckoutPage() {
                         onClick={() => aplicarEndereco(e)}
                         className="block w-full rounded-lg border border-line px-3 py-2 text-left text-sm hover:border-acid/40"
                       >
-                        <span className="text-white">{e.nome}</span>
+                        <span className="text-ink">{e.nome}</span>
                         <span className="ml-2 font-mono text-[11px] text-steel">
                           {e.morada}, {e.cidade}
                         </span>
@@ -339,7 +339,7 @@ export function CheckoutPage() {
                 <p className="font-mono text-[10px] text-steel">
                   Entregamos em Luanda e nas províncias. Fora de Angola, fala connosco.
                 </p>
-                <button className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink">
+                <button className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas">
                   Continuar para pagamento
                 </button>
               </form>
@@ -357,13 +357,13 @@ export function CheckoutPage() {
                   Entrega: {form.name} · {form.address}, {form.postalCode} {form.city}
                 </p>
                 <div className="rounded-lg border border-acid/40 bg-panel2 px-4 py-3">
-                  <p className="font-display text-white">Transferência bancária</p>
+                  <p className="font-display text-ink">Transferência bancária</p>
                   <p className="mt-1 font-mono text-[11px] text-steel">
                     Transfere {formatEuro(total)} para a conta da loja, anexa a fotografia do
                     comprovativo e confirma. Só o administrador marca a encomenda como paga.
                   </p>
                   {iban ? (
-                    <p className="mt-2 break-all font-mono text-sm text-zinc-200">IBAN {iban}</p>
+                    <p className="mt-2 break-all font-mono text-sm text-ink/80">IBAN {iban}</p>
                   ) : (
                     <p className="mt-2 font-mono text-[11px] text-steel">
                       Os dados da conta aparecem também na página da encomenda, se a loja os tiver
@@ -419,14 +419,14 @@ export function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="h-11 rounded-lg px-5 font-mono text-xs tracking-[0.12em] text-zinc-300 uppercase ring-1 ring-line"
+                    className="h-11 rounded-lg px-5 font-mono text-xs tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line"
                   >
                     Voltar
                   </button>
                   <button
                     type="submit"
                     disabled={aPagar}
-                    className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink disabled:opacity-60"
+                    className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas disabled:opacity-60"
                   >
                     {aPagar ? 'A enviar…' : `Confirmar encomenda ${formatEuro(total)}`}
                   </button>
@@ -443,14 +443,14 @@ export function CheckoutPage() {
                   <span className="text-steel">
                     {l.qty}× {l.name}
                   </span>
-                  <span className="text-zinc-200">{formatEuro(l.price * l.qty)}</span>
+                  <span className="text-ink/80">{formatEuro(l.price * l.qty)}</span>
                 </div>
               ))}
             </div>
             <dl className="mt-4 space-y-2 border-t border-line pt-4 font-mono text-[11px] text-steel">
               <div className="flex justify-between">
                 <dt>Subtotal</dt>
-                <dd className="text-zinc-200">{formatEuro(cart.subtotal)}</dd>
+                <dd className="text-ink/80">{formatEuro(cart.subtotal)}</dd>
               </div>
               {desconto > 0 && (
                 <div className="flex justify-between">
@@ -460,13 +460,13 @@ export function CheckoutPage() {
               )}
               <div className="flex justify-between">
                 <dt>Envio</dt>
-                <dd className="text-zinc-200">
+                <dd className="text-ink/80">
                   {cart.shipping === 0 ? 'Grátis' : formatEuro(cart.shipping)}
                 </dd>
               </div>
               <div className="flex justify-between">
                 <dt>IVA incluído ({Math.round(LOJA.taxaIva * 100)}%)</dt>
-                <dd className="text-zinc-200">{formatEuro(iva)}</dd>
+                <dd className="text-ink/80">{formatEuro(iva)}</dd>
               </div>
             </dl>
             {faltaEnvio > 0 && (
@@ -474,7 +474,7 @@ export function CheckoutPage() {
                 Faltam {formatEuro(faltaEnvio)} para envio grátis.
               </p>
             )}
-            <div className="mt-4 flex items-center justify-between font-display text-lg text-white">
+            <div className="mt-4 flex items-center justify-between font-display text-lg text-ink">
               <span>Total</span>
               <span>{formatEuro(total)}</span>
             </div>

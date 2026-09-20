@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
@@ -100,7 +100,7 @@ export function FacturaPage() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="h-10 rounded-lg bg-black px-4 text-sm text-white"
+          className="h-10 rounded-lg bg-black px-4 text-sm text-ink"
         >
           Imprimir / PDF
         </button>

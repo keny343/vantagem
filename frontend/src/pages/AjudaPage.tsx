@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -14,7 +14,7 @@ export function AjudaPage() {
 
   return (
     <StoreShell>
-      <h1 className="mt-8 font-display text-2xl font-semibold text-white">Ajuda</h1>
+      <h1 className="mt-8 font-display text-2xl font-semibold text-ink">Ajuda</h1>
       <p className="mt-2 max-w-[56ch] text-zinc-400">
         Como comprar, acompanhar a encomenda e o que cada tipo de conta pode fazer.
       </p>
@@ -91,7 +91,7 @@ export function AjudaPage() {
             <dl className="space-y-3">
               {faq.map((f) => (
                 <div key={f.id}>
-                  <dt className="font-display text-white">{f.pergunta}</dt>
+                  <dt className="font-display text-ink">{f.pergunta}</dt>
                   <dd className="mt-1">{f.resposta}</dd>
                 </div>
               ))}
@@ -113,7 +113,7 @@ export function AjudaPage() {
 function Seccao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="rounded-[14px] border border-line bg-panel p-5">
-      <h2 className="font-display text-lg text-white">{titulo}</h2>
+      <h2 className="font-display text-lg text-ink">{titulo}</h2>
       <div className="mt-3 text-sm leading-relaxed text-zinc-400">{children}</div>
     </section>
   );

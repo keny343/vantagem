@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { request } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -99,7 +99,7 @@ export default function PerfilPage() {
       <div className="mt-8 flex items-end justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Perfil</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Perfil</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -134,7 +134,7 @@ export default function PerfilPage() {
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="mt-4 h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink"
+                className="mt-4 h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
               >
                 Editar
               </button>
@@ -156,7 +156,7 @@ export default function PerfilPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
+                  className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas disabled:opacity-60"
                 >
                   {saving ? 'A guardar…' : 'Guardar'}
                 </button>
@@ -180,7 +180,7 @@ function Campo({ label, valor }: { label: string; valor: string }) {
   return (
     <div>
       <p className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">{label}</p>
-      <p className="mt-1 text-white">{valor}</p>
+      <p className="mt-1 text-ink">{valor}</p>
     </div>
   );
 }

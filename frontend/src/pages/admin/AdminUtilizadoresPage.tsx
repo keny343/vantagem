@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { ApiError, api } from '../../api/client';
 import { useSession } from '../../auth/SessionContext';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -64,7 +64,7 @@ export function AdminUtilizadoresPage() {
   return (
     <div>
       <p className="label-mono">Contas</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Utilizadores</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Utilizadores</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         Activar contas e alterar perfil. Não podes deixar o sistema sem um admin.
       </p>
@@ -88,7 +88,7 @@ export function AdminUtilizadoresPage() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id} className="border-b border-line last:border-0">
-                <td className="px-4 py-3 text-white">{u.name}</td>
+                <td className="px-4 py-3 text-ink">{u.name}</td>
                 <td className="px-4 py-3 font-mono text-[11px] text-steel">{u.email}</td>
                 <td className="px-4 py-3">
                   <select

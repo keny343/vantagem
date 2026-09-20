@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+﻿import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api, mensagemParaUtilizador } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -51,7 +51,7 @@ export function LoginPage() {
     <StoreShell>
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
         <div className="label-mono">Sessão</div>
-        <h1 className="mt-2 font-display text-2xl font-semibold text-white">Entrar</h1>
+        <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Entrar</h1>
         <p className="mt-2 text-sm text-zinc-400">
           Entra para concluir a compra e acompanhar se a loja já confirmou o pagamento.
         </p>
@@ -101,7 +101,7 @@ export function LoginPage() {
           </div>
           <button
             disabled={busy}
-            className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-ink disabled:opacity-60"
+            className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
             {busy ? 'A autenticar…' : 'Entrar'}
           </button>

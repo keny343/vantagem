@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError, api, urlMedia, type AdminProduct } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -78,7 +78,7 @@ export function AdminProdutosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="label-mono">Catálogo</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Artigos</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Artigos</h1>
           <p className="mt-1 font-mono text-[11px] text-steel">
             O que aparece aqui é o que está na base de dados — nada de exemplos fictícios.
           </p>
@@ -90,7 +90,7 @@ export function AdminProdutosPage() {
         </div>
         <Link
           to="/admin/produtos/novo"
-          className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+          className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
         >
           Novo artigo
         </Link>
@@ -108,13 +108,13 @@ export function AdminProdutosPage() {
 
       {products.length === 0 ? (
         <div className="mt-6 rounded-[14px] border border-line bg-panel p-10 text-center">
-          <p className="font-display text-lg text-white">Ainda não há artigos</p>
+          <p className="font-display text-lg text-ink">Ainda não há artigos</p>
           <p className="mt-2 font-mono text-[11px] text-steel">
             Começa por adicionar o primeiro. O catálogo público fica vazio até o publicares.
           </p>
           <Link
             to="/admin/produtos/novo"
-            className="mt-5 inline-grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+            className="mt-5 inline-grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
           >
             Adicionar artigo
           </Link>
@@ -134,7 +134,7 @@ export function AdminProdutosPage() {
                 />
               )}
               <div className="min-w-[200px] flex-1">
-                <div className="font-display text-white">
+                <div className="font-display text-ink">
                   {p.name}
                   {p.hero && (
                     <span className="ml-2 font-mono text-[10px] tracking-[0.12em] text-acid uppercase">

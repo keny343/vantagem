@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { ApiError, api, type AdminCategory } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
@@ -69,7 +69,7 @@ export function AdminCategoriasPage() {
   return (
     <div>
       <p className="label-mono">Catálogo</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Categorias</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Categorias</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         Organizam o catálogo público. Não se elimina uma categoria com produtos associados.
       </p>
@@ -98,7 +98,7 @@ export function AdminCategoriasPage() {
           className="h-10 w-20 rounded-lg border border-line bg-panel2 px-3 text-sm"
           aria-label="Ordem"
         />
-        <button className="h-10 rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink">
+        <button className="h-10 rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas">
           Criar
         </button>
       </form>
@@ -127,7 +127,7 @@ export function AdminCategoriasPage() {
             <button
               type="button"
               onClick={() => void guardar(c)}
-              className="h-9 rounded-md bg-acid px-3 font-mono text-[10px] text-ink uppercase"
+              className="h-9 rounded-md bg-acid px-3 font-mono text-[10px] text-canvas uppercase"
             >
               Guardar
             </button>

@@ -37,7 +37,10 @@ Endurecer o que já existe sob condições reais — sem adicionar features de p
 
 - Redis / filas / microserviços
 - Rastreio de transportadora (removido)
-- Redesign visual completo (fase seguinte: identidade própria)
+
+## Identidade visual (em curso)
+
+Ver `PRODUCT.md` + `DESIGN.md` — mundo **Concrete tropical modern (Luanda)**: limestone, teal Atlântico, Sora. Home brand-first full-bleed.
 
 ## Como correr localmente
 

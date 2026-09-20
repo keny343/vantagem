@@ -1,33 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0e0f12;
-  --color-panel: #16171c;
-  --color-panel2: #1c1e25;
-  --color-line: #2a2c35;
-  --color-acid: #c9f24a;
-  --color-steel: #8b90a0;
-  --color-warn: #f0b429;
-  --color-destructive: #ef5a4e;
-  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
-  --font-sans: "IBM Plex Sans", ui-sans-serif, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-canvas: #ede6da;
+  --color-ink: #142126;
+  --color-panel: #f7f2e8;
+  --color-panel2: #e8dfd0;
+  --color-line: #d4cbb8;
+  --color-acid: #0c7c76;
+  --color-steel: #5a6a6e;
+  --color-brass: #b8956a;
+  --color-warn: #c47a1a;
+  --color-destructive: #c23b2e;
+  --font-display: "Sora", ui-sans-serif, sans-serif;
+  --font-sans: "Source Sans 3", ui-sans-serif, sans-serif;
+  --font-mono: "Source Code Pro", ui-monospace, monospace;
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     margin: 0;
     min-height: 100vh;
-    background: var(--color-ink);
-    color: #e4e4e7;
+    background: var(--color-canvas);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
   * {
     box-sizing: border-box;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-acid) 35%, transparent);
+    color: var(--color-ink);
   }
   :focus-visible {
     outline: 2px solid var(--color-acid);
@@ -36,24 +42,23 @@
 }
 
 @layer utilities {
-  .glass {
-    background: color-mix(in oklab, var(--color-panel) 82%, transparent);
-    backdrop-filter: blur(16px);
-  }
-  .diagonal-wash {
+  .facade-wash {
     background:
-      linear-gradient(115deg, color-mix(in oklab, var(--color-acid) 8%, transparent), transparent 42%),
-      radial-gradient(circle at 80% 20%, color-mix(in oklab, var(--color-acid) 12%, transparent), transparent 50%);
+      linear-gradient(165deg, #f4efe6 0%, #ede6da 38%, #d9e4e3 100%),
+      radial-gradient(ellipse 80% 60% at 70% 10%, color-mix(in oklab, var(--color-brass) 22%, transparent), transparent 55%);
+  }
+  .shade-band {
+    background: linear-gradient(180deg, #1a2c30 0%, #142126 100%);
   }
   .label-mono {
     font-family: var(--font-mono);
     font-size: 10px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-steel);
   }
   .skel {
-    background: linear-gradient(90deg, #1c1e25 25%, #252833 50%, #1c1e25 75%);
+    background: linear-gradient(90deg, #e8dfd0 25%, #f7f2e8 50%, #e8dfd0 75%);
     background-size: 200% 100%;
     animation: skel 1.2s ease-in-out infinite;
   }
@@ -62,18 +67,25 @@
     100% { background-position: -200% 0; }
   }
   .rise {
-    animation: rise 280ms ease-out;
+    animation: rise 420ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes rise {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  .brand-in {
+    animation: brand-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes brand-in {
+    from { opacity: 0; letter-spacing: 0.12em; transform: translateY(12px); }
+    to { opacity: 1; letter-spacing: -0.02em; transform: translateY(0); }
   }
   .cart-bump {
     animation: bump 320ms ease;
   }
   @keyframes bump {
     0% { transform: scale(1); }
-    40% { transform: scale(1.25); }
+    40% { transform: scale(1.2); }
     100% { transform: scale(1); }
   }
 }

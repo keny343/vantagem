@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -80,7 +80,7 @@ export default function TicketPage() {
       <Link to="/conta/suporte" className="mt-8 inline-block font-mono text-[11px] text-steel hover:text-acid">
         ← Conversas
       </Link>
-      <h1 className="mt-3 font-display text-2xl font-semibold text-white">{ticket.assunto}</h1>
+      <h1 className="mt-3 font-display text-2xl font-semibold text-ink">{ticket.assunto}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         {ROTULO_TICKET[ticket.estado] ?? ticket.estado} ·{' '}
         {ROTULO_CATEGORIA_TICKET[ticket.categoria] ?? ticket.categoria}

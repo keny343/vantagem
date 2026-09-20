@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, type Product } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -59,11 +59,11 @@ export function AdminPage() {
     return (
       <StoreShell>
         <div className="mt-16 text-center">
-          <h1 className="font-display text-2xl text-white">Acesso restrito</h1>
+          <h1 className="font-display text-2xl text-ink">Acesso restrito</h1>
           <p className="mt-2 font-mono text-[11px] text-steel">
             Esta área é só para administradores.
           </p>
-          <Link to="/conta" className="mt-6 inline-grid h-11 place-items-center rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink">
+          <Link to="/conta" className="mt-6 inline-grid h-11 place-items-center rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas">
             Ir para a conta
           </Link>
         </div>
@@ -90,7 +90,7 @@ export function AdminPage() {
     <StoreShell>
       <div className="mt-8">
         <div className="label-mono">Administração</div>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-white">Painel</h1>
+        <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Painel</h1>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -106,7 +106,7 @@ export function AdminPage() {
             type="button"
             onClick={() => setTab(id)}
             className={`h-9 rounded-md px-4 font-mono text-[11px] tracking-[0.12em] uppercase ${
-              tab === id ? 'bg-acid text-ink' : 'text-steel ring-1 ring-line hover:text-acid'
+              tab === id ? 'bg-acid text-canvas' : 'text-steel ring-1 ring-line hover:text-acid'
             }`}
           >
             {label}
@@ -126,7 +126,7 @@ export function AdminPage() {
           ].map(([label, value]) => (
             <div key={label} className="rounded-[14px] border border-line bg-panel p-5">
               <div className="label-mono">{label}</div>
-              <div className="mt-2 font-display text-2xl text-white">{value}</div>
+              <div className="mt-2 font-display text-2xl text-ink">{value}</div>
             </div>
           ))}
         </div>
@@ -141,7 +141,7 @@ export function AdminPage() {
               className="flex flex-wrap items-center gap-3 border-b border-line p-4 last:border-b-0"
             >
               <div className="min-w-[180px] flex-1">
-                <div className="font-display text-white">{p.name}</div>
+                <div className="font-display text-ink">{p.name}</div>
                 <div className="font-mono text-[10px] text-steel">
                   {p.sku} · {p.brand}
                 </div>
@@ -153,7 +153,7 @@ export function AdminPage() {
                 defaultValue={p.stock}
                 className="h-9 w-24 rounded-md border border-line bg-panel2 px-2 font-mono text-sm"
               />
-              <button className="h-9 rounded-md bg-acid px-3 font-mono text-[11px] text-ink uppercase">
+              <button className="h-9 rounded-md bg-acid px-3 font-mono text-[11px] text-canvas uppercase">
                 Guardar
               </button>
             </form>
@@ -173,10 +173,10 @@ export function AdminPage() {
             >
               <div className="min-w-[160px] flex-1">
                 <div className="font-mono text-[11px] text-acid">{o.reference}</div>
-                <div className="font-display text-white">{o.customerName}</div>
+                <div className="font-display text-ink">{o.customerName}</div>
                 <div className="font-mono text-[10px] text-steel">{o.customerEmail}</div>
               </div>
-              <div className="font-display text-white">{formatEuro(o.total)}</div>
+              <div className="font-display text-ink">{formatEuro(o.total)}</div>
               <select
                 value={o.status}
                 onChange={(e) => void mudarEstado(o.id, e.target.value)}

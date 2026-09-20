@@ -1,4 +1,4 @@
-import {
+﻿import {
   createContext,
   useCallback,
   useContext,
@@ -62,10 +62,10 @@ export function AvisosProvider({ children }: { children: ReactNode }) {
             key={a.id}
             className={`pointer-events-auto flex max-w-md items-center gap-3 rounded-lg border px-4 py-3 shadow-lg ${
               a.tipo === 'erro'
-                ? 'border-destructive/40 bg-panel text-white'
+                ? 'border-destructive/40 bg-panel text-ink'
                 : a.tipo === 'info'
-                  ? 'border-line bg-panel text-zinc-100'
-                  : 'border-acid/40 bg-panel text-white'
+                  ? 'border-line bg-panel text-ink'
+                  : 'border-acid/40 bg-panel text-ink'
             }`}
           >
             <p className="font-mono text-[12px]">{a.texto}</p>
@@ -84,7 +84,7 @@ export function AvisosProvider({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => fechar(a.id)}
-              className="font-mono text-[11px] text-steel hover:text-white"
+              className="font-mono text-[11px] text-steel hover:text-ink"
               aria-label="Fechar aviso"
             >
               ✕

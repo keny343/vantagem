@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+﻿import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { api, ApiError, type Order } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -66,7 +66,7 @@ export default function DevolucoesPage() {
       <div className="mt-8 flex items-end justify-between">
         <div>
           <p className="label-mono">Conta</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Devoluções</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Devoluções</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -110,7 +110,7 @@ export default function DevolucoesPage() {
             </select>
           </label>
           <Campo id="dev-desc" label="Detalhe (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
-          <button className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink">
+          <button className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas">
             Pedir devolução
           </button>
         </form>
@@ -118,7 +118,7 @@ export default function DevolucoesPage() {
       <div className="mt-8 space-y-3">
         {lista.map((d) => (
           <article key={d.id} className="rounded-[14px] border border-line bg-panel p-4">
-            <p className="font-display text-white">{d.motivo}</p>
+            <p className="font-display text-ink">{d.motivo}</p>
             <p className="mt-1 font-mono text-[11px] text-steel">
               {d.estado} · {new Date(d.created_at).toLocaleDateString('pt-PT')}
             </p>

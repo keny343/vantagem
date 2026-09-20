@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from 'react';
+﻿import type { InputHTMLAttributes, ReactNode } from 'react';
 
 export function Campo({
   label,
@@ -24,7 +24,7 @@ export function Campo({
           id={id}
           aria-invalid={erro ? true : undefined}
           aria-describedby={[hint ? hintId : '', erro ? erroId : ''].filter(Boolean).join(' ') || undefined}
-          className="mt-1 h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm text-zinc-100 outline-none placeholder:text-steel/60 focus:border-acid/60"
+          className="mt-1 h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm text-ink outline-none placeholder:text-steel/70 focus:border-acid/60"
           {...input}
         />
       )}

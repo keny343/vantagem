@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { request } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -57,7 +57,7 @@ export default function CuponsPage() {
       <div className="mt-8 flex items-end justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Cupons</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Cupons</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -79,7 +79,7 @@ export default function CuponsPage() {
           cupons.map((c) => (
             <article key={c.id} className="rounded-[14px] border border-line bg-panel p-5">
               <p className="font-mono text-sm tracking-[0.16em] text-acid uppercase">{c.codigo}</p>
-              <p className="mt-2 text-white">
+              <p className="mt-2 text-ink">
                 {c.tipo === 'percentual' ? `${c.valor}%` : formatEuro(c.valor / 100)} de desconto
               </p>
               {c.descricao && <p className="mt-1 font-mono text-[11px] text-steel">{c.descricao}</p>}

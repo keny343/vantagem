@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+﻿import { Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useSession } from './SessionContext';
 import type { User } from '../api/client';
@@ -9,7 +9,7 @@ export function ContaDeCliente({ children }: { children: ReactNode }) {
   const { user, loading } = useSession();
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-ink font-mono text-steel">
+      <div className="grid min-h-screen place-items-center bg-canvas font-mono text-steel">
         A carregar…
       </div>
     );

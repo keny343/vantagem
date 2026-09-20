@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, urlMedia, type Order } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -94,7 +94,7 @@ export function AdminPedidoPage() {
         ← Pedidos
       </Link>
       <p className="label-mono mt-4">Operações</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">{order.reference}</h1>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{order.reference}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         {ROTULO_ESTADO[order.status] ?? order.status} · {formatEuro(order.total)} ·{' '}
         {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod}
@@ -126,7 +126,7 @@ export function AdminPedidoPage() {
             type="button"
             disabled={aPagar}
             onClick={() => void marcarPago()}
-            className="mt-4 h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
+            className="mt-4 h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
             {aPagar ? 'A marcar…' : 'Marcar como pago'}
           </button>
@@ -136,10 +136,10 @@ export function AdminPedidoPage() {
       <section className="mt-6 grid gap-6 lg:grid-cols-2">
         <div className="rounded-[14px] border border-line bg-panel p-5">
           <div className="label-mono mb-3">Cliente</div>
-          <p className="text-white">{order.customer.name}</p>
+          <p className="text-ink">{order.customer.name}</p>
           <p className="font-mono text-[12px] text-steel">{order.customer.email}</p>
           <p className="font-mono text-[12px] text-steel">{order.customer.phone}</p>
-          <p className="mt-3 font-mono text-[12px] text-zinc-300">
+          <p className="mt-3 font-mono text-[12px] text-ink/70">
             {order.customer.address}
             <br />
             {order.customer.postalCode} {order.customer.city}
@@ -156,7 +156,7 @@ export function AdminPedidoPage() {
               <span>{formatEuro(i.total)}</span>
             </div>
           ))}
-          <div className="mt-3 flex justify-between border-t border-line pt-3 font-display text-white">
+          <div className="mt-3 flex justify-between border-t border-line pt-3 font-display text-ink">
             <span>Total</span>
             <span>{formatEuro(order.total)}</span>
           </div>
@@ -181,7 +181,7 @@ export function AdminPedidoPage() {
               type="button"
               onClick={() => void mudar(s)}
               className={`h-9 rounded-md px-3 font-mono text-[10px] uppercase ${
-                order.status === s ? 'bg-acid text-ink' : 'text-zinc-300 ring-1 ring-line'
+                order.status === s ? 'bg-acid text-canvas' : 'text-canvas/70 ring-1 ring-line'
               }`}
             >
               {ROTULO_ESTADO[s]}

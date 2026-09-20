@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { urlMedia } from '../api/client';
 import { useCart } from '../cart/CartContext';
 import { useSession } from '../auth/SessionContext';
@@ -24,17 +24,17 @@ export function CarrinhoPage() {
 
   return (
     <StoreShell>
-      <h1 className="mt-8 font-display text-2xl font-semibold text-white">Carrinho</h1>
+      <h1 className="mt-8 font-display text-2xl font-semibold text-ink">Carrinho</h1>
       <p className="mt-1 font-mono text-[11px] tracking-[0.15em] text-steel uppercase">
         {cart.count} artigos
       </p>
 
       {cart.lines.length === 0 ? (
         <div className="mt-6 rounded-[14px] border border-line bg-panel p-10 text-center">
-          <p className="font-display text-lg text-white">O carrinho está vazio</p>
+          <p className="font-display text-lg text-ink">O carrinho está vazio</p>
           <Link
             to="/catalogo"
-            className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink"
+            className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas"
           >
             Ver catálogo
           </Link>
@@ -53,7 +53,7 @@ export function CarrinhoPage() {
                   className="size-20 rounded-lg border border-line object-cover"
                 />
                 <div className="flex-1">
-                  <Link to={`/produto/${line.id}`} className="font-display text-white hover:text-acid">
+                  <Link to={`/produto/${line.id}`} className="font-display text-ink hover:text-acid">
                     {line.name}
                   </Link>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">{line.variant}</div>
@@ -71,7 +71,7 @@ export function CarrinhoPage() {
                   >
                     −
                   </button>
-                  <span className="min-w-7 text-center font-mono text-xs text-white">{line.qty}</span>
+                  <span className="min-w-7 text-center font-mono text-xs text-ink">{line.qty}</span>
                   <button
                     type="button"
                     onClick={() => cart.setQty(line.id, line.variant, line.qty + 1)}
@@ -81,7 +81,7 @@ export function CarrinhoPage() {
                     +
                   </button>
                 </div>
-                <div className="w-24 text-right font-display text-white">
+                <div className="w-24 text-right font-display text-ink">
                   {formatEuro(line.price * line.qty)}
                 </div>
                 <button
@@ -100,17 +100,17 @@ export function CarrinhoPage() {
             <dl className="space-y-2 font-mono text-[12px] text-steel">
               <div className="flex justify-between">
                 <dt>Subtotal</dt>
-                <dd className="text-zinc-200">{formatEuro(cart.subtotal)}</dd>
+                <dd className="text-ink/80">{formatEuro(cart.subtotal)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt>Envio</dt>
-                <dd className="text-zinc-200">
+                <dd className="text-ink/80">
                   {cart.shipping === 0 ? 'Grátis' : formatEuro(cart.shipping)}
                 </dd>
               </div>
               <div className="flex justify-between">
                 <dt>IVA incluído</dt>
-                <dd className="text-zinc-200">{formatEuro(ivaIncluidoDe(cart.total))}</dd>
+                <dd className="text-ink/80">{formatEuro(ivaIncluidoDe(cart.total))}</dd>
               </div>
             </dl>
             {faltaParaEnvioGratis(cart.subtotal) > 0 && (
@@ -118,13 +118,13 @@ export function CarrinhoPage() {
                 Faltam {formatEuro(faltaParaEnvioGratis(cart.subtotal))} para envio grátis.
               </p>
             )}
-            <div className="mt-4 flex items-center justify-between border-t border-line pt-4 font-display text-lg text-white">
+            <div className="mt-4 flex items-center justify-between border-t border-line pt-4 font-display text-lg text-ink">
               <span>Total</span>
               <span>{formatEuro(cart.total)}</span>
             </div>
             <Link
               to="/checkout"
-              className="mt-4 grid h-11 place-items-center rounded-lg bg-acid font-display text-sm font-semibold text-ink hover:brightness-105"
+              className="mt-4 grid h-11 place-items-center rounded-lg bg-acid font-display text-sm font-semibold text-canvas hover:brightness-105"
             >
               Finalizar compra
             </Link>

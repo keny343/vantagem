@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+﻿import { useEffect, useId, useState } from 'react';
 import { urlMedia } from '../api/client';
 
 const ACEITES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -65,7 +65,7 @@ export function CampoComprovativo({
       <span className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">
         Fotografia do comprovativo{obrigatorio ? ' (obrigatório)' : ''}
       </span>
-      <p className="mt-1 text-sm text-zinc-300">
+      <p className="mt-1 text-sm text-ink/70">
         Anexa o comprovativo da transferência. JPG, PNG ou WEBP até 5 MB.
       </p>
       {/*
@@ -75,7 +75,7 @@ export function CampoComprovativo({
       <div className="relative mt-3 inline-block">
         <span
           aria-hidden
-          className={`inline-flex h-10 items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink ${
+          className={`inline-flex h-10 items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas ${
             aEnviar ? 'opacity-60' : ''
           }`}
         >

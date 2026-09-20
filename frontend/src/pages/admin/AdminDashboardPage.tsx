@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useSession } from '../../auth/SessionContext';
@@ -64,7 +64,7 @@ export function AdminDashboardPage() {
             {saudacao()}
             {primeiro ? `, ${primeiro}` : ''}
           </p>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">
             Dashboard administrativo
           </h1>
           <p className="mt-1 font-mono text-[11px] text-steel">
@@ -123,7 +123,7 @@ export function AdminDashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="label-mono">Capa da loja</p>
-            <p className="mt-1 font-display text-lg text-white">
+            <p className="mt-1 font-display text-lg text-ink">
               {capa ? capa.name : 'Nenhum artigo na capa'}
             </p>
             <p className="mt-1 font-mono text-[11px] text-steel">
@@ -142,25 +142,25 @@ export function AdminDashboardPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           to="/admin/produtos/novo"
-          className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+          className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
         >
           Novo artigo
         </Link>
         <Link
           to="/admin/categorias"
-          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-white ring-1 ring-line"
+          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-ink ring-1 ring-line"
         >
           Categorias
         </Link>
         <Link
           to="/admin/pedidos"
-          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-white ring-1 ring-line"
+          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-ink ring-1 ring-line"
         >
           Gerir pedidos
         </Link>
         <Link
           to="/admin/tickets"
-          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-white ring-1 ring-line"
+          className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-ink ring-1 ring-line"
         >
           Mensagens
         </Link>
@@ -187,7 +187,7 @@ function Kpi({
       }`}
     >
       <div className="label-mono">{label}</div>
-      <div className="mt-2 font-display text-2xl text-white">{valor ?? '—'}</div>
+      <div className="mt-2 font-display text-2xl text-ink">{valor ?? '—'}</div>
     </div>
   );
 }

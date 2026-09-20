@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+﻿import { Link, useLocation } from 'react-router-dom';
 import { LOJA } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
@@ -53,7 +53,7 @@ export function LegalPage() {
     <StoreShell>
       <article className="mt-10 max-w-[62ch]">
         <p className="label-mono">Informação legal</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-white">{pag.titulo}</h1>
+        <h1 className="mt-2 font-display text-3xl font-semibold text-ink">{pag.titulo}</h1>
         <div className="mt-6 space-y-4 text-zinc-400">
           {pag.corpo.map((p) => (
             <p key={p}>{p}</p>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -32,7 +32,7 @@ export function Notificacoes() {
       >
         Avisos
         {porLer > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-acid px-1 text-[10px] text-ink">
+          <span className="absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-acid px-1 text-[10px] text-canvas">
             {porLer}
           </span>
         )}
@@ -67,7 +67,7 @@ export function Notificacoes() {
                   }}
                   className="block rounded-lg p-2 hover:bg-white/5"
                 >
-                  <p className={`text-sm ${n.lida ? 'text-zinc-400' : 'text-white'}`}>{n.titulo}</p>
+                  <p className={`text-sm ${n.lida ? 'text-zinc-400' : 'text-ink'}`}>{n.titulo}</p>
                   <p className="font-mono text-[10px] text-steel">{n.mensagem}</p>
                 </Link>
               </li>

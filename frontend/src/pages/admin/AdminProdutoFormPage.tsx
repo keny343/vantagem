@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+﻿import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, urlMedia, type AdminProduct, type ProductWrite } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -146,7 +146,7 @@ export function AdminProdutoFormPage() {
   return (
     <div>
       <p className="label-mono">Catálogo</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">
+      <h1 className="mt-1 font-display text-2xl font-semibold text-ink">
         {editar ? 'Editar artigo' : 'Novo artigo'}
       </h1>
       <Link to="/admin/produtos" className="mt-2 inline-block font-mono text-[11px] text-steel hover:text-acid">
@@ -244,7 +244,7 @@ export function AdminProdutoFormPage() {
                   <button
                     type="button"
                     onClick={() => escolherFicheiro(i)}
-                    className="flex-1 py-1 font-mono text-[9px] text-white uppercase"
+                    className="flex-1 py-1 font-mono text-[9px] text-ink uppercase"
                   >
                     Trocar
                   </button>
@@ -357,7 +357,7 @@ export function AdminProdutoFormPage() {
         <div className="flex flex-wrap gap-3">
           <button
             disabled={saving || aEnviarFoto}
-            className="h-11 max-w-xs rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink disabled:opacity-60"
+            className="h-11 max-w-xs rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
             {saving ? 'A guardar…' : editar ? 'Guardar alterações' : 'Publicar artigo'}
           </button>

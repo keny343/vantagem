@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, ApiError } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -76,7 +76,7 @@ export function AdminTicketPage() {
       <Link to="/admin/tickets" className="font-mono text-[11px] text-steel hover:text-acid">
         ← Mensagens
       </Link>
-      <h1 className="mt-3 font-display text-2xl font-semibold text-white">{ticket.subject}</h1>
+      <h1 className="mt-3 font-display text-2xl font-semibold text-ink">{ticket.subject}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
         {ticket.customerName} · {ticket.customerEmail} ·{' '}
         {ROTULO_CATEGORIA_TICKET[ticket.category] ?? ticket.category}
@@ -91,7 +91,7 @@ export function AdminTicketPage() {
             type="button"
             onClick={() => void mudarEstado(valor)}
             className={`h-8 rounded-md px-3 font-mono text-[10px] uppercase ${
-              ticket.status === valor ? 'bg-acid text-ink' : 'text-zinc-300 ring-1 ring-line'
+              ticket.status === valor ? 'bg-acid text-canvas' : 'text-canvas/70 ring-1 ring-line'
             }`}
           >
             {rotulo}

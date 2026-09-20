@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+﻿import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { request, ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -107,7 +107,7 @@ export default function EnderecosPage() {
       <div className="mt-8 flex items-end justify-between gap-4">
         <div>
           <div className="label-mono">Conta</div>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Endereços</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Endereços</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -129,8 +129,8 @@ export default function EnderecosPage() {
             <article key={e.id} className="rounded-[14px] border border-line bg-panel p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-display text-white">{e.nome}</p>
-                  <p className="mt-1 text-sm text-zinc-300">{e.destinatario}</p>
+                  <p className="font-display text-ink">{e.nome}</p>
+                  <p className="mt-1 text-sm text-ink/70">{e.destinatario}</p>
                   <p className="mt-1 font-mono text-[11px] text-steel">
                     {e.morada}
                     {e.codigo_postal ? `, ${e.codigo_postal}` : ''} · {e.cidade}
@@ -159,7 +159,7 @@ export default function EnderecosPage() {
           onInput={onInputPt}
           className="rounded-[14px] border border-line bg-panel p-6 space-y-3"
         >
-          <h2 className="font-display text-lg text-white">Novo endereço</h2>
+          <h2 className="font-display text-lg text-ink">Novo endereço</h2>
           <Campo label="Nome" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} />
           <Campo
             label="Destinatário"
@@ -192,7 +192,7 @@ export default function EnderecosPage() {
           />
           <button
             disabled={saving}
-            className="mt-2 h-10 w-full rounded-lg bg-acid font-display text-sm font-semibold text-ink disabled:opacity-60"
+            className="mt-2 h-10 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
             {saving ? 'A guardar…' : 'Adicionar'}
           </button>

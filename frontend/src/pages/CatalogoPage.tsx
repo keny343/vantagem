@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, type Product } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -77,7 +77,7 @@ export function CatalogoPage() {
     <StoreShell>
       <div className="mt-8 flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-white">Catálogo</h1>
+          <h1 className="font-display text-2xl font-semibold text-ink">Catálogo</h1>
           <p className="mt-1 font-mono text-[11px] tracking-[0.15em] text-steel uppercase">
             {countLabel}
           </p>
@@ -90,13 +90,13 @@ export function CatalogoPage() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Pesquisar no catálogo…"
               aria-label="Pesquisar no catálogo"
-              className="w-full bg-transparent text-sm text-zinc-200 outline-none placeholder:text-steel/70"
+              className="w-full bg-transparent text-sm text-ink/80 outline-none placeholder:text-steel/70"
             />
           </div>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="h-10 rounded-md border border-line bg-panel px-3 font-mono text-[11px] text-zinc-200"
+            className="h-10 rounded-md border border-line bg-panel px-3 font-mono text-[11px] text-ink/80"
             aria-label="Ordenar"
           >
             <option value="relevancia">Relevância</option>
@@ -121,7 +121,7 @@ export function CatalogoPage() {
               </button>
             </div>
             <div className="mb-5">
-              <div className="mb-2 font-display text-sm font-medium text-white">Categoria</div>
+              <div className="mb-2 font-display text-sm font-medium text-ink">Categoria</div>
               <div className="space-y-1">
                 {categorias.map((c) => (
                   <button
@@ -131,7 +131,7 @@ export function CatalogoPage() {
                     className={`block w-full rounded px-2 py-1.5 text-left text-sm transition-colors ${
                       categoria === c.slug
                         ? 'bg-acid/15 text-acid'
-                        : 'text-zinc-300 hover:bg-panel2 hover:text-white'
+                        : 'text-ink/70 hover:bg-panel2 hover:text-canvas'
                     }`}
                   >
                     {c.name}
@@ -140,7 +140,7 @@ export function CatalogoPage() {
               </div>
             </div>
             <div className="mb-5 border-t border-line pt-4">
-              <div className="mb-2 font-display text-sm font-medium text-white">Preço máximo</div>
+              <div className="mb-2 font-display text-sm font-medium text-ink">Preço máximo</div>
               <input
                 type="range"
                 min={1_000}
@@ -159,7 +159,7 @@ export function CatalogoPage() {
               </div>
             </div>
             <div className="border-t border-line pt-4">
-              <div className="mb-2 font-display text-sm font-medium text-white">Marca</div>
+              <div className="mb-2 font-display text-sm font-medium text-ink">Marca</div>
               <div className="space-y-1">
                 {marcas.map((m) => (
                   <button
@@ -169,7 +169,7 @@ export function CatalogoPage() {
                     className={`block w-full rounded px-2 py-1.5 text-left text-sm transition-colors ${
                       marca === m
                         ? 'bg-acid/15 text-acid'
-                        : 'text-zinc-300 hover:bg-panel2 hover:text-white'
+                        : 'text-ink/70 hover:bg-panel2 hover:text-canvas'
                     }`}
                   >
                     {m}
@@ -206,7 +206,7 @@ export function CatalogoPage() {
             </div>
           ) : products.length === 0 ? (
             <div className="rounded-[14px] border border-line bg-panel p-10 text-center">
-              <p className="font-display text-lg text-white">
+              <p className="font-display text-lg text-ink">
                 {q || categoria || marca || max < MAX_SLIDER
                   ? 'Sem resultados'
                   : 'Ainda não há artigos'}
@@ -220,7 +220,7 @@ export function CatalogoPage() {
                 <button
                   type="button"
                   onClick={limpar}
-                  className="mt-4 h-10 rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink"
+                  className="mt-4 h-10 rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
                 >
                   Limpar filtros
                 </button>
