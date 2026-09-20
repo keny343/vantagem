@@ -33,7 +33,6 @@ export interface PedidoPublico {
   vat: number;
   mbEntity: string | null;
   mbReference: string | null;
-  tracking: string | null;
   paidAt: string | null;
   comprovativoUrl: string | null;
   customer: {
@@ -79,7 +78,6 @@ interface PedidoRow {
   cupao_codigo: string | null;
   mb_entidade: string | null;
   mb_referencia: string | null;
-  tracking: string | null;
   comprovativo_url: string | null;
   pago_em: Date | null;
   stock_reposto: boolean;
@@ -152,7 +150,6 @@ const mapearPedido = (pedido: PedidoRow, items: ItemRow[]): PedidoPublico => ({
   vat: eurosDeCentimos(pedido.iva_centimos),
   mbEntity: pedido.mb_entidade,
   mbReference: pedido.mb_referencia,
-  tracking: pedido.tracking,
   paidAt: pedido.pago_em === null ? null : pedido.pago_em.toISOString(),
   comprovativoUrl: pedido.comprovativo_url ?? null,
   customer: {
@@ -472,7 +469,6 @@ export const confirmarPagamento = async (referencia: string): Promise<PedidoPubl
 export const alterarEstado = async (
   id: string,
   novo: EstadoPedido,
-  tracking?: string,
 ): Promise<PedidoPublico> => {
   return transaction(async (client) => {
     const { rows } = await client.query<PedidoRow>(
@@ -504,12 +500,11 @@ export const alterarEstado = async (
     const { rows: actualizados } = await client.query<PedidoRow>(
       `UPDATE pedidos
        SET estado = $1,
-           tracking = COALESCE($2, tracking),
            pago_em = CASE WHEN $1 = 'pago' AND pago_em IS NULL THEN now() ELSE pago_em END,
            updated_at = now()
-       WHERE id = $3
+       WHERE id = $2
        RETURNING *`,
-      [novo, tracking ?? null, id],
+      [novo, id],
     );
     const actualizado = actualizados[0];
     if (actualizado === undefined) throw notFound('Pedido');

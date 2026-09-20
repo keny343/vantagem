@@ -130,7 +130,6 @@ export const listarPedidos = async (_req: Request, res: Response): Promise<void>
 
 const estadoSchema = z.object({
   status: z.enum(['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue', 'cancelado']),
-  tracking: z.string().trim().max(80).optional(),
 });
 
 export const obterPedido = async (req: Request, res: Response): Promise<void> => {
@@ -141,11 +140,8 @@ export const obterPedido = async (req: Request, res: Response): Promise<void> =>
 
 export const actualizarEstado = async (req: Request, res: Response): Promise<void> => {
   const id = z.string().uuid().parse(req.params.id);
-  const { status, tracking } = estadoSchema.parse(req.body);
-  const order =
-    tracking !== undefined && tracking.length > 0
-      ? await pedidos.alterarEstado(id, status, tracking)
-      : await pedidos.alterarEstado(id, status);
+  const { status } = estadoSchema.parse(req.body);
+  const order = await pedidos.alterarEstado(id, status);
 
   const rotulo = ROTULO_ESTADO[order.status] ?? order.status;
   void emailEstadoPedido(order.customer.email, order.customer.name, order.reference, rotulo);

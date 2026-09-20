@@ -264,7 +264,6 @@ export function PedidoPage() {
           <p className="mt-3">
             Emitido por {LOJA.nomeLegal} · NIF {LOJA.nif}
           </p>
-          {order.tracking && <p className="mt-2 text-acid">Tracking {order.tracking}</p>}
         </section>
 
         {erro && (

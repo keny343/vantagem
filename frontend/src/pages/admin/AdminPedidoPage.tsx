@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, type Order } from '../../api/client';
+import { api, urlMedia, type Order } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
-import { Campo } from '../../ui/Campo';
 import { useConfirmar } from '../../ui/Confirmar';
 import { ErroBloco } from '../../ui/ErroBloco';
-import { formatEuro, ROTULO_ESTADO } from '../../utils/format';
+import { formatEuro, ROTULO_ESTADO, ROTULO_PAGAMENTO } from '../../utils/format';
 
 const ESTADOS = ['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue', 'cancelado'] as const;
 
@@ -15,14 +14,13 @@ export function AdminPedidoPage() {
   const { avisar } = useAvisos();
   const { confirmar } = useConfirmar();
   const [order, setOrder] = useState<Order | null>(null);
-  const [tracking, setTracking] = useState('');
   const [erro, setErro] = useState('');
+  const [aPagar, setAPagar] = useState(false);
   useTitulo(order?.reference ?? 'Pedido');
 
   async function carregar() {
     const r = await api.adminPedido(id);
     setOrder(r.order);
-    setTracking(r.order.tracking ?? '');
   }
 
   useEffect(() => {
@@ -42,7 +40,7 @@ export function AdminPedidoPage() {
     }
     setErro('');
     try {
-      await api.adminEstado(order.id, status, tracking || undefined);
+      await api.adminEstado(order.id, status);
       avisar(`Pedido actualizado: ${ROTULO_ESTADO[status] ?? status}.`);
       await carregar();
     } catch {
@@ -50,8 +48,41 @@ export function AdminPedidoPage() {
     }
   }
 
+  async function marcarPago() {
+    if (!order) return;
+    const ok = await confirmar({
+      titulo: 'Marcar como pago?',
+      mensagem: order.comprovativoUrl
+        ? `Confirmas que o comprovativo corresponde a ${formatEuro(order.total)}?`
+        : `Ainda não há fotografia do comprovativo. Queres mesmo marcar ${formatEuro(order.total)} como pago?`,
+      confirmarLabel: 'Sim, está pago',
+    });
+    if (!ok) return;
+    setAPagar(true);
+    setErro('');
+    try {
+      await api.adminEstado(order.id, 'pago');
+      avisar('Encomenda marcada como paga.');
+      await carregar();
+    } catch {
+      setErro('Não foi possível marcar como pago.');
+    } finally {
+      setAPagar(false);
+    }
+  }
+
   if (!order && erro) {
-    return <ErroBloco titulo="Pedido não encontrado" mensagem={erro} extra={<Link to="/admin/pedidos" className="grid h-10 place-items-center font-mono text-[11px] text-acid">Voltar aos pedidos</Link>} />;
+    return (
+      <ErroBloco
+        titulo="Pedido não encontrado"
+        mensagem={erro}
+        extra={
+          <Link to="/admin/pedidos" className="grid h-10 place-items-center font-mono text-[11px] text-acid">
+            Voltar aos pedidos
+          </Link>
+        }
+      />
+    );
   }
   if (!order) {
     return <p className="font-mono text-steel">A carregar…</p>;
@@ -65,12 +96,41 @@ export function AdminPedidoPage() {
       <p className="label-mono mt-4">Operações</p>
       <h1 className="mt-1 font-display text-2xl font-semibold text-white">{order.reference}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
-        {ROTULO_ESTADO[order.status] ?? order.status} · {formatEuro(order.total)}
+        {ROTULO_ESTADO[order.status] ?? order.status} · {formatEuro(order.total)} ·{' '}
+        {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod}
       </p>
       {erro && (
         <div className="mt-4">
           <ErroBloco mensagem={erro} />
         </div>
+      )}
+
+      {order.status === 'pendente' && (
+        <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
+          <div className="label-mono mb-3">Comprovativo de transferência</div>
+          {order.comprovativoUrl ? (
+            <>
+              <a href={urlMedia(order.comprovativoUrl)} target="_blank" rel="noreferrer">
+                <img
+                  src={urlMedia(order.comprovativoUrl)}
+                  alt="Comprovativo de pagamento"
+                  className="max-h-80 rounded-lg border border-line object-contain"
+                />
+              </a>
+              <p className="mt-2 font-mono text-[11px] text-steel">Clica na imagem para abrir em tamanho real.</p>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-400">O cliente ainda não enviou a fotografia do comprovativo.</p>
+          )}
+          <button
+            type="button"
+            disabled={aPagar}
+            onClick={() => void marcarPago()}
+            className="mt-4 h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
+          >
+            {aPagar ? 'A marcar…' : 'Marcar como pago'}
+          </button>
+        </section>
       )}
 
       <section className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -109,18 +169,11 @@ export function AdminPedidoPage() {
       </section>
 
       <div className="mt-6 space-y-3 rounded-[14px] border border-line bg-panel p-5">
-        <div className="label-mono">Estado e tracking</div>
+        <div className="label-mono">Estado da encomenda</div>
         <p className="font-mono text-[11px] text-steel">
-          Cancelar devolve o stock se o pedido ainda não saiu do armazém.
+          Depois de pago: preparação → enviado → entregue. O cliente vê o mesmo estado na conta. A loja
+          não gera códigos de rastreio — a entrega é tratada fora do sistema.
         </p>
-        <Campo
-          id="tracking"
-          label="Código de rastreio"
-          hint="Número da transportadora. O cliente vê-o na página da encomenda."
-          value={tracking}
-          onChange={(e) => setTracking(e.target.value)}
-          placeholder="Ex.: AO123456789"
-        />
         <div className="flex flex-wrap gap-2">
           {ESTADOS.map((s) => (
             <button

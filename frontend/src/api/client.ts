@@ -312,7 +312,6 @@ export interface Order {
   vat: number;
   mbEntity: string | null;
   mbReference: string | null;
-  tracking: string | null;
   paidAt: string | null;
   comprovativoUrl: string | null;
   customer: {
@@ -619,10 +618,10 @@ export const api = {
         comprovativoUrl: string | null;
       }[];
     }>('/api/admin/pedidos'),
-  adminEstado: (id: string, status: string, tracking?: string) =>
+  adminEstado: (id: string, status: string) =>
     request<{ ok: boolean; order: Order }>(`/api/admin/pedidos/${id}/estado`, {
       method: 'PATCH',
-      body: JSON.stringify(tracking ? { status, tracking } : { status }),
+      body: JSON.stringify({ status }),
     }),
   adminUploadFoto: (ficheiro: File) => {
     const data = new FormData();
