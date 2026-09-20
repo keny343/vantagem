@@ -113,4 +113,29 @@ describe('checkout concorrente (Postgres)', () => {
     expect(segundo.reference).toBe(primeiro.reference);
     expect(await stockDe(produto.produtoId)).toBe(1);
   }, 30_000);
+
+  it('marca pendente → pago sem erro de tipos no Postgres', async ({ skip }) => {
+    if (!ativo) {
+      skip();
+      return;
+    }
+
+    const slug = `pago-${randomUUID().slice(0, 8)}`;
+    const produto = await criarProdutoComStock({ slug, stock: 3 });
+    const userId = await criarClienteTeste(slug);
+
+    const criado = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+      customer: clientePedido('Pago Enum'),
+      paymentMethod: 'cartao',
+      userId,
+      idempotencyKey: `idem-pago-${slug}`,
+    });
+
+    expect(criado.status).toBe('pendente');
+
+    const actualizado = await pedidos.alterarEstado(criado.id, 'pago');
+    expect(actualizado.status).toBe('pago');
+    expect(actualizado.paidAt).toBeTruthy();
+  }, 30_000);
 });

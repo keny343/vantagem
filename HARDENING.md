@@ -31,6 +31,7 @@ Endurecer o que já existe sob condições reais — sem adicionar features de p
 |------|--------|
 | E2E Playwright | Registo → checkout + comprovativo → admin confirma pagamento |
 | CI E2E | Job com Postgres + API + Vite + Chromium ([docs/e2e.md](docs/e2e.md)) |
+| Regressão enum | `alterarEstado(pendente→pago)` coberto no teste de integração Postgres |
 
 ## Fora de âmbito (de propósito)
 
