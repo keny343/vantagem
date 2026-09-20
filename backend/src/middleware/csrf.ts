@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import type { CookieOptions, NextFunction, Request, Response } from 'express';
 import { env } from '../config/env.js';
 import { tokensIguais } from '../services/auth.service.js';
@@ -7,7 +7,33 @@ import { AppError } from '../utils/errors.js';
 export const COOKIE_CSRF = 'vantagem_csrf';
 export const HEADER_CSRF = 'x-csrf-token';
 
+/** Mensagem clara para quem não programa (heurística de Nielsen). */
+export const MSG_CSRF =
+  'Não foi possível concluir por uma questão de segurança. Actualiza a página e tenta outra vez.';
+
 const SAFE = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+const segredoCsrf = (): string => {
+  if (env.CSRF_SECRET.length > 0) return env.CSRF_SECRET;
+  return env.DATABASE_URL || 'vantagem-csrf-dev';
+};
+
+/** Token assinado: o SPA pode enviar só o cabeçalho (útil atrás do proxy Vercel). */
+export const criarTokenCsrf = (): string => {
+  const nonce = randomBytes(24).toString('base64url');
+  const sig = createHmac('sha256', segredoCsrf()).update(nonce).digest('base64url');
+  return `${nonce}.${sig}`;
+};
+
+export const tokenCsrfAssinado = (token: string): boolean => {
+  const i = token.lastIndexOf('.');
+  if (i <= 0) return false;
+  const nonce = token.slice(0, i);
+  const sig = token.slice(i + 1);
+  if (nonce.length < 16 || sig.length < 20) return false;
+  const esperado = createHmac('sha256', segredoCsrf()).update(nonce).digest('base64url');
+  return tokensIguais(sig, esperado);
+};
 
 const opcoesCsrf = (): CookieOptions => ({
   // Readable by the SPA so it can mirror the value into X-CSRF-Token.
@@ -18,7 +44,7 @@ const opcoesCsrf = (): CookieOptions => ({
   maxAge: 7 * 24 * 60 * 60 * 1000,
 });
 
-export const emitirCsrf = (res: Response, token = randomBytes(32).toString('base64url')): string => {
+export const emitirCsrf = (res: Response, token = criarTokenCsrf()): string => {
   res.cookie(COOKIE_CSRF, token, opcoesCsrf());
   return token;
 };
@@ -27,16 +53,20 @@ export const emitirCsrf = (res: Response, token = randomBytes(32).toString('base
 export const garantirCsrf = (req: Request, res: Response, next: NextFunction): void => {
   const cookies = ((req as Request & { cookies?: Record<string, string> }).cookies ??= {});
   const actual = cookies[COOKIE_CSRF];
-  if (actual === undefined || actual.length < 20) {
-    cookies[COOKIE_CSRF] = emitirCsrf(res);
+  // Em mutações não rodamos o cookie: senão o proxy emite um valor novo
+  // e o cabeçalho X-CSRF-Token (do SPA) deixa de coincidir.
+  if (SAFE.has(req.method.toUpperCase())) {
+    if (actual === undefined || actual.length < 20) {
+      cookies[COOKIE_CSRF] = emitirCsrf(res);
+    }
   }
   next();
 };
 
 /**
- * Double-submit cookie: the browser sends the cookie automatically and the SPA
- * must also put the same value in X-CSRF-Token. A cross-site form cannot read
- * the cookie, so it cannot forge the header.
+ * Aceita:
+ * 1) cabeçalho com token HMAC válido (SPA atrás de rewrite Vercel→Render);
+ * 2) double-submit clássico cookie === cabeçalho (legado / mesmo host).
  */
 export const requerCsrf = (req: Request, _res: Response, next: NextFunction): void => {
   if (SAFE.has(req.method.toUpperCase())) {
@@ -52,15 +82,20 @@ export const requerCsrf = (req: Request, _res: Response, next: NextFunction): vo
   const cookieToken = cookies?.[COOKIE_CSRF];
   const headerToken = req.header(HEADER_CSRF);
 
-  if (
-    cookieToken === undefined ||
-    headerToken === undefined ||
-    cookieToken.length < 20 ||
-    !tokensIguais(cookieToken, headerToken)
-  ) {
-    next(new AppError('FORBIDDEN', 'Token CSRF inválido ou em falta.'));
+  if (headerToken !== undefined && headerToken.length >= 20 && tokenCsrfAssinado(headerToken)) {
+    next();
     return;
   }
 
-  next();
+  if (
+    cookieToken !== undefined &&
+    headerToken !== undefined &&
+    cookieToken.length >= 20 &&
+    tokensIguais(cookieToken, headerToken)
+  ) {
+    next();
+    return;
+  }
+
+  next(new AppError('FORBIDDEN', MSG_CSRF));
 };

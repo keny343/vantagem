@@ -2,7 +2,7 @@ import type { CookieOptions, Request, Response } from 'express';
 import { z } from 'zod';
 import { env } from '../config/env.js';
 import { lerSessao } from '../middleware/authenticate.js';
-import { emitirCsrf, COOKIE_CSRF } from '../middleware/csrf.js';
+import { emitirCsrf, COOKIE_CSRF, tokenCsrfAssinado } from '../middleware/csrf.js';
 import * as authRepo from '../repositories/auth.repository.js';
 import {
   COOKIE_SESSAO,
@@ -125,6 +125,8 @@ export const csrf = (req: Request, res: Response): void => {
   const cookies = (req as Request & { cookies?: Record<string, string> }).cookies;
   const actual = cookies?.[COOKIE_CSRF];
   const token =
-    actual !== undefined && actual.length >= 20 ? actual : emitirCsrf(res);
+    actual !== undefined && actual.length >= 20 && tokenCsrfAssinado(actual)
+      ? actual
+      : emitirCsrf(res);
   res.json({ csrfToken: token });
 };

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { api, ApiError } from '../api/client';
+import { api, mensagemParaUtilizador } from '../api/client';
 import { useSession } from '../auth/SessionContext';
 import { destinoAposLogin, urlComSeguir } from '../auth/seguir';
 import { useTitulo } from '../hooks/useTitulo';
@@ -37,9 +37,10 @@ export function LoginPage() {
       void navigate(destino(sessao.user?.role ?? 'cliente'));
     } catch (err) {
       setErro(
-        err instanceof ApiError
-          ? `${err.message} Confirma o email e a palavra-passe, ou pede ajuda.`
-          : 'Não foi possível entrar. Tenta outra vez.',
+        mensagemParaUtilizador(
+          err,
+          'Não foi possível entrar. Confirma o email e a palavra-passe, ou pede ajuda.',
+        ),
       );
     } finally {
       setBusy(false);

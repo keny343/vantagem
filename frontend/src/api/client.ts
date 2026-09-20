@@ -81,9 +81,14 @@ let csrfPronto: Promise<void> | null = null;
 
 const tokenCsrf = (): string | undefined => csrfMemoria ?? lerCookie('vantagem_csrf');
 
-/** Obtém o CSRF via JSON — o cookie da API não é visível noutro domínio (Vercel). */
-export const ensureCsrf = async (): Promise<void> => {
-  if (tokenCsrf()) return;
+const limparCsrf = (): void => {
+  csrfMemoria = undefined;
+};
+
+/** Obtém o CSRF via JSON — o cookie da API pode não chegar bem pelo proxy Vercel. */
+export const ensureCsrf = async (forcar = false): Promise<void> => {
+  if (forcar) limparCsrf();
+  if (!forcar && tokenCsrf()) return;
   if (csrfPronto === null) {
     csrfPronto = xhr(urlAbsoluto('/api/auth/csrf'), { method: 'GET' })
       .then(({ text }) => {
@@ -99,6 +104,34 @@ export const ensureCsrf = async (): Promise<void> => {
   await csrfPronto;
 };
 
+/** Traduz códigos/jargão técnico para linguagem clara (Nielsen: feedback compreensível). */
+export const mensagemParaUtilizador = (err: unknown, fallback: string): string => {
+  if (!(err instanceof ApiError)) return fallback;
+  const msg = err.message;
+  if (
+    /csrf|token csrf|questão de segurança/i.test(msg) ||
+    (err.code === 'FORBIDDEN' && /token|csrf|segurança/i.test(msg))
+  ) {
+    return 'Não foi possível concluir por uma questão de segurança. Actualiza a página e tenta outra vez.';
+  }
+  if (err.code === 'NETWORK_ERROR' || err.code === 'UNEXPECTED_ERROR') {
+    return msg.includes('ligação') || msg.includes('internet')
+      ? msg
+      : 'Não foi possível contactar a loja. Verifica a internet e tenta outra vez.';
+  }
+  if (err.code === 'INTERNAL_ERROR' || err.status >= 500) {
+    return 'Algo correu mal do nosso lado. Tenta dentro de momentos.';
+  }
+  if (/^Erro \d{3}/.test(msg) || /ECONN|SQL|stack|undefined|null/i.test(msg)) {
+    return fallback;
+  }
+  return msg.length > 0 ? msg : fallback;
+};
+
+const pareceErroCsrf = (err: ApiError): boolean =>
+  err.status === 403 &&
+  (err.code === 'FORBIDDEN' || /csrf|segurança|token/i.test(err.message));
+
 /** Prefixa fotos locais (`/uploads/...`) com o origin da API quando o SPA está noutro host. */
 export const urlMedia = (caminho: string | undefined): string => {
   if (caminho === undefined || caminho.length === 0) return '';
@@ -107,8 +140,11 @@ export const urlMedia = (caminho: string | undefined): string => {
   return caminho;
 };
 
-export const request = async <T>(caminho: string, init: RequestInit = {}): Promise<T> => {
-  const metodo = (init.method ?? 'GET').toUpperCase();
+const executarPedido = async <T>(
+  caminho: string,
+  init: RequestInit,
+  metodo: string,
+): Promise<T> => {
   if (!SAFE.has(metodo)) {
     await ensureCsrf();
   }
@@ -136,7 +172,10 @@ export const request = async <T>(caminho: string, init: RequestInit = {}): Promi
     texto = res.text;
   } catch {
     throw new ApiError(0, {
-      error: { code: 'NETWORK_ERROR', message: 'Sem ligação ao servidor.' },
+      error: {
+        code: 'NETWORK_ERROR',
+        message: 'Sem ligação à loja. Verifica a internet e tenta outra vez.',
+      },
     });
   }
 
@@ -145,15 +184,40 @@ export const request = async <T>(caminho: string, init: RequestInit = {}): Promi
   if (status < 200 || status >= 300) {
     const temEnvelope =
       corpo !== null && typeof corpo === 'object' && 'error' in (corpo as Record<string, unknown>);
-    throw new ApiError(
-      status,
-      temEnvelope
-        ? (corpo as ApiErrorBody)
-        : { error: { code: 'UNEXPECTED_ERROR', message: `Erro ${status}.` } },
-    );
+    const bruto = temEnvelope
+      ? (corpo as ApiErrorBody)
+      : {
+          error: {
+            code: 'UNEXPECTED_ERROR',
+            message: 'Não foi possível concluir o pedido. Tenta outra vez.',
+          },
+        };
+    const err = new ApiError(status, bruto);
+    throw new ApiError(status, {
+      error: {
+        code: err.code,
+        message: mensagemParaUtilizador(err, bruto.error.message),
+        ...(err.requestId !== undefined ? { requestId: err.requestId } : {}),
+        ...(err.details !== undefined ? { details: err.details } : {}),
+      },
+    });
   }
 
   return corpo as T;
+};
+
+export const request = async <T>(caminho: string, init: RequestInit = {}): Promise<T> => {
+  const metodo = (init.method ?? 'GET').toUpperCase();
+  try {
+    return await executarPedido<T>(caminho, init, metodo);
+  } catch (err) {
+    // Um token antigo ou cookie do proxy desalinhado — pedimos CSRF novo e tentamos uma vez.
+    if (err instanceof ApiError && pareceErroCsrf(err) && !SAFE.has(metodo)) {
+      await ensureCsrf(true);
+      return executarPedido<T>(caminho, init, metodo);
+    }
+    throw err;
+  }
 };
 
 export interface AdminProduct extends Product {
