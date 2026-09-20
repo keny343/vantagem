@@ -10,18 +10,19 @@ Replaces the previous acid-lime-on-near-black gadget mall look.
 
 ## Color
 
-| Token | Value | Role |
-|-------|-------|------|
-| canvas | `#ede6da` | Page ground (limestone) |
-| ink | `#142126` | Primary text / shade |
-| panel | `#f7f2e8` | Surfaces |
-| panel2 | `#e8dfd0` | Recessed |
-| line | `#d4cbb8` | Rules |
-| acid | `#0c7c76` | Accent (Atlantic teal; legacy class name) |
-| brass | `#b8956a` | Warm secondary wash |
-| steel | `#5a6a6e` | Muted labels |
+Two themes via `data-theme` on `<html>` (default **dark**). Toggle in header stores `vantagem-tema` in localStorage.
 
-Strategy: Restrained neutrals + one committed teal accent; shade bands for trust/copy sections.
+| Token | Dark (default) | Light |
+|-------|----------------|-------|
+| canvas | `#0e0f12` | `#ede6da` |
+| ink | `#e8e9ed` | `#142126` |
+| panel | `#16171c` | `#f7f2e8` |
+| panel2 | `#1c1e25` | `#e8dfd0` |
+| line | `#2a2c35` | `#d4cbb8` |
+| acid | `#c9f24a` | `#0c7c76` |
+| steel | `#8b90a0` | `#5a6a6e` |
+
+Dark = preto + acid lime (primary). Light = limestone + Atlantic teal.
 
 ## Typography
 

@@ -129,11 +129,11 @@ export function HomePage() {
               />
             ) : (
               <div className="shade-band absolute inset-0 flex items-end p-8 sm:p-10">
-                <div className="max-w-[32ch] text-canvas">
+                <div className="max-w-[32ch]">
                   <p className="font-display text-xl font-medium">
                     {admin ? 'Ainda não há artigo na capa' : 'Catálogo a ser preenchido'}
                   </p>
-                  <p className="mt-2 text-sm text-canvas/70">
+                  <p className="mt-2 text-sm opacity-70">
                     {admin
                       ? 'Escolhe um artigo no painel para ocupar este plano.'
                       : 'Os artigos aparecem aqui quando forem publicados.'}
@@ -208,13 +208,13 @@ export function HomePage() {
           )}
         </section>
 
-        <section className="mb-20 overflow-hidden rounded-md shade-band text-canvas">
+        <section className="mb-20 overflow-hidden rounded-md shade-band">
           <div className="grid gap-8 p-8 sm:grid-cols-[1.2fr_0.8fr] sm:p-12">
             <div>
               <h2 className="font-display text-2xl font-medium text-balance">
                 Compra com documento, pagamento com comprovativo
               </h2>
-              <p className="mt-4 max-w-[46ch] text-pretty text-canvas/75">
+              <p className="mt-4 max-w-[46ch] text-pretty opacity-75">
                 Transfere o valor, anexa a fotografia do comprovativo, e a loja confirma. Factura e
                 garantia inclusas — sem surpresas de stock.
               </p>
@@ -225,7 +225,7 @@ export function HomePage() {
                 Como funciona
               </Link>
             </div>
-            <div className="flex flex-col justify-end gap-3 font-mono text-[11px] tracking-[0.12em] text-canvas/60 uppercase">
+            <div className="flex flex-col justify-end gap-3 font-mono text-[11px] tracking-[0.12em] opacity-60 uppercase">
               <span>IVA incluído</span>
               <span>Envio grátis a partir de {formatEuro(LOJA.envioGratisAPartir)}</span>
               <span>Devolução {LOJA.diasDevolucao} dias</span>

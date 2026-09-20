@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/SessionContext';
+import { TemaToggle } from '../ui/TemaToggle';
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', end: true },
@@ -70,9 +71,12 @@ export function AdminLayout() {
           Menu
         </button>
         <span className="font-display text-sm font-semibold text-ink">Painel</span>
-        <Link to="/" className="font-mono text-[10px] tracking-[0.12em] text-steel uppercase">
-          Loja
-        </Link>
+        <div className="flex items-center gap-2">
+          <TemaToggle />
+          <Link to="/" className="font-mono text-[10px] tracking-[0.12em] text-steel uppercase">
+            Loja
+          </Link>
+        </div>
       </header>
 
       <aside
@@ -103,6 +107,9 @@ export function AdminLayout() {
         <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">{nav}</nav>
 
         <div className="mt-3 space-y-2 border-t border-line pt-3">
+          <div className="px-1 pb-1">
+            <TemaToggle className="w-full" />
+          </div>
           <Link
             to="/"
             className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-panel2 hover:text-ink"

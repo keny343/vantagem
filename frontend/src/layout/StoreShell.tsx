@@ -7,6 +7,7 @@ import { useCart } from '../cart/CartContext';
 import { LOJA } from '../config/loja';
 import { useAvisos } from '../ui/Avisos';
 import { Notificacoes } from '../ui/Notificacoes';
+import { TemaToggle } from '../ui/TemaToggle';
 import { formatEuro } from '../utils/format';
 
 const NAV_PUBLIC = [
@@ -213,6 +214,7 @@ function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <TemaToggle className="hidden sm:inline-flex" />
           <form
             onSubmit={onSearch}
             className="hidden h-9 w-52 items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60 sm:flex"
@@ -283,6 +285,10 @@ function Header() {
       </div>
       {menu && (
         <nav className="border-t border-line bg-panel px-5 py-3 font-mono text-[11px] tracking-[0.15em] text-steel uppercase md:hidden">
+          <div className="mb-2 flex items-center justify-between gap-3 normal-case">
+            <span className="tracking-[0.15em] uppercase">Aparência</span>
+            <TemaToggle />
+          </div>
           {[...nav, ...(!user ? [{ to: '/login', label: 'Entrar' }] : [])].map((item) => (
             <Link
               key={item.to}

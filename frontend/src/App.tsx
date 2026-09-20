@@ -38,9 +38,11 @@ import TicketPage from './pages/TicketPage';
 import DevolucoesPage from './pages/DevolucoesPage';
 import { AvisosProvider } from './ui/Avisos';
 import { ConfirmarProvider } from './ui/Confirmar';
+import { ThemeProvider } from './theme/ThemeContext';
 
 export function App() {
   return (
+    <ThemeProvider>
     <SessionProvider>
       <CartProvider>
         <AvisosProvider>
@@ -173,5 +175,6 @@ export function App() {
         </AvisosProvider>
       </CartProvider>
     </SessionProvider>
+    </ThemeProvider>
   );
 }
