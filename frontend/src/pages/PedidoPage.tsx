@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ApiError, api, urlMedia, type Order } from '../api/client';
+import { ApiError, api, mensagemParaUtilizador, urlMedia, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
@@ -27,6 +27,7 @@ export function PedidoPage() {
   const [iban, setIban] = useState<string | null>(null);
   const [aFalar, setAFalar] = useState(false);
   const [ficheiro, setFicheiro] = useState<File | null>(null);
+  const [aEnviarFoto, setAEnviarFoto] = useState(false);
   useTitulo(order?.reference ?? 'Encomenda');
 
   async function carregar() {
@@ -175,6 +176,8 @@ export function PedidoPage() {
                 id="pedido-comprovativo"
                 ficheiro={ficheiro}
                 required
+                aEnviar={aEnviarFoto}
+                erro={erro}
                 onChange={(f) => {
                   setErro('');
                   if (!f) {
@@ -188,15 +191,23 @@ export function PedidoPage() {
                     return;
                   }
                   setFicheiro(f);
+                  setAEnviarFoto(true);
                   void api
                     .enviarComprovativo(referencia, f)
                     .then((r) => {
                       setOrder(r.order);
+                      setErro('');
                       avisar('Comprovativo enviado. A loja vai verificar.');
                     })
                     .catch((err) =>
-                      setErro(err instanceof ApiError ? err.message : 'Falha ao enviar comprovativo.'),
-                    );
+                      setErro(
+                        mensagemParaUtilizador(
+                          err,
+                          'Não foi possível enviar a fotografia. Tenta outra vez.',
+                        ),
+                      ),
+                    )
+                    .finally(() => setAEnviarFoto(false));
                 }}
               />
             </div>

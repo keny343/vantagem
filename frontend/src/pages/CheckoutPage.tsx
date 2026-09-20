@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiError, api } from '../api/client';
+import { ApiError, api, mensagemParaUtilizador } from '../api/client';
 import { useCart } from '../cart/CartContext';
 import { useSession } from '../auth/SessionContext';
 import { LOJA, faltaParaEnvioGratis, ivaIncluidoDe } from '../config/loja';
@@ -174,9 +174,10 @@ export function CheckoutPage() {
       navigate(`/pedido/${encodeURIComponent(order.reference)}`);
     } catch (err) {
       setErro(
-        err instanceof ApiError
-          ? err.message
-          : 'Não foi possível reservar o pedido. Confirma os dados e tenta outra vez.',
+        mensagemParaUtilizador(
+          err,
+          'Não foi possível reservar o pedido. Confirma os dados e tenta outra vez.',
+        ),
       );
     } finally {
       setAPagar(false);
@@ -423,6 +424,7 @@ export function CheckoutPage() {
                     Voltar
                   </button>
                   <button
+                    type="submit"
                     disabled={aPagar}
                     className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink disabled:opacity-60"
                   >
