@@ -7,6 +7,7 @@ import { LOJA, faltaParaEnvioGratis, ivaIncluidoDe } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
 import { Campo } from '../ui/Campo';
+import { CampoComprovativo, validarComprovativo } from '../ui/CampoComprovativo';
 import { formatEuro } from '../utils/format';
 import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 
@@ -38,12 +39,15 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [erro, setErro] = useState('');
-  const [payment, setPayment] = useState<'cartao' | 'mbway' | 'multibanco'>('mbway');
+  const [payment] = useState<'cartao'>('cartao');
   const [cupao, setCupao] = useState('');
   const [desconto, setDesconto] = useState(0);
   const [cupaoOk, setCupaoOk] = useState('');
   const [enderecos, setEnderecos] = useState<Endereco[]>([]);
   const [aPagar, setAPagar] = useState(false);
+  const [comprovativo, setComprovativo] = useState<File | null>(null);
+  const [erroFoto, setErroFoto] = useState('');
+  const [iban, setIban] = useState<string | null>(null);
   const alertaRef = useRef<HTMLDivElement>(null);
   useTitulo('Finalizar compra');
   const [form, setForm] = useState({
@@ -72,6 +76,13 @@ export function CheckoutPage() {
       .then((r) => setEnderecos(r.enderecos))
       .catch(() => undefined);
   }, [user]);
+
+  useEffect(() => {
+    void api
+      .loja()
+      .then((r) => setIban(r.iban))
+      .catch(() => undefined);
+  }, []);
 
   const total = useMemo(
     () => Math.max(0, cart.subtotal - desconto) + cart.shipping,
@@ -111,8 +122,15 @@ export function CheckoutPage() {
       setErro('O carrinho está vazio.');
       return;
     }
-    if (payment === 'mbway' && !form.phone.trim()) {
-      setErro('O Express exige o telemóvel da conta.');
+    if (!comprovativo) {
+      setErroFoto('Anexa a fotografia do comprovativo da transferência.');
+      setErro('Anexa a fotografia do comprovativo da transferência.');
+      return;
+    }
+    const fotoInvalida = validarComprovativo(comprovativo);
+    if (fotoInvalida) {
+      setErroFoto(fotoInvalida);
+      setErro(fotoInvalida);
       return;
     }
     setAPagar(true);
@@ -136,6 +154,21 @@ export function CheckoutPage() {
         couponCode: cupaoOk || undefined,
         idempotencyKey: chaveIdem(),
       });
+      try {
+        await api.enviarComprovativo(order.reference, comprovativo);
+      } catch (err) {
+        cart.clear();
+        sessionStorage.removeItem('vantagem_idem');
+        navigate(`/pedido/${encodeURIComponent(order.reference)}`, {
+          state: {
+            aviso:
+              err instanceof ApiError
+                ? err.message
+                : 'A encomenda ficou criada, mas o comprovativo não foi enviado. Anexa-o nesta página.',
+          },
+        });
+        return;
+      }
       cart.clear();
       sessionStorage.removeItem('vantagem_idem');
       navigate(`/pedido/${encodeURIComponent(order.reference)}`);
@@ -322,47 +355,45 @@ export function CheckoutPage() {
                 <p className="text-sm text-zinc-400">
                   Entrega: {form.name} · {form.address}, {form.postalCode} {form.city}
                 </p>
-                <div className="space-y-2">
-                  {(
-                    [
-                      ['mbway', 'Multicaixa Express'],
-                      ['multibanco', 'Referência Multicaixa'],
-                      ['cartao', 'Transferência bancária'],
-                    ] as const
-                  ).map(([value, label]) => (
-                    <label
-                      key={value}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-line bg-panel2 px-4 py-3 text-sm hover:border-acid/40"
-                    >
-                      <input
-                        type="radio"
-                        name="pay"
-                        checked={payment === value}
-                        onChange={() => setPayment(value)}
-                        className="accent-acid"
-                      />
-                      {label}
-                    </label>
-                  ))}
+                <div className="rounded-lg border border-acid/40 bg-panel2 px-4 py-3">
+                  <p className="font-display text-white">Transferência bancária</p>
+                  <p className="mt-1 font-mono text-[11px] text-steel">
+                    Transfere {formatEuro(total)} para a conta da loja, anexa a fotografia do
+                    comprovativo e confirma. Só o administrador marca a encomenda como paga.
+                  </p>
+                  {iban ? (
+                    <p className="mt-2 break-all font-mono text-sm text-zinc-200">IBAN {iban}</p>
+                  ) : (
+                    <p className="mt-2 font-mono text-[11px] text-steel">
+                      Os dados da conta aparecem também na página da encomenda, se a loja os tiver
+                      configurado.
+                    </p>
+                  )}
                 </div>
-                {payment === 'mbway' && (
-                  <p className="font-mono text-[11px] text-steel">
-                    Pedido Express para {form.phone || 'o telemóvel indicado'}. Confirmas o
-                    pagamento na página seguinte.
-                  </p>
-                )}
-                {payment === 'multibanco' && (
-                  <p className="font-mono text-[11px] text-steel">
-                    Geramos entidade e referência Multicaixa. O pedido fica pendente até o
-                    pagamento ser confirmado.
-                  </p>
-                )}
-                {payment === 'cartao' && (
-                  <p className="font-mono text-[11px] text-steel">
-                    Transferência para a conta da loja. Nenhum valor é cobrado automaticamente —
-                    confirmas na página do pedido.
-                  </p>
-                )}
+                <CampoComprovativo
+                  id="chk-comprovativo"
+                  ficheiro={comprovativo}
+                  required
+                  erro={erroFoto}
+                  onChange={(ficheiro) => {
+                    setErroFoto('');
+                    setErro('');
+                    if (!ficheiro) {
+                      setComprovativo(null);
+                      return;
+                    }
+                    const invalido = validarComprovativo(ficheiro);
+                    if (invalido) {
+                      setComprovativo(null);
+                      setErroFoto(invalido);
+                      return;
+                    }
+                    setComprovativo(ficheiro);
+                  }}
+                />
+                <p className="font-mono text-[11px] text-steel">
+                  Multicaixa Express e referência Multicaixa ficam para uma fase seguinte.
+                </p>
                 <div className="flex gap-2">
                   <input
                     className={field}
@@ -395,7 +426,7 @@ export function CheckoutPage() {
                     disabled={aPagar}
                     className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-ink disabled:opacity-60"
                   >
-                    {aPagar ? 'A reservar…' : `Reservar e pagar ${formatEuro(total)}`}
+                    {aPagar ? 'A enviar…' : `Confirmar encomenda ${formatEuro(total)}`}
                   </button>
                 </div>
               </form>
