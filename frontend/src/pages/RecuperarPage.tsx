@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+Ôªøimport { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -21,7 +21,7 @@ export function RecuperarPage() {
       await api.recuperar(email);
       setOk(true);
     } catch (err) {
-      setErro(err instanceof ApiError ? err.message : 'N„o foi possÌvel enviar o pedido.');
+      setErro(err instanceof ApiError ? err.message : 'N√£o foi poss√≠vel enviar o pedido.');
     } finally {
       setBusy(false);
     }
@@ -33,7 +33,7 @@ export function RecuperarPage() {
         <h1 className="font-display text-2xl font-semibold text-ink">Recuperar palavra-passe</h1>
         {ok ? (
           <p className="mt-4 text-sm text-steel">
-            Se existir uma conta com este email, envi·mos um link v·lido por uma hora. Sem servidor
+            Se existir uma conta com este email, envi√°mos um link v√°lido por uma hora. Sem servidor
             de email configurado, o link aparece no registo da API.
           </p>
         ) : (
@@ -60,7 +60,7 @@ export function RecuperarPage() {
               disabled={busy}
               className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
             >
-              {busy ? 'A enviarÖ' : 'Enviar link'}
+              {busy ? 'A enviar‚Ä¶' : 'Enviar link'}
             </button>
           </form>
         )}

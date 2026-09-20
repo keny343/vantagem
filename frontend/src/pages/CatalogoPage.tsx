@@ -84,7 +84,6 @@ export function CatalogoPage() {
         </div>
         <div className="flex w-full max-w-xl flex-wrap items-center gap-2">
           <div className="flex h-10 min-w-[12rem] flex-1 items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60">
-            <span className="font-mono text-xs text-steel">⌕</span>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -100,8 +99,8 @@ export function CatalogoPage() {
             aria-label="Ordenar"
           >
             <option value="relevancia">Relevância</option>
-            <option value="preco_asc">Preço ↑</option>
-            <option value="preco_desc">Preço ↓</option>
+            <option value="preco_asc">Preço: menor</option>
+            <option value="preco_desc">Preço: maior</option>
             <option value="novos">Novos</option>
           </select>
         </div>
@@ -246,7 +245,7 @@ function Chip({ texto, onLimpar }: { texto: string; onLimpar: () => void }) {
       onClick={onLimpar}
       className="rounded-full bg-acid/15 px-3 py-1 font-mono text-[10px] tracking-[0.08em] text-acid uppercase"
     >
-      {texto} ✕
+      {texto} x
     </button>
   );
 }

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+ï»¿import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { mensagemParaUtilizador } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -40,7 +40,7 @@ export function RegistoPage() {
       });
       void navigate(destinoAposLogin(location.search, 'cliente'));
     } catch (err) {
-      setErro(mensagemParaUtilizador(err, 'Não foi possível criar a conta. Tenta outra vez.'));
+      setErro(mensagemParaUtilizador(err, 'NÃ£o foi possÃ­vel criar a conta. Tenta outra vez.'));
     } finally {
       setBusy(false);
     }
@@ -52,7 +52,7 @@ export function RegistoPage() {
         <div className="label-mono">Conta</div>
         <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Criar conta</h1>
         <p className="mt-2 text-sm text-steel">
-          Com a conta acompanhas a encomenda e vês quando a loja confirmar o pagamento.
+          Com a conta acompanhas a encomenda e vÃªs quando a loja confirmar o pagamento.
         </p>
         <form
           className="mt-6 space-y-4"
@@ -82,7 +82,7 @@ export function RegistoPage() {
           />
           <Campo
             id="reg-tel"
-            label="Telemóvel"
+            label="TelemÃ³vel"
             hint="Opcional. 9xxxxxxxx ou +244 9xxxxxxxx"
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
@@ -94,7 +94,7 @@ export function RegistoPage() {
             required
             minLength={8}
             autoComplete="new-password"
-            hint="Pelo menos 8 caracteres, com uma letra e um número."
+            hint="Pelo menos 8 caracteres, com uma letra e um nÃºmero."
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -102,14 +102,14 @@ export function RegistoPage() {
             disabled={busy}
             className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
-            {busy ? 'A criar…' : 'Criar conta'}
+            {busy ? 'A criarâ€¦' : 'Criar conta'}
           </button>
         </form>
         <Link
           to={urlComSeguir('/login', location.search)}
           className="mt-4 grid h-11 place-items-center rounded-lg font-display text-sm font-semibold text-acid ring-1 ring-acid/40 hover:bg-acid/10"
         >
-          Já tenho conta — entrar
+          JÃ¡ tenho conta â€” entrar
         </Link>
       </div>
     </StoreShell>

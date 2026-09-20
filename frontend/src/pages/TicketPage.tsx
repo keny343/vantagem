@@ -78,7 +78,7 @@ export default function TicketPage() {
   return (
     <StoreShell>
       <Link to="/conta/suporte" className="mt-8 inline-block font-mono text-[11px] text-steel hover:text-acid">
-        ← Conversas
+        Conversas
       </Link>
       <h1 className="mt-3 font-display text-2xl font-semibold text-ink">{ticket.assunto}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">

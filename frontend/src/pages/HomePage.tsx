@@ -181,7 +181,7 @@ export function HomePage() {
               to="/catalogo"
               className="font-mono text-[11px] tracking-[0.14em] text-steel uppercase hover:text-acid"
             >
-              Catálogo →
+              Catálogo
             </Link>
           </div>
           {loading ? (

@@ -69,7 +69,7 @@ export function CarrinhoPage() {
                     className="px-2.5 font-mono text-xs text-steel hover:text-acid"
                     aria-label="Diminuir quantidade"
                   >
-                    −
+                    -
                   </button>
                   <span className="min-w-7 text-center font-mono text-xs text-ink">{line.qty}</span>
                   <button

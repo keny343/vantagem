@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+ï»¿import { Link, useLocation } from 'react-router-dom';
 import { LOJA } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
@@ -11,34 +11,34 @@ const PAGINAS: Record<string, { titulo: string; corpo: string[] }> = {
     titulo: 'A empresa',
     corpo: [
       `${LOJA.nomeLegal} opera a loja online ${LOJA.nome}, com sede em ${LOJA.morada}.`,
-      `NIF ${LOJA.nif} (demonstração). Contacto: ${LOJA.email} · ${LOJA.telefone}.`,
-      'Vendemos electrónica de consumo e profissional a particulares e empresas em Angola. Preços apresentados em Kwanzas, com IVA (14%) incluído.',
-      'Não somos um marketplace: o catálogo, o stock e a factura são da mesma empresa.',
+      `NIF ${LOJA.nif} (demonstraÃ§Ã£o). Contacto: ${LOJA.email} Â· ${LOJA.telefone}.`,
+      'Vendemos electrÃ³nica de consumo e profissional a particulares e empresas em Angola. PreÃ§os apresentados em Kwanzas, com IVA (14%) incluÃ­do.',
+      'NÃ£o somos um marketplace: o catÃ¡logo, o stock e a factura sÃ£o da mesma empresa.',
     ],
   },
   '/termos': {
-    titulo: 'Termos e condições',
+    titulo: 'Termos e condiÃ§Ãµes',
     corpo: [
-      'Ao concluir uma encomenda aceitas estes termos. O contrato forma-se quando o pagamento é confirmado, não quando o stock é reservado.',
-      `Entregas em Angola (Luanda e províncias). Custo de envio ${formatPrecoLegal(LOJA.custoEnvio)}, grátis a partir de ${formatPrecoLegal(LOJA.envioGratisAPartir)} de subtotal. Fora do país apenas sob consulta.`,
-      'Métodos de pagamento: de momento transferência bancária. O cliente anexa a fotografia do comprovativo no formulário de compra; a loja verifica e confirma o pagamento. Multicaixa Express e referência Multicaixa serão ligados mais tarde.',
-      'Reservamos o direito de cancelar encomendas por erro manifesto de preço ou falta de stock, com reposição do artigo e aviso ao cliente.',
+      'Ao concluir uma encomenda aceitas estes termos. O contrato forma-se quando o pagamento Ã© confirmado, nÃ£o quando o stock Ã© reservado.',
+      `Entregas em Angola (Luanda e provÃ­ncias). Custo de envio ${formatPrecoLegal(LOJA.custoEnvio)}, grÃ¡tis a partir de ${formatPrecoLegal(LOJA.envioGratisAPartir)} de subtotal. Fora do paÃ­s apenas sob consulta.`,
+      'MÃ©todos de pagamento: de momento transferÃªncia bancÃ¡ria. O cliente anexa a fotografia do comprovativo no formulÃ¡rio de compra; a loja verifica e confirma o pagamento. Multicaixa Express e referÃªncia Multicaixa serÃ£o ligados mais tarde.',
+      'Reservamos o direito de cancelar encomendas por erro manifesto de preÃ§o ou falta de stock, com reposiÃ§Ã£o do artigo e aviso ao cliente.',
     ],
   },
   '/devolucoes': {
-    titulo: 'Devoluções e garantia',
+    titulo: 'DevoluÃ§Ãµes e garantia',
     corpo: [
-      `Tens ${LOJA.diasDevolucao} dias, a contar da entrega, para devolver compras à distância, nos termos da lei angolana aplicável ao comércio electrónico.`,
-      'O artigo deve regressar completo, sem uso para além do necessário para o examinar. Software aberto, artigos personalizados e selos de higiene quebrados podem estar excluídos.',
-      `A garantia legal mínima é de ${LOJA.garantiaMesesPadrao} meses, salvo indicação diferente na ficha do produto.`,
-      `Para abrir uma devolução, responde à encomenda com o teu pedido em ${LOJA.email} ou, com conta, na área de cliente.`,
+      `Tens ${LOJA.diasDevolucao} dias, a contar da entrega, para devolver compras Ã  distÃ¢ncia, nos termos da lei angolana aplicÃ¡vel ao comÃ©rcio electrÃ³nico.`,
+      'O artigo deve regressar completo, sem uso para alÃ©m do necessÃ¡rio para o examinar. Software aberto, artigos personalizados e selos de higiene quebrados podem estar excluÃ­dos.',
+      `A garantia legal mÃ­nima Ã© de ${LOJA.garantiaMesesPadrao} meses, salvo indicaÃ§Ã£o diferente na ficha do produto.`,
+      `Para abrir uma devoluÃ§Ã£o, responde Ã  encomenda com o teu pedido em ${LOJA.email} ou, com conta, na Ã¡rea de cliente.`,
     ],
   },
   '/privacidade': {
     titulo: 'Privacidade',
     corpo: [
-      'Tratamos nome, email, telemóvel, morada e NIF para cumprir o contrato de compra e as obrigações fiscais.',
-      'A sessão usa cookie httpOnly. Não vendemos listas a terceiros. O acesso à página da encomenda pela referência revela os dados dessa encomenda — não partilhes a ligação.',
+      'Tratamos nome, email, telemÃ³vel, morada e NIF para cumprir o contrato de compra e as obrigaÃ§Ãµes fiscais.',
+      'A sessÃ£o usa cookie httpOnly. NÃ£o vendemos listas a terceiros. O acesso Ã  pÃ¡gina da encomenda pela referÃªncia revela os dados dessa encomenda â€” nÃ£o partilhes a ligaÃ§Ã£o.',
       `Para aceder, rectificar ou apagar dados, escreve para ${LOJA.email}.`,
     ],
   },
@@ -52,7 +52,7 @@ export function LegalPage() {
   return (
     <StoreShell>
       <article className="mt-10 max-w-[62ch]">
-        <p className="label-mono">Informação legal</p>
+        <p className="label-mono">InformaÃ§Ã£o legal</p>
         <h1 className="mt-2 font-display text-3xl font-semibold text-ink">{pag.titulo}</h1>
         <div className="mt-6 space-y-4 text-steel">
           {pag.corpo.map((p) => (
@@ -63,15 +63,15 @@ export function LegalPage() {
           <Link to="/empresa" className="hover:text-acid">
             Empresa
           </Link>
-          {' · '}
+          {' Â· '}
           <Link to="/termos" className="hover:text-acid">
             Termos
           </Link>
-          {' · '}
+          {' Â· '}
           <Link to="/devolucoes" className="hover:text-acid">
-            Devoluções
+            DevoluÃ§Ãµes
           </Link>
-          {' · '}
+          {' Â· '}
           <Link to="/privacidade" className="hover:text-acid">
             Privacidade
           </Link>

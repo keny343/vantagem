@@ -99,7 +99,7 @@ export default function SuportePage() {
           </p>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
-          ← Voltar
+          Voltar
         </Link>
       </div>
       {erro && (

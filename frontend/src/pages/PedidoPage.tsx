@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+ï»¿import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, mensagemParaUtilizador, urlMedia, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
@@ -43,8 +43,8 @@ export function PedidoPage() {
       }
       setErro(
         err instanceof ApiError
-          ? mensagemParaUtilizador(err, 'Pedido não encontrado.')
-          : 'Pedido não encontrado.',
+          ? mensagemParaUtilizador(err, 'Pedido nÃ£o encontrado.')
+          : 'Pedido nÃ£o encontrado.',
       );
     });
     void api
@@ -71,12 +71,12 @@ export function PedidoPage() {
       const r = await api.criarTicket({
         categoria,
         assunto: `Encomenda ${order.reference}`,
-        descricao: `Olá, preciso de ajuda com a encomenda ${order.reference}.`,
+        descricao: `OlÃ¡, preciso de ajuda com a encomenda ${order.reference}.`,
         pedidoReferencia: order.reference,
       });
       navigate(`/conta/suporte/${r.ticket.id}`);
     } catch (err) {
-      setErro(err instanceof ApiError ? err.message : 'Não foi possível abrir a conversa.');
+      setErro(err instanceof ApiError ? err.message : 'NÃ£o foi possÃ­vel abrir a conversa.');
     } finally {
       setAFalar(false);
     }
@@ -87,7 +87,7 @@ export function PedidoPage() {
       <StoreShell>
         <div className="mt-16 max-w-lg">
           <ErroBloco
-            titulo="Encomenda não encontrada"
+            titulo="Encomenda nÃ£o encontrada"
             mensagem={erro}
             extra={
               <>
@@ -111,7 +111,7 @@ export function PedidoPage() {
   if (!order) {
     return (
       <StoreShell>
-        <p className="mt-16 text-center font-mono text-steel">A carregar pedido…</p>
+        <p className="mt-16 text-center font-mono text-steel">A carregar pedidoâ€¦</p>
       </StoreShell>
     );
   }
@@ -125,14 +125,14 @@ export function PedidoPage() {
         <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{order.reference}</h1>
         <p className="mt-2 font-mono text-[11px] text-steel">
           {estadoEncomenda(order)}
-          {order.paidAt ? ` · ${new Date(order.paidAt).toLocaleString('pt-PT')}` : ''}
+          {order.paidAt ? ` Â· ${new Date(order.paidAt).toLocaleString('pt-PT')}` : ''}
         </p>
 
         {pendente && !admin && order.comprovativoUrl && (
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
             <h2 className="font-display text-ink">Comprovativo recebido</h2>
             <p className="mt-2 text-sm text-steel">
-              A loja está a verificar a transferência. Quando confirmar, o estado passa a pago —
+              A loja estÃ¡ a verificar a transferÃªncia. Quando confirmar, o estado passa a pago â€”
               acompanhas isso na tua conta, em Os meus pedidos.
             </p>
             <img
@@ -168,10 +168,10 @@ export function PedidoPage() {
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
             <h2 className="font-display text-ink">Envia o comprovativo</h2>
             <p className="mt-2 text-sm text-steel">
-              Transfere o valor e anexa a fotografia. Só a loja marca a encomenda como paga.
+              Transfere o valor e anexa a fotografia. SÃ³ a loja marca a encomenda como paga.
             </p>
             <div className="mt-3 rounded-lg border border-line bg-panel2 p-3 font-mono text-sm text-ink/80">
-              <div>Método {ROTULO_PAGAMENTO.cartao}</div>
+              <div>MÃ©todo {ROTULO_PAGAMENTO.cartao}</div>
               {iban ? <div className="mt-1 break-all">IBAN {iban}</div> : (
                 <div className="mt-1 text-steel">
                   Os dados da conta aparecem aqui quando a loja os configurar.
@@ -211,7 +211,7 @@ export function PedidoPage() {
                       setErro(
                         mensagemParaUtilizador(
                           err,
-                          'Não foi possível enviar a fotografia. Tenta outra vez.',
+                          'NÃ£o foi possÃ­vel enviar a fotografia. Tenta outra vez.',
                         ),
                       ),
                     )
@@ -227,7 +227,7 @@ export function PedidoPage() {
           {order.items.map((i) => (
             <div key={i.sku + i.variant} className="flex justify-between py-2 font-mono text-[12px]">
               <span className="text-steel">
-                {i.quantity}× {i.name} ({i.variant})
+                {i.quantity}Ã— {i.name} ({i.variant})
               </span>
               <span className="text-ink/80">{formatEuro(i.total)}</span>
             </div>
@@ -239,16 +239,16 @@ export function PedidoPage() {
             </div>
             {order.discount > 0 && (
               <div className="flex justify-between">
-                <dt>Cupão {order.couponCode}</dt>
+                <dt>CupÃ£o {order.couponCode}</dt>
                 <dd>-{formatEuro(order.discount)}</dd>
               </div>
             )}
             <div className="flex justify-between">
               <dt>Envio</dt>
-              <dd>{order.shipping === 0 ? 'Grátis' : formatEuro(order.shipping)}</dd>
+              <dd>{order.shipping === 0 ? 'GrÃ¡tis' : formatEuro(order.shipping)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt>IVA incluído</dt>
+              <dt>IVA incluÃ­do</dt>
               <dd>{formatEuro(order.vat)}</dd>
             </div>
             <div className="flex justify-between font-display text-base text-ink">
@@ -270,7 +270,7 @@ export function PedidoPage() {
           </p>
           {order.nif && <p className="mt-2">NIF cliente {order.nif}</p>}
           <p className="mt-3">
-            Emitido por {LOJA.nomeLegal} · NIF {LOJA.nif}
+            Emitido por {LOJA.nomeLegal} Â· NIF {LOJA.nif}
           </p>
         </section>
 
@@ -292,7 +292,7 @@ export function PedidoPage() {
               onClick={() => void falarComLoja()}
               className="font-mono text-[11px] text-acid uppercase disabled:opacity-60"
             >
-              {aFalar ? 'A abrir…' : 'Falar com a loja'}
+              {aFalar ? 'A abrirâ€¦' : 'Falar com a loja'}
             </button>
           )}
           {user && !admin ? (
@@ -311,7 +311,7 @@ export function PedidoPage() {
             Factura
           </Link>
           <Link to="/catalogo" className="font-mono text-[11px] text-steel uppercase hover:text-acid">
-            {admin ? 'Ver catálogo' : 'Continuar a comprar'}
+            {admin ? 'Ver catÃ¡logo' : 'Continuar a comprar'}
           </Link>
         </div>
       </div>

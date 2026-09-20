@@ -87,7 +87,7 @@ export function AvisosProvider({ children }: { children: ReactNode }) {
               className="font-mono text-[11px] text-steel hover:text-ink"
               aria-label="Fechar aviso"
             >
-              ✕
+              x
             </button>
           </div>
         ))}

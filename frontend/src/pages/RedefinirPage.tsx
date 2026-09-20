@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+ï»¿import { FormEvent, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useTitulo } from '../hooks/useTitulo';
@@ -23,7 +23,7 @@ export function RedefinirPage() {
       await api.redefinir(token, password);
       setOk(true);
     } catch (err) {
-      setErro(err instanceof ApiError ? err.message : 'Não foi possível gravar a palavra-passe.');
+      setErro(err instanceof ApiError ? err.message : 'NÃ£o foi possÃ­vel gravar a palavra-passe.');
     } finally {
       setBusy(false);
     }
@@ -34,7 +34,7 @@ export function RedefinirPage() {
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
         <h1 className="font-display text-2xl font-semibold text-ink">Nova palavra-passe</h1>
         {!token ? (
-          <p className="mt-4 text-sm text-steel">Este link está incompleto. Pede um novo em Recuperar.</p>
+          <p className="mt-4 text-sm text-steel">Este link estÃ¡ incompleto. Pede um novo em Recuperar.</p>
         ) : ok ? (
           <p className="mt-4 text-sm text-ink/70">
             Palavra-passe actualizada.{' '}
@@ -60,7 +60,7 @@ export function RedefinirPage() {
               type="password"
               required
               minLength={8}
-              hint="Pelo menos 8 caracteres, com uma letra e um número."
+              hint="Pelo menos 8 caracteres, com uma letra e um nÃºmero."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -68,7 +68,7 @@ export function RedefinirPage() {
               disabled={busy}
               className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
             >
-              {busy ? 'A gravar…' : 'Guardar'}
+              {busy ? 'A gravarâ€¦' : 'Guardar'}
             </button>
           </form>
         )}

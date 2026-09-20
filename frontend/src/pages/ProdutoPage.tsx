@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+Ôªøimport { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, urlMedia, type Product } from '../api/client';
 import { eAdmin } from '../auth/papeis';
@@ -33,12 +33,12 @@ export function ProdutoPage() {
         const res = await api.produto(id);
         setProduct(res.product);
         setRelated(res.related);
-        setVariant(res.product.variants.options[0] ?? 'Padr„o');
+        setVariant(res.product.variants.options[0] ?? 'Padr√£o');
         setFoto(0);
         setQty(1);
         setErro('');
       } catch {
-        setErro('Produto n„o encontrado.');
+        setErro('Produto n√£o encontrado.');
         setProduct(null);
       }
     })();
@@ -67,7 +67,7 @@ export function ProdutoPage() {
       <StoreShell>
         <div className="mt-16 max-w-lg">
           <ErroBloco
-            titulo="Artigo n„o encontrado"
+            titulo="Artigo n√£o encontrado"
             mensagem={erro}
             extra={
               <>
@@ -75,7 +75,7 @@ export function ProdutoPage() {
                   to="/catalogo"
                   className="grid h-10 place-items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-canvas"
                 >
-                  Ver cat·logo
+                  Ver cat√°logo
                 </Link>
                 <Link to="/ajuda" className="grid h-10 place-items-center font-mono text-[11px] text-acid">
                   Ajuda
@@ -126,7 +126,7 @@ export function ProdutoPage() {
         avisar('Guardado nos favoritos.');
       }
     } catch {
-      avisar('N„o foi possÌvel actualizar os favoritos.', { tipo: 'erro' });
+      avisar('N√£o foi poss√≠vel actualizar os favoritos.', { tipo: 'erro' });
     }
   }
 
@@ -143,7 +143,7 @@ export function ProdutoPage() {
         avisar('Este artigo passou a ser a capa.');
       }
     } catch {
-      avisar('N„o foi possÌvel alterar a capa.', { tipo: 'erro' });
+      avisar('N√£o foi poss√≠vel alterar a capa.', { tipo: 'erro' });
     }
   }
 
@@ -151,7 +151,7 @@ export function ProdutoPage() {
     <StoreShell>
       <div className="mt-6 font-mono text-[11px] tracking-[0.12em] text-steel uppercase">
         <Link to="/catalogo" className="hover:text-acid">
-          Cat·logo
+          Cat√°logo
         </Link>
         <span> / </span>
         <Link
@@ -200,14 +200,14 @@ export function ProdutoPage() {
                 {formatEuro(product.oldPrice)}
               </span>
             )}
-            <span className="font-mono text-[11px] text-steel">IVA incluÌdo</span>
+            <span className="font-mono text-[11px] text-steel">IVA inclu√≠do</span>
           </div>
           <p className="mt-2 font-mono text-[11px] text-steel">{stockLabel(product.stock)}</p>
           <p className="mt-4 max-w-[48ch] text-steel">{product.description}</p>
 
-          {product.variants.options.filter((o) => !['⁄nico', 'Padr„o'].includes(o)).length > 0 && (
+          {product.variants.options.filter((o) => !['√önico', 'Padr√£o'].includes(o)).length > 0 && (
           <div className="mt-6">
-            <div className="label-mono mb-2">Vers„o</div>
+            <div className="label-mono mb-2">Vers√£o</div>
             <div className="flex flex-wrap gap-2">
               {product.variants.options.map((opt) => (
                 <button
@@ -241,7 +241,7 @@ export function ProdutoPage() {
                   onClick={() => void definirCapa()}
                   className="h-11 rounded-lg px-4 font-mono text-[11px] tracking-[0.12em] text-acid uppercase ring-1 ring-acid/40"
                 >
-                  {product.hero ? 'Na capa' : 'PÙr na capa'}
+                  {product.hero ? 'Na capa' : 'P√¥r na capa'}
                 </button>
               </>
             ) : (
@@ -293,7 +293,7 @@ export function ProdutoPage() {
                 }`}
                 aria-label={favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               >
-                ?
+                ‚ô•
               </button>
             )}
               </>
@@ -301,8 +301,8 @@ export function ProdutoPage() {
           </div>
           {admin && (
             <p className="mt-3 font-mono text-[11px] text-steel">
-              Est·s a ver a loja como administrador ó esta conta n„o compra.
-              {product.hero ? ' Este È o artigo da capa.' : ''}
+              Est√°s a ver a loja como administrador ‚Äî esta conta n√£o compra.
+              {product.hero ? ' Este √© o artigo da capa.' : ''}
             </p>
           )}
 
@@ -317,7 +317,7 @@ export function ProdutoPage() {
             <span>Envio em Angola {formatEuro(LOJA.custoEnvio)}</span>
             <span>
               <Link to="/devolucoes" className="hover:text-acid">
-                DevoluÁ„o {LOJA.diasDevolucao} dias
+                Devolu√ß√£o {LOJA.diasDevolucao} dias
               </Link>
             </span>
             <span>Garantia {garantia} meses</span>
@@ -364,13 +364,13 @@ function Avaliacoes({ produtoId }: { produtoId: string }) {
 
   return (
     <section className="mt-14 max-w-2xl">
-      <h2 className="font-display text-xl text-ink">Opiniıes</h2>
-      {lista.length === 0 && <p className="mt-3 font-mono text-[11px] text-steel">Ainda n„o h· opiniıes.</p>}
+      <h2 className="font-display text-xl text-ink">Opini√µes</h2>
+      {lista.length === 0 && <p className="mt-3 font-mono text-[11px] text-steel">Ainda n√£o h√° opini√µes.</p>}
       <div className="mt-4 space-y-3">
         {lista.map((a) => (
           <article key={a.id} className="rounded-[14px] border border-line bg-panel p-4">
             <p className="font-display text-ink">
-              {'?'.repeat(a.estrelas_produto)}{' '}
+              {'‚òÖ'.repeat(a.estrelas_produto)}{' '}
               <span className="font-mono text-[11px] text-steel">{a.utilizador_nome}</span>
             </p>
             {a.comentario && <p className="mt-2 text-sm text-ink/70">{a.comentario}</p>}
@@ -390,15 +390,15 @@ function Avaliacoes({ produtoId }: { produtoId: string }) {
                 comentario,
               })
               .then(() => {
-                avisar('Opini„o publicada.');
+                avisar('Opini√£o publicada.');
                 setPedidoId('');
                 return api.avaliacoes(produtoId);
               })
               .then((r) => setLista(r.avaliacoes))
-              .catch(() => avisar('N„o foi possÌvel publicar.', { tipo: 'erro' }));
+              .catch(() => avisar('N√£o foi poss√≠vel publicar.', { tipo: 'erro' }));
           }}
         >
-          <p className="font-mono text-[11px] text-steel">Compraste este artigo ó deixa a tua opini„o.</p>
+          <p className="font-mono text-[11px] text-steel">Compraste este artigo ‚Äî deixa a tua opini√£o.</p>
           <label className="block font-mono text-[10px] text-steel uppercase">
             Estrelas
             <select

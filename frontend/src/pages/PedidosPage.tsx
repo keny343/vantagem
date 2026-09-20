@@ -50,7 +50,7 @@ export default function PedidosPage() {
           <h1 className="mt-1 font-display text-2xl font-semibold text-ink">Pedidos</h1>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
-          ← Voltar
+          Voltar
         </Link>
       </div>
 

@@ -74,7 +74,7 @@ export function AdminTicketPage() {
   return (
     <div>
       <Link to="/admin/tickets" className="font-mono text-[11px] text-steel hover:text-acid">
-        ← Mensagens
+        Mensagens
       </Link>
       <h1 className="mt-3 font-display text-2xl font-semibold text-ink">{ticket.subject}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">

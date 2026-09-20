@@ -150,7 +150,7 @@ export function AdminProdutoFormPage() {
         {editar ? 'Editar artigo' : 'Novo artigo'}
       </h1>
       <Link to="/admin/produtos" className="mt-2 inline-block font-mono text-[11px] text-steel hover:text-acid">
-        ← Lista de artigos
+        Lista de artigos
       </Link>
       {erro && <p className="mt-4 font-mono text-[11px] text-destructive">{erro}</p>}
 

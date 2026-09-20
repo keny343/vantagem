@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+ï»¿import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api, urlMedia, type Order } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
@@ -24,7 +24,7 @@ export function AdminPedidoPage() {
   }
 
   useEffect(() => {
-    void carregar().catch(() => setErro('Pedido não encontrado.'));
+    void carregar().catch(() => setErro('Pedido nÃ£o encontrado.'));
   }, [id]);
 
   async function mudar(status: string) {
@@ -32,7 +32,7 @@ export function AdminPedidoPage() {
     if (status === 'cancelado') {
       const ok = await confirmar({
         titulo: 'Cancelar encomenda?',
-        mensagem: 'Se ainda não saiu do armazém, o stock volta para o artigo.',
+        mensagem: 'Se ainda nÃ£o saiu do armazÃ©m, o stock volta para o artigo.',
         confirmarLabel: 'Cancelar encomenda',
         perigo: true,
       });
@@ -44,7 +44,7 @@ export function AdminPedidoPage() {
       avisar(`Pedido actualizado: ${ROTULO_ESTADO[status] ?? status}.`);
       await carregar();
     } catch {
-      setErro('Não foi possível actualizar.');
+      setErro('NÃ£o foi possÃ­vel actualizar.');
     }
   }
 
@@ -54,8 +54,8 @@ export function AdminPedidoPage() {
       titulo: 'Marcar como pago?',
       mensagem: order.comprovativoUrl
         ? `Confirmas que o comprovativo corresponde a ${formatEuro(order.total)}?`
-        : `Ainda não há fotografia do comprovativo. Queres mesmo marcar ${formatEuro(order.total)} como pago?`,
-      confirmarLabel: 'Sim, está pago',
+        : `Ainda nÃ£o hÃ¡ fotografia do comprovativo. Queres mesmo marcar ${formatEuro(order.total)} como pago?`,
+      confirmarLabel: 'Sim, estÃ¡ pago',
     });
     if (!ok) return;
     setAPagar(true);
@@ -65,7 +65,7 @@ export function AdminPedidoPage() {
       avisar('Encomenda marcada como paga.');
       await carregar();
     } catch {
-      setErro('Não foi possível marcar como pago.');
+      setErro('NÃ£o foi possÃ­vel marcar como pago.');
     } finally {
       setAPagar(false);
     }
@@ -74,7 +74,7 @@ export function AdminPedidoPage() {
   if (!order && erro) {
     return (
       <ErroBloco
-        titulo="Pedido não encontrado"
+        titulo="Pedido nÃ£o encontrado"
         mensagem={erro}
         extra={
           <Link to="/admin/pedidos" className="grid h-10 place-items-center font-mono text-[11px] text-acid">
@@ -85,18 +85,18 @@ export function AdminPedidoPage() {
     );
   }
   if (!order) {
-    return <p className="font-mono text-steel">A carregar…</p>;
+    return <p className="font-mono text-steel">A carregarâ€¦</p>;
   }
 
   return (
     <div>
       <Link to="/admin/pedidos" className="font-mono text-[11px] text-steel hover:text-acid">
-        ? Pedidos
+        Pedidos
       </Link>
-      <p className="label-mono mt-4">Operações</p>
+      <p className="label-mono mt-4">OperaÃ§Ãµes</p>
       <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{order.reference}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
-        {ROTULO_ESTADO[order.status] ?? order.status} · {formatEuro(order.total)} ·{' '}
+        {ROTULO_ESTADO[order.status] ?? order.status} Â· {formatEuro(order.total)} Â·{' '}
         {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod}
       </p>
       {erro && (
@@ -107,7 +107,7 @@ export function AdminPedidoPage() {
 
       {order.status === 'pendente' && (
         <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
-          <div className="label-mono mb-3">Comprovativo de transferência</div>
+          <div className="label-mono mb-3">Comprovativo de transferÃªncia</div>
           {order.comprovativoUrl ? (
             <>
               <a href={urlMedia(order.comprovativoUrl)} target="_blank" rel="noreferrer">
@@ -120,7 +120,7 @@ export function AdminPedidoPage() {
               <p className="mt-2 font-mono text-[11px] text-steel">Clica na imagem para abrir em tamanho real.</p>
             </>
           ) : (
-            <p className="text-sm text-steel">O cliente ainda não enviou a fotografia do comprovativo.</p>
+            <p className="text-sm text-steel">O cliente ainda nÃ£o enviou a fotografia do comprovativo.</p>
           )}
           <button
             type="button"
@@ -128,7 +128,7 @@ export function AdminPedidoPage() {
             onClick={() => void marcarPago()}
             className="mt-4 h-11 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
-            {aPagar ? 'A marcar…' : 'Marcar como pago'}
+            {aPagar ? 'A marcarâ€¦' : 'Marcar como pago'}
           </button>
         </section>
       )}
@@ -151,7 +151,7 @@ export function AdminPedidoPage() {
           {order.items.map((i) => (
             <div key={i.sku + i.variant} className="flex justify-between py-1 font-mono text-[12px]">
               <span className="text-steel">
-                {i.quantity}× {i.name}
+                {i.quantity}Ã— {i.name}
               </span>
               <span>{formatEuro(i.total)}</span>
             </div>
@@ -162,7 +162,7 @@ export function AdminPedidoPage() {
           </div>
           {order.couponCode && (
             <p className="mt-2 font-mono text-[11px] text-acid">
-              Cupão {order.couponCode} (-{formatEuro(order.discount)})
+              CupÃ£o {order.couponCode} (-{formatEuro(order.discount)})
             </p>
           )}
         </div>
@@ -171,8 +171,8 @@ export function AdminPedidoPage() {
       <div className="mt-6 space-y-3 rounded-[14px] border border-line bg-panel p-5">
         <div className="label-mono">Estado da encomenda</div>
         <p className="font-mono text-[11px] text-steel">
-          Depois de pago: preparação ? enviado ? entregue. O cliente vê o mesmo estado na conta. A loja
-          não gera códigos de rastreio — a entrega é tratada fora do sistema.
+          Depois de pago: preparaÃ§Ã£o, enviado, entregue. O cliente vÃª o mesmo estado na conta. A loja
+          nÃ£o gera cÃ³digos de rastreio â€” a entrega Ã© tratada fora do sistema.
         </p>
         <div className="flex flex-wrap gap-2">
           {ESTADOS.map((s) => (

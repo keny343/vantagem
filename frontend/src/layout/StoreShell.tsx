@@ -70,7 +70,7 @@ function CartDrawer() {
             className="font-mono text-sm text-steel transition-colors hover:text-acid"
             aria-label="Fechar carrinho"
           >
-            ✕
+            x
           </button>
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
@@ -105,7 +105,7 @@ function CartDrawer() {
                       className="px-2 font-mono text-xs text-steel hover:text-acid"
                       aria-label="Diminuir quantidade"
                     >
-                      −
+                      -
                     </button>
                     <span className="min-w-6 text-center font-mono text-xs text-ink/80">
                       {line.qty}
@@ -190,7 +190,7 @@ function Header() {
               to="/admin"
               className="font-mono text-[10px] tracking-[0.14em] text-ink uppercase hover:text-acid"
             >
-              Ir para o painel →
+              Ir para o painel
             </Link>
           </div>
         </div>
@@ -219,7 +219,6 @@ function Header() {
             onSubmit={onSearch}
             className="hidden h-9 w-52 items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60 sm:flex"
           >
-            <span className="font-mono text-xs text-steel">⌕</span>
             <input
               id="pesquisa-loja"
               value={q}
@@ -279,7 +278,7 @@ function Header() {
             className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] text-ink/70 ring-1 ring-line md:hidden"
             aria-label="Menu"
           >
-            ☰
+            Menu
           </button>
         </div>
       </div>

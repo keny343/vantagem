@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+ï»¿import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api, mensagemParaUtilizador } from '../api/client';
 import { useSession } from '../auth/SessionContext';
@@ -39,7 +39,7 @@ export function LoginPage() {
       setErro(
         mensagemParaUtilizador(
           err,
-          'Não foi possível entrar. Confirma o email e a palavra-passe, ou pede ajuda.',
+          'NÃ£o foi possÃ­vel entrar. Confirma o email e a palavra-passe, ou pede ajuda.',
         ),
       );
     } finally {
@@ -50,10 +50,10 @@ export function LoginPage() {
   return (
     <StoreShell>
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
-        <div className="label-mono">Sessão</div>
+        <div className="label-mono">SessÃ£o</div>
         <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Entrar</h1>
         <p className="mt-2 text-sm text-steel">
-          Entra para concluir a compra e acompanhar se a loja já confirmou o pagamento.
+          Entra para concluir a compra e acompanhar se a loja jÃ¡ confirmou o pagamento.
         </p>
         <form
           className="mt-6 space-y-4"
@@ -103,14 +103,14 @@ export function LoginPage() {
             disabled={busy}
             className="h-11 w-full rounded-lg bg-acid font-display text-sm font-semibold text-canvas disabled:opacity-60"
           >
-            {busy ? 'A autenticar…' : 'Entrar'}
+            {busy ? 'A autenticarâ€¦' : 'Entrar'}
           </button>
         </form>
         <Link
           to={urlComSeguir('/registo', location.search)}
           className="mt-4 grid h-11 place-items-center rounded-lg font-display text-sm font-semibold text-acid ring-1 ring-acid/40 hover:bg-acid/10"
         >
-          Não tenho conta — criar conta
+          NÃ£o tenho conta â€” criar conta
         </Link>
         <div className="mt-4 flex flex-wrap justify-between gap-2 font-mono text-[11px] text-steel">
           <Link to="/recuperar" className="hover:text-acid">

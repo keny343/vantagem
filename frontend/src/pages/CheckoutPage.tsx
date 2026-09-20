@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+ï»¿import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, api, mensagemParaUtilizador } from '../api/client';
 import { useCart } from '../cart/CartContext';
@@ -111,7 +111,7 @@ export function CheckoutPage() {
     } catch (err) {
       setDesconto(0);
       setCupaoOk('');
-      setErro(err instanceof ApiError ? err.message : 'Cupão inválido.');
+      setErro(err instanceof ApiError ? err.message : 'CupÃ£o invÃ¡lido.');
     }
   }
 
@@ -119,12 +119,12 @@ export function CheckoutPage() {
     e.preventDefault();
     setErro('');
     if (cart.lines.length === 0) {
-      setErro('O carrinho está vazio.');
+      setErro('O carrinho estÃ¡ vazio.');
       return;
     }
     if (!comprovativo) {
-      setErroFoto('Anexa a fotografia do comprovativo da transferência.');
-      setErro('Anexa a fotografia do comprovativo da transferência.');
+      setErroFoto('Anexa a fotografia do comprovativo da transferÃªncia.');
+      setErro('Anexa a fotografia do comprovativo da transferÃªncia.');
       return;
     }
     const fotoInvalida = validarComprovativo(comprovativo);
@@ -164,7 +164,7 @@ export function CheckoutPage() {
             aviso:
               err instanceof ApiError
                 ? err.message
-                : 'A encomenda ficou criada, mas o comprovativo não foi enviado. Anexa-o nesta página.',
+                : 'A encomenda ficou criada, mas o comprovativo nÃ£o foi enviado. Anexa-o nesta pÃ¡gina.',
           },
         });
         return;
@@ -176,7 +176,7 @@ export function CheckoutPage() {
       setErro(
         mensagemParaUtilizador(
           err,
-          'Não foi possível reservar o pedido. Confirma os dados e tenta outra vez.',
+          'NÃ£o foi possÃ­vel reservar o pedido. Confirma os dados e tenta outra vez.',
         ),
       );
     } finally {
@@ -194,7 +194,7 @@ export function CheckoutPage() {
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Finalizar compra</h1>
           <p className="mt-1 font-mono text-[11px] text-steel">
-            Entrega em {LOJA.pais} · preços em Kwanzas, com IVA incluído
+            Entrega em {LOJA.pais} Â· preÃ§os em Kwanzas, com IVA incluÃ­do
           </p>
         </div>
         <Link to="/carrinho" className="font-mono text-[11px] text-steel uppercase hover:text-acid">
@@ -238,9 +238,9 @@ export function CheckoutPage() {
 
       {cart.lines.length === 0 ? (
         <div className="mt-6 rounded-[14px] border border-line bg-panel p-8 text-center">
-          <p className="font-display text-ink">Não há artigos para pagar.</p>
+          <p className="font-display text-ink">NÃ£o hÃ¡ artigos para pagar.</p>
           <Link to="/catalogo" className="mt-4 inline-block font-mono text-[11px] text-acid">
-            Voltar ao catálogo
+            Voltar ao catÃ¡logo
           </Link>
         </div>
       ) : (
@@ -303,7 +303,7 @@ export function CheckoutPage() {
                   />
                   <Campo
                     id="chk-postal"
-                    label="Código postal"
+                    label="CÃ³digo postal"
                     hint="Opcional em Angola"
                     autoComplete="postal-code"
                     value={form.postalCode}
@@ -311,7 +311,7 @@ export function CheckoutPage() {
                   />
                   <Campo
                     id="chk-cidade"
-                    label="Cidade ou município"
+                    label="Cidade ou municÃ­pio"
                     required
                     autoComplete="address-level2"
                     value={form.city}
@@ -319,7 +319,7 @@ export function CheckoutPage() {
                   />
                   <Campo
                     id="chk-tel"
-                    label="Telemóvel"
+                    label="TelemÃ³vel"
                     required
                     autoComplete="tel"
                     hint="9xxxxxxxx ou +244 9xxxxxxxx"
@@ -337,7 +337,7 @@ export function CheckoutPage() {
                   />
                 </div>
                 <p className="font-mono text-[10px] text-steel">
-                  Entregamos em Luanda e nas províncias. Fora de Angola, fala connosco.
+                  Entregamos em Luanda e nas provÃ­ncias. Fora de Angola, fala connosco.
                 </p>
                 <button className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas">
                   Continuar para pagamento
@@ -354,19 +354,19 @@ export function CheckoutPage() {
               >
                 <div className="label-mono">Pagamento</div>
                 <p className="text-sm text-steel">
-                  Entrega: {form.name} · {form.address}, {form.postalCode} {form.city}
+                  Entrega: {form.name} Â· {form.address}, {form.postalCode} {form.city}
                 </p>
                 <div className="rounded-lg border border-acid/40 bg-panel2 px-4 py-3">
-                  <p className="font-display text-ink">Transferência bancária</p>
+                  <p className="font-display text-ink">TransferÃªncia bancÃ¡ria</p>
                   <p className="mt-1 font-mono text-[11px] text-steel">
                     Transfere {formatEuro(total)} para a conta da loja, anexa a fotografia do
-                    comprovativo e confirma. Só o administrador marca a encomenda como paga.
+                    comprovativo e confirma. SÃ³ o administrador marca a encomenda como paga.
                   </p>
                   {iban ? (
                     <p className="mt-2 break-all font-mono text-sm text-ink/80">IBAN {iban}</p>
                   ) : (
                     <p className="mt-2 font-mono text-[11px] text-steel">
-                      Os dados da conta aparecem também na página da encomenda, se a loja os tiver
+                      Os dados da conta aparecem tambÃ©m na pÃ¡gina da encomenda, se a loja os tiver
                       configurado.
                     </p>
                   )}
@@ -393,12 +393,12 @@ export function CheckoutPage() {
                   }}
                 />
                 <p className="font-mono text-[11px] text-steel">
-                  Multicaixa Express e referência Multicaixa ficam para uma fase seguinte.
+                  Multicaixa Express e referÃªncia Multicaixa ficam para uma fase seguinte.
                 </p>
                 <div className="flex gap-2">
                   <input
                     className={field}
-                    placeholder="Cupão"
+                    placeholder="CupÃ£o"
                     value={cupao}
                     onChange={(e) => setCupao(e.target.value)}
                   />
@@ -412,7 +412,7 @@ export function CheckoutPage() {
                 </div>
                 {cupaoOk && (
                   <p className="font-mono text-[11px] text-acid">
-                    {cupaoOk} · -{formatEuro(desconto)}
+                    {cupaoOk} Â· -{formatEuro(desconto)}
                   </p>
                 )}
                 <div className="flex gap-3">
@@ -428,7 +428,7 @@ export function CheckoutPage() {
                     disabled={aPagar}
                     className="h-11 rounded-lg bg-acid px-6 font-display text-sm font-semibold text-canvas disabled:opacity-60"
                   >
-                    {aPagar ? 'A enviar…' : `Confirmar encomenda ${formatEuro(total)}`}
+                    {aPagar ? 'A enviarâ€¦' : `Confirmar encomenda ${formatEuro(total)}`}
                   </button>
                 </div>
               </form>
@@ -441,7 +441,7 @@ export function CheckoutPage() {
               {cart.lines.map((l) => (
                 <div key={l.id + l.variant} className="flex justify-between font-mono text-[11px]">
                   <span className="text-steel">
-                    {l.qty}× {l.name}
+                    {l.qty}Ã— {l.name}
                   </span>
                   <span className="text-ink/80">{formatEuro(l.price * l.qty)}</span>
                 </div>
@@ -461,17 +461,17 @@ export function CheckoutPage() {
               <div className="flex justify-between">
                 <dt>Envio</dt>
                 <dd className="text-ink/80">
-                  {cart.shipping === 0 ? 'Grátis' : formatEuro(cart.shipping)}
+                  {cart.shipping === 0 ? 'GrÃ¡tis' : formatEuro(cart.shipping)}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt>IVA incluído ({Math.round(LOJA.taxaIva * 100)}%)</dt>
+                <dt>IVA incluÃ­do ({Math.round(LOJA.taxaIva * 100)}%)</dt>
                 <dd className="text-ink/80">{formatEuro(iva)}</dd>
               </div>
             </dl>
             {faltaEnvio > 0 && (
               <p className="mt-3 font-mono text-[10px] text-steel">
-                Faltam {formatEuro(faltaEnvio)} para envio grátis.
+                Faltam {formatEuro(faltaEnvio)} para envio grÃ¡tis.
               </p>
             )}
             <div className="mt-4 flex items-center justify-between font-display text-lg text-ink">

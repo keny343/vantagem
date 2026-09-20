@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+ï»¿import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
@@ -21,16 +21,16 @@ export function FacturaPage() {
           void navigate(`/login?seguir=${encodeURIComponent(`/pedido/${referencia}/factura`)}`);
           return;
         }
-        setErro('Encomenda não encontrada.');
+        setErro('Encomenda nÃ£o encontrada.');
       });
   }, [referencia, navigate]);
 
   if (erro || !order) {
     return (
       <div className="mx-auto max-w-xl p-8">
-        <p className="text-steel">{erro || 'A carregar…'}</p>
+        <p className="text-steel">{erro || 'A carregarâ€¦'}</p>
         <Link to="/" className="mt-4 inline-block text-acid">
-          Início
+          InÃ­cio
         </Link>
       </div>
     );
@@ -85,7 +85,7 @@ export function FacturaPage() {
           <dd>{formatEuro(order.subtotal)}</dd>
         </div>
         <div className="flex justify-between">
-          <dt>IVA incluído</dt>
+          <dt>IVA incluÃ­do</dt>
           <dd>{formatEuro(order.vat)}</dd>
         </div>
         <div className="flex justify-between font-semibold">
@@ -94,7 +94,7 @@ export function FacturaPage() {
         </div>
       </dl>
       <p className="mt-6 text-sm">
-        {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod} · {ROTULO_ESTADO[order.status]}
+        {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod} Â· {ROTULO_ESTADO[order.status]}
       </p>
       <div className="mt-8 flex gap-3 print:hidden">
         <button
@@ -105,7 +105,7 @@ export function FacturaPage() {
           Imprimir / PDF
         </button>
         <Link to={`/pedido/${order.reference}`} className="grid h-10 place-items-center text-sm">
-          Voltar à encomenda
+          Voltar Ã  encomenda
         </Link>
       </div>
     </div>
