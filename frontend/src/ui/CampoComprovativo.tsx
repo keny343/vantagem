@@ -1,22 +1,22 @@
-﻿import { useEffect, useId, useState } from 'react';
+﻿import { useId } from 'react';
 import { urlMedia } from '../api/client';
 
-const ACEITES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const MAX_BYTES = 5 * 1024 * 1024;
-const EXT_OK = /\.(jpe?g|png|webp|gif)$/i;
+const MIN_BYTES = 512;
 
 export function validarComprovativo(ficheiro: File): string | null {
   const tipo = ficheiro.type.toLowerCase();
   const nome = ficheiro.name.toLowerCase();
-  if (/heic|heif/.test(tipo) || /\.hei[cf]$/.test(nome)) {
-    return 'Esta fotografia está no formato HEIC. No telemóvel, grava-a como JPG ou escolhe outra foto.';
+  const extPdf = nome.endsWith('.pdf');
+  const mimePdf = tipo === 'application/pdf' || tipo === 'application/x-pdf' || tipo === '';
+  if (!extPdf || !mimePdf) {
+    return 'Só são aceites comprovativos em PDF (não fotografias).';
   }
-  const tipoOk = ACEITES.has(tipo) || (tipo === '' && EXT_OK.test(nome));
-  if (!tipoOk) {
-    return 'Só são aceites fotografias JPG, PNG ou WEBP.';
+  if (ficheiro.size < MIN_BYTES) {
+    return 'O PDF parece incompleto. Envia o comprovativo completo do banco.';
   }
   if (ficheiro.size > MAX_BYTES) {
-    return 'A fotografia não pode ter mais de 5 MB.';
+    return 'O PDF não pode ter mais de 5 MB.';
   }
   return null;
 }
@@ -40,38 +40,22 @@ export function CampoComprovativo({
 }) {
   const autoId = useId();
   const inputId = id ?? autoId;
-  const [localUrl, setLocalUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!ficheiro) {
-      setLocalUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(ficheiro);
-    setLocalUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [ficheiro]);
-
-  const preview = localUrl ?? (urlEnviada ? urlMedia(urlEnviada) : null);
   const obrigatorio = required && !urlEnviada;
   const rotulo = aEnviar
     ? 'A enviar…'
     : ficheiro || urlEnviada
-      ? 'Trocar fotografia'
-      : 'Escolher fotografia';
+      ? 'Trocar PDF'
+      : 'Escolher PDF';
 
   return (
     <div className="rounded-lg border border-dashed border-acid/50 bg-panel2 p-4">
       <span className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">
-        Fotografia do comprovativo{obrigatorio ? ' (obrigatório)' : ''}
+        PDF do comprovativo{obrigatorio ? ' (obrigatório)' : ''}
       </span>
       <p className="mt-1 text-sm text-ink/70">
-        Anexa o comprovativo da transferência. JPG, PNG ou WEBP até 5 MB.
+        Anexa o comprovativo da transferência em PDF (512 B–5 MB). Fotografias e outros formatos são
+        rejeitados.
       </p>
-      {/*
-        O input fica por cima do botão (opacidade 0). O clique é nativo no
-        <input type="file"> — display:none + .click() falha no desktop em Chromium.
-      */}
       <div className="relative mt-3 inline-block">
         <span
           aria-hidden
@@ -86,7 +70,7 @@ export function CampoComprovativo({
           name="comprovativo"
           type="file"
           disabled={aEnviar}
-          accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+          accept="application/pdf,.pdf"
           aria-label={rotulo}
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-wait"
           onChange={(e) => {
@@ -97,17 +81,22 @@ export function CampoComprovativo({
         />
       </div>
       {ficheiro && (
-        <p className="mt-2 font-mono text-[11px] text-acid">{ficheiro.name}</p>
+        <p className="mt-2 font-mono text-[11px] text-acid">
+          {ficheiro.name} · {(ficheiro.size / 1024).toFixed(0)} KB
+        </p>
       )}
       {urlEnviada && !ficheiro && (
-        <p className="mt-2 font-mono text-[11px] text-acid">Comprovativo já enviado.</p>
-      )}
-      {preview && (
-        <img
-          src={preview}
-          alt="Pré-visualização do comprovativo"
-          className="mt-3 max-h-48 rounded-lg border border-line object-contain"
-        />
+        <p className="mt-2 font-mono text-[11px] text-acid">
+          Comprovativo já enviado.{' '}
+          <a
+            href={urlMedia(urlEnviada)}
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-ink"
+          >
+            Abrir PDF
+          </a>
+        </p>
       )}
       {erro && (
         <p role="alert" className="mt-2 font-mono text-[11px] text-destructive">

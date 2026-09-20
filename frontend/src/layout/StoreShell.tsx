@@ -166,7 +166,7 @@ function CartDrawer() {
 
 function Header() {
   const cart = useCart();
-  const { user, loading } = useSession();
+  const { user, loading, logout } = useSession();
   const navigate = useNavigate();
   const [q, setQ] = useState('');
   const [menu, setMenu] = useState(false);
@@ -176,6 +176,11 @@ function Header() {
   function onSearch(e: FormEvent) {
     e.preventDefault();
     void navigate(q.trim() ? `/catalogo?q=${encodeURIComponent(q.trim())}` : '/catalogo');
+  }
+
+  function sair() {
+    setMenu(false);
+    void logout().then(() => navigate('/login'));
   }
 
   return (
@@ -214,7 +219,7 @@ function Header() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <TemaToggle className="hidden sm:inline-flex" />
+          <TemaToggle className="hidden sm:grid" />
           <form
             onSubmit={onSearch}
             className="hidden h-9 w-52 items-center gap-2 rounded-md bg-panel px-3 ring-1 ring-line focus-within:ring-acid/60 sm:flex"
@@ -238,23 +243,43 @@ function Header() {
           ) : (
             <>
               <Notificacoes />
-              <Link
-                to={user ? '/conta' : '/login'}
-                className="hidden h-9 items-center rounded-md px-3 font-mono text-[11px] tracking-[0.12em] text-steel uppercase transition-colors hover:text-acid sm:flex"
-              >
-                {user ? user.name.split(' ')[0] : 'Entrar'}
-              </Link>
+              {!user && (
+                <Link
+                  to="/login"
+                  className="hidden h-9 items-center rounded-md px-3 font-mono text-[11px] tracking-[0.12em] text-steel uppercase transition-colors hover:text-acid sm:flex"
+                >
+                  Entrar
+                </Link>
+              )}
+              {user && (
+                <button
+                  type="button"
+                  onClick={sair}
+                  className="hidden h-9 items-center rounded-md px-3 font-mono text-[11px] tracking-[0.12em] text-steel uppercase ring-1 ring-line transition-colors hover:text-acid sm:flex"
+                >
+                  Sair
+                </button>
+              )}
             </>
           )}
           {loading ? (
             <span className="h-9 w-20" aria-hidden />
           ) : admin ? (
-            <Link
-              to="/admin"
-              className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] leading-9 tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line transition-colors hover:text-acid"
-            >
-              Painel
-            </Link>
+            <>
+              <Link
+                to="/admin"
+                className="h-9 rounded-md bg-panel px-3 font-mono text-[11px] leading-9 tracking-[0.12em] text-ink/70 uppercase ring-1 ring-line transition-colors hover:text-acid"
+              >
+                Painel
+              </Link>
+              <button
+                type="button"
+                onClick={sair}
+                className="hidden h-9 items-center rounded-md px-3 font-mono text-[11px] tracking-[0.12em] text-steel uppercase ring-1 ring-line transition-colors hover:text-acid sm:flex"
+              >
+                Sair
+              </button>
+            </>
           ) : (
             <button
               type="button"
@@ -298,6 +323,15 @@ function Header() {
               {item.label}
             </Link>
           ))}
+          {user && (
+            <button
+              type="button"
+              onClick={sair}
+              className="block w-full py-2 text-left transition-colors hover:text-acid"
+            >
+              Sair
+            </button>
+          )}
         </nav>
       )}
       {!loading && !admin && <CartDrawer />}

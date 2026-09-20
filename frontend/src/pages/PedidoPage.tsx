@@ -135,11 +135,14 @@ export function PedidoPage() {
               A loja está a verificar a transferência. Quando confirmar, o estado passa a pago —
               acompanhas isso na tua conta, em Os meus pedidos.
             </p>
-            <img
-              src={urlMedia(order.comprovativoUrl)}
-              alt="Comprovativo enviado"
-              className="mt-4 max-h-56 rounded-lg border border-line object-contain"
-            />
+            <a
+              href={urlMedia(order.comprovativoUrl)}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex h-11 items-center rounded-lg bg-panel2 px-4 font-mono text-[11px] tracking-[0.12em] text-acid uppercase ring-1 ring-line"
+            >
+              Abrir PDF enviado
+            </a>
             <Link
               to="/conta/pedidos"
               className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
@@ -168,7 +171,7 @@ export function PedidoPage() {
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
             <h2 className="font-display text-ink">Envia o comprovativo</h2>
             <p className="mt-2 text-sm text-steel">
-              Transfere o valor e anexa a fotografia. Só a loja marca a encomenda como paga.
+              Transfere o valor e anexa o PDF do comprovativo. Só a loja marca a encomenda como paga.
             </p>
             <div className="mt-3 rounded-lg border border-line bg-panel2 p-3 font-mono text-sm text-ink/80">
               <div>Método {ROTULO_PAGAMENTO.cartao}</div>

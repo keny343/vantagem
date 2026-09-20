@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, JPEG_1X1 } from './fixtures';
+import { ADMIN, PDF_COMPROVATIVO } from './fixtures';
 
 test('registo → checkout com comprovativo → admin confirma pagamento', async ({ page }) => {
   const stamp = Date.now();
@@ -30,9 +30,9 @@ test('registo → checkout com comprovativo → admin confirma pagamento', async
   await page.getByRole('button', { name: 'Continuar para pagamento' }).click();
 
   await page.locator('#chk-comprovativo').setInputFiles({
-    name: 'comprovativo.jpg',
-    mimeType: 'image/jpeg',
-    buffer: JPEG_1X1,
+    name: 'comprovativo.pdf',
+    mimeType: 'application/pdf',
+    buffer: PDF_COMPROVATIVO,
   });
   await page.getByRole('button', { name: /Confirmar encomenda/ }).click();
 
@@ -42,7 +42,7 @@ test('registo → checkout com comprovativo → admin confirma pagamento', async
   await expect(page.getByRole('heading', { name: 'Comprovativo recebido' })).toBeVisible();
 
   await page.goto('/conta');
-  await page.getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('button', { name: 'Sair' }).first().click();
   await expect(page).toHaveURL(/\/login/);
 
   await page.locator('#login-email').fill(ADMIN.email);
@@ -58,7 +58,7 @@ test('registo → checkout com comprovativo → admin confirma pagamento', async
   await page.getByRole('button', { name: 'Sim, pagamento confirmado' }).click();
   await expect(page.getByText('Não há comprovativos à espera')).toBeVisible({ timeout: 15_000 });
 
-  await page.getByRole('button', { name: 'Sair' }).click();
+  await page.getByRole('button', { name: 'Sair' }).first().click();
   await page.goto('/login');
   await page.locator('#login-email').fill(email);
   await page.locator('#login-passe').fill(password);

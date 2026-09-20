@@ -377,7 +377,7 @@ export const api = {
     request<{ order: Order }>('/api/pedidos', { method: 'POST', body: JSON.stringify(body) }),
   enviarComprovativo: (referencia: string, ficheiro: File) => {
     const data = new FormData();
-    data.append('fotografia', ficheiro);
+    data.append('comprovativo', ficheiro);
     return request<{ order: Order }>(
       `/api/pedidos/${encodeURIComponent(referencia)}/comprovativo`,
       { method: 'POST', body: data },

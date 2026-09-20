@@ -215,7 +215,7 @@ export function HomePage() {
                 Compra com documento, pagamento com comprovativo
               </h2>
               <p className="mt-4 max-w-[46ch] text-pretty opacity-75">
-                Transfere o valor, anexa a fotografia do comprovativo, e a loja confirma. Factura e
+                Transfere o valor, anexa o PDF do comprovativo, e a loja confirma. Factura e
                 garantia inclusas — sem surpresas de stock.
               </p>
               <Link

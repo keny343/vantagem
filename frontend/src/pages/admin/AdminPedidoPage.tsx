@@ -54,7 +54,7 @@ export function AdminPedidoPage() {
       titulo: 'Marcar como pago?',
       mensagem: order.comprovativoUrl
         ? `Confirmas que o comprovativo corresponde a ${formatEuro(order.total)}?`
-        : `Ainda não há fotografia do comprovativo. Queres mesmo marcar ${formatEuro(order.total)} como pago?`,
+        : `Ainda não há PDF do comprovativo. Queres mesmo marcar ${formatEuro(order.total)} como pago?`,
       confirmarLabel: 'Sim, está pago',
     });
     if (!ok) return;
@@ -110,17 +110,18 @@ export function AdminPedidoPage() {
           <div className="label-mono mb-3">Comprovativo de transferência</div>
           {order.comprovativoUrl ? (
             <>
-              <a href={urlMedia(order.comprovativoUrl)} target="_blank" rel="noreferrer">
-                <img
-                  src={urlMedia(order.comprovativoUrl)}
-                  alt="Comprovativo de pagamento"
-                  className="max-h-80 rounded-lg border border-line object-contain"
-                />
+              <a
+                href={urlMedia(order.comprovativoUrl)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-11 items-center rounded-lg bg-panel2 px-4 font-mono text-[11px] tracking-[0.12em] text-acid uppercase ring-1 ring-line hover:bg-acid hover:text-canvas"
+              >
+                Abrir PDF do comprovativo
               </a>
-              <p className="mt-2 font-mono text-[11px] text-steel">Clica na imagem para abrir em tamanho real.</p>
+              <p className="mt-2 font-mono text-[11px] text-steel">Abre o PDF noutro separador para verificar.</p>
             </>
           ) : (
-            <p className="text-sm text-steel">O cliente ainda não enviou a fotografia do comprovativo.</p>
+            <p className="text-sm text-steel">O cliente ainda não enviou o PDF do comprovativo.</p>
           )}
           <button
             type="button"

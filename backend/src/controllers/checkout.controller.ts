@@ -105,10 +105,10 @@ export const enviarComprovativo = async (req: Request, res: Response): Promise<v
     throw new AppError('UNAUTHENTICATED', 'Entra na tua conta para enviar o comprovativo.');
   }
   if (req.file === undefined || !req.file.buffer) {
-    throw new AppError('VALIDATION_ERROR', 'Envia a fotografia do comprovativo.');
+    throw new AppError('VALIDATION_ERROR', 'Envia o PDF do comprovativo.');
   }
-  const { validarUploadImagem } = await import('./upload.controller.js');
-  validarUploadImagem(req);
+  const { validarUploadComprovativo } = await import('./upload.controller.js');
+  validarUploadComprovativo(req);
   const url = await guardarFicheiro(
     {
       buffer: req.file.buffer,

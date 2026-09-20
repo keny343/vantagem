@@ -26,7 +26,7 @@ export function AjudaPage() {
             <li>Adiciona ao carrinho. Podes alterar quantidades ou anular a remoção.</li>
             <li>Entra na tua conta ou cria uma, se ainda não tiveres.</li>
             <li>Em Finalizar compra, indica a morada em Angola.</li>
-            <li>No pagamento, transfere o valor, anexa a fotografia do comprovativo e confirma a encomenda.</li>
+            <li>No pagamento, transfere o valor, anexa o PDF do comprovativo e confirma a encomenda.</li>
           </ol>
         </Seccao>
         <Seccao titulo="Pagamento e envio">

@@ -21,7 +21,7 @@ const PAGINAS: Record<string, { titulo: string; corpo: string[] }> = {
     corpo: [
       'Ao concluir uma encomenda aceitas estes termos. O contrato forma-se quando o pagamento é confirmado, não quando o stock é reservado.',
       `Entregas em Angola (Luanda e províncias). Custo de envio ${formatPrecoLegal(LOJA.custoEnvio)}, grátis a partir de ${formatPrecoLegal(LOJA.envioGratisAPartir)} de subtotal. Fora do país apenas sob consulta.`,
-      'Métodos de pagamento: de momento transferência bancária. O cliente anexa a fotografia do comprovativo no formulário de compra; a loja verifica e confirma o pagamento. Multicaixa Express e referência Multicaixa serão ligados mais tarde.',
+      'Métodos de pagamento: de momento transferência bancária. O cliente anexa o PDF do comprovativo no formulário de compra; a loja verifica e confirma o pagamento. Multicaixa Express e referência Multicaixa serão ligados mais tarde.',
       'Reservamos o direito de cancelar encomendas por erro manifesto de preço ou falta de stock, com reposição do artigo e aviso ao cliente.',
     ],
   },

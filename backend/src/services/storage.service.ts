@@ -7,7 +7,8 @@ import { AppError } from '../utils/errors.js';
 
 const extensaoDe = (mimetype: string, original: string): string => {
   const doNome = path.extname(original).toLowerCase();
-  if (['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(doNome)) return doNome;
+  if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf'].includes(doNome)) return doNome;
+  if (mimetype === 'application/pdf') return '.pdf';
   if (mimetype === 'image/png') return '.png';
   if (mimetype === 'image/webp') return '.webp';
   if (mimetype === 'image/gif') return '.gif';

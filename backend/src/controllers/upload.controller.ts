@@ -3,8 +3,9 @@ import multer from 'multer';
 import { guardarFicheiro } from '../services/storage.service.js';
 import { AppError } from '../utils/errors.js';
 import { exigirImagemSegura } from '../utils/imagemSegura.js';
+import { exigirPdfComprovativo, PDF_MAX_BYTES } from '../utils/pdfSeguro.js';
 
-const tipos = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const tiposImagem = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
 export const uploadFotoProduto = multer({
   storage: multer.memoryStorage(),
@@ -15,7 +16,7 @@ export const uploadFotoProduto = multer({
       cb(new Error('Nome de ficheiro inválido.'));
       return;
     }
-    if (!tipos.has(file.mimetype)) {
+    if (!tiposImagem.has(file.mimetype)) {
       cb(new Error('Só são aceites fotografias JPG, PNG ou WEBP.'));
       return;
     }
@@ -23,7 +24,27 @@ export const uploadFotoProduto = multer({
   },
 }).single('fotografia');
 
-const validarBuffer = (req: Request): void => {
+/** Comprovativos de transferência: apenas PDF. */
+export const uploadComprovativoPdf = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: PDF_MAX_BYTES, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const nome = file.originalname.toLowerCase();
+    if (nome.includes('..') || nome.includes('/') || nome.includes('\\')) {
+      cb(new Error('Nome de ficheiro inválido.'));
+      return;
+    }
+    const mime = file.mimetype.toLowerCase();
+    const extOk = nome.endsWith('.pdf');
+    if (mime !== 'application/pdf' && mime !== 'application/x-pdf' && !extOk) {
+      cb(new Error('Só são aceites comprovativos em PDF.'));
+      return;
+    }
+    cb(null, true);
+  },
+}).single('comprovativo');
+
+const validarBufferImagem = (req: Request): void => {
   if (req.file === undefined || !req.file.buffer) {
     throw new AppError('VALIDATION_ERROR', 'Escolhe uma fotografia para enviar.');
   }
@@ -31,8 +52,16 @@ const validarBuffer = (req: Request): void => {
   req.file.mimetype = mimeReal;
 };
 
+export const validarUploadComprovativo = (req: Request): void => {
+  if (req.file === undefined || !req.file.buffer) {
+    throw new AppError('VALIDATION_ERROR', 'Envia o PDF do comprovativo.');
+  }
+  const mimeReal = exigirPdfComprovativo(req.file.buffer, req.file.mimetype || 'application/pdf');
+  req.file.mimetype = mimeReal;
+};
+
 export const guardarFotoProduto = async (req: Request, res: Response): Promise<void> => {
-  validarBuffer(req);
+  validarBufferImagem(req);
   const ficheiro = req.file!;
   const url = await guardarFicheiro({
     buffer: ficheiro.buffer,
@@ -42,4 +71,4 @@ export const guardarFotoProduto = async (req: Request, res: Response): Promise<v
   res.status(201).json({ url });
 };
 
-export const validarUploadImagem = validarBuffer;
+export const validarUploadImagem = validarBufferImagem;

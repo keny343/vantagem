@@ -130,7 +130,7 @@ export function AdminPedidosPage() {
 
         {porVerificar.length === 0 ? (
           <p className="mt-4 font-mono text-[11px] text-steel">
-            Não há comprovativos à espera. Quando o cliente enviar a foto, aparece aqui.
+            Não há comprovativos à espera. Quando o cliente enviar o PDF, aparece aqui.
           </p>
         ) : (
           <div className="mt-4 space-y-4">
@@ -144,13 +144,9 @@ export function AdminPedidosPage() {
                     href={urlMedia(o.comprovativoUrl)}
                     target="_blank"
                     rel="noreferrer"
-                    className="shrink-0"
+                    className="grid h-28 w-28 shrink-0 place-items-center rounded-md border border-line bg-panel font-mono text-[10px] tracking-[0.12em] text-acid uppercase"
                   >
-                    <img
-                      src={urlMedia(o.comprovativoUrl)}
-                      alt={`Comprovativo ${o.reference}`}
-                      className="h-28 w-28 rounded-md border border-line object-cover"
-                    />
+                    Ver PDF
                   </a>
                 ) : null}
                 <div className="min-w-[180px] flex-1">

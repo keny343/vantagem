@@ -123,8 +123,8 @@ export function CheckoutPage() {
       return;
     }
     if (!comprovativo) {
-      setErroFoto('Anexa a fotografia do comprovativo da transferência.');
-      setErro('Anexa a fotografia do comprovativo da transferência.');
+      setErroFoto('Anexa o PDF do comprovativo da transferência.');
+      setErro('Anexa o PDF do comprovativo da transferência.');
       return;
     }
     const fotoInvalida = validarComprovativo(comprovativo);
@@ -360,7 +360,7 @@ export function CheckoutPage() {
                   <p className="font-display text-ink">Transferência bancária</p>
                   <p className="mt-1 font-mono text-[11px] text-steel">
                     Transfere {formatEuro(total)} para a conta da loja, anexa a fotografia do
-                    comprovativo e confirma. Só o administrador marca a encomenda como paga.
+                    Transfere o valor, anexa o PDF do comprovativo e confirma. Só o administrador marca a encomenda como paga.
                   </p>
                   {iban ? (
                     <p className="mt-2 break-all font-mono text-sm text-ink/80">IBAN {iban}</p>

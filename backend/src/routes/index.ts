@@ -118,7 +118,7 @@ apiRouter.post(
   uploadLimiter,
   bloquearComprasDeAdmin,
   (req, res, next) => {
-    upload.uploadFotoProduto(req, res, (erro: unknown) => {
+    upload.uploadComprovativoPdf(req, res, (erro: unknown) => {
       if (erro) {
         next(erro);
         return;
