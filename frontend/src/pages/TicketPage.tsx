@@ -1,11 +1,12 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
+import { Conversa, type MensagemChat } from '../ui/Conversa';
 import { ErroBloco } from '../ui/ErroBloco';
-import { ROTULO_TICKET } from '../utils/format';
+import { ROTULO_CATEGORIA_TICKET, ROTULO_TICKET } from '../utils/format';
 
 export default function TicketPage() {
   const { id = '' } = useParams();
@@ -15,32 +16,38 @@ export default function TicketPage() {
     descricao: string;
     estado: string;
     categoria: string;
+    pedidoReferencia: string | null;
+    created_at: string;
   } | null>(null);
-  const [respostas, setRespostas] = useState<{ id: string; mensagem: string; created_at: string }[]>([]);
-  const [mensagem, setMensagem] = useState('');
+  const [mensagens, setMensagens] = useState<MensagemChat[]>([]);
   const [erro, setErro] = useState('');
-  useTitulo(ticket?.assunto ?? 'Pedido de ajuda');
+  useTitulo(ticket?.assunto ?? 'Conversa');
 
   async function carregar() {
     const r = await api.ticket(id);
     setTicket(r.ticket);
-    setRespostas(r.respostas);
+    const abertura: MensagemChat = {
+      id: 'abertura',
+      texto: r.ticket.descricao,
+      createdAt: r.ticket.created_at,
+      autorNome: user?.name ?? 'Tu',
+      papel: 'cliente',
+    };
+    setMensagens([abertura, ...r.mensagens]);
   }
 
   useEffect(() => {
     if (!user) return;
-    void carregar().catch(() => setErro('Pedido de ajuda não encontrado.'));
+    void carregar().catch(() => setErro('Conversa não encontrada.'));
+    const t = window.setInterval(() => {
+      void carregar().catch(() => undefined);
+    }, 8000);
+    return () => window.clearInterval(t);
   }, [user, id]);
 
-  async function responder(e: FormEvent) {
-    e.preventDefault();
-    try {
-      await api.responderTicket(id, mensagem);
-      setMensagem('');
-      await carregar();
-    } catch (err) {
-      setErro(err instanceof ApiError ? err.message : 'Não foi possível responder.');
-    }
+  async function enviar(texto: string) {
+    await api.responderTicket(id, texto);
+    await carregar();
   }
 
   if (loading) {
@@ -71,34 +78,39 @@ export default function TicketPage() {
   return (
     <StoreShell>
       <Link to="/conta/suporte" className="mt-8 inline-block font-mono text-[11px] text-steel hover:text-acid">
-        ← Pedidos de ajuda
+        ← Conversas
       </Link>
       <h1 className="mt-3 font-display text-2xl font-semibold text-white">{ticket.assunto}</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
-        {ROTULO_TICKET[ticket.estado] ?? ticket.estado} · {ticket.categoria}
+        {ROTULO_TICKET[ticket.estado] ?? ticket.estado} ·{' '}
+        {ROTULO_CATEGORIA_TICKET[ticket.categoria] ?? ticket.categoria}
+        {ticket.pedidoReferencia ? ` · ${ticket.pedidoReferencia}` : ''}
       </p>
-      <p className="mt-4 max-w-2xl text-zinc-300">{ticket.descricao}</p>
-      <div className="mt-6 max-w-2xl space-y-3">
-        {respostas.map((r) => (
-          <article key={r.id} className="rounded-[14px] border border-line bg-panel p-4">
-            <p className="text-sm text-zinc-200">{r.mensagem}</p>
-            <p className="mt-2 font-mono text-[10px] text-steel">{new Date(r.created_at).toLocaleString('pt-PT')}</p>
-          </article>
-        ))}
-      </div>
-      <form onSubmit={(e) => void responder(e)} className="mt-6 max-w-2xl space-y-3">
-        <textarea
-          required
-          rows={3}
-          value={mensagem}
-          onChange={(e) => setMensagem(e.target.value)}
-          className="w-full rounded-lg border border-line bg-panel2 px-3 py-2 text-sm"
-          placeholder="Escreve uma resposta…"
+      {ticket.pedidoReferencia && (
+        <Link
+          to={`/pedido/${encodeURIComponent(ticket.pedidoReferencia)}`}
+          className="mt-2 inline-block font-mono text-[11px] text-acid"
+        >
+          Ver encomenda
+        </Link>
+      )}
+      {erro && <p className="mt-3 font-mono text-[11px] text-destructive">{erro}</p>}
+      <div className="mt-6 max-w-2xl">
+        <Conversa
+          mensagens={mensagens}
+          papelEu="cliente"
+          fechado={ticket.estado === 'fechado'}
+          onEnviar={async (texto) => {
+            try {
+              await enviar(texto);
+            } catch (err) {
+              setErro(err instanceof ApiError ? err.message : 'Não foi possível enviar.');
+              throw err;
+            }
+          }}
+          placeholder="Ex.: a encomenda ainda não chegou, chegou danificada…"
         />
-        <button className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink">
-          Responder
-        </button>
-      </form>
+      </div>
     </StoreShell>
   );
 }

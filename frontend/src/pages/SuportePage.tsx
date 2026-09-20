@@ -7,13 +7,13 @@ import { StoreShell } from '../layout/StoreShell';
 import { useAvisos } from '../ui/Avisos';
 import { Campo } from '../ui/Campo';
 import { ErroBloco } from '../ui/ErroBloco';
-import { ROTULO_TICKET } from '../utils/format';
+import { ROTULO_CATEGORIA_TICKET, ROTULO_TICKET } from '../utils/format';
 import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 
 const CATS = [
   { id: 'pedido', label: 'Encomenda' },
   { id: 'pagamento', label: 'Pagamento' },
-  { id: 'entrega', label: 'Entrega' },
+  { id: 'entrega', label: 'Entrega (não chegou / danificada)' },
   { id: 'devolucao', label: 'Devolução' },
   { id: 'produto', label: 'Artigo' },
   { id: 'conta', label: 'Conta' },
@@ -23,14 +23,24 @@ const CATS = [
 export default function SuportePage() {
   const { user, loading: sessionLoading } = useSession();
   const { avisar } = useAvisos();
-  useTitulo('Ajuda e suporte');
+  useTitulo('Conversas com a loja');
   const [lista, setLista] = useState<
-    { id: string; categoria: string; assunto: string; descricao: string; estado: string; created_at: string }[]
+    {
+      id: string;
+      categoria: string;
+      assunto: string;
+      descricao: string;
+      estado: string;
+      pedidoReferencia: string | null;
+      created_at: string;
+      updated_at: string;
+    }[]
   >([]);
   const [erro, setErro] = useState('');
   const [assunto, setAssunto] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [categoria, setCategoria] = useState('pedido');
+  const [categoria, setCategoria] = useState('entrega');
+  const [pedidoRef, setPedidoRef] = useState('');
   const [busy, setBusy] = useState(false);
 
   const carregar = useCallback(async () => {
@@ -39,7 +49,7 @@ export default function SuportePage() {
       const r = await api.tickets();
       setLista(r.tickets);
     } catch {
-      setErro('Não foi possível carregar os pedidos de ajuda.');
+      setErro('Não foi possível carregar as conversas.');
     }
   }, []);
 
@@ -51,10 +61,16 @@ export default function SuportePage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await api.criarTicket({ categoria, assunto, descricao });
+      await api.criarTicket({
+        categoria,
+        assunto,
+        descricao,
+        ...(pedidoRef.trim() ? { pedidoReferencia: pedidoRef.trim() } : {}),
+      });
       setAssunto('');
       setDescricao('');
-      avisar('Pedido de ajuda enviado.');
+      setPedidoRef('');
+      avisar('Mensagem enviada. A loja responde nesta conversa.');
       await carregar();
     } catch (err) {
       setErro(err instanceof ApiError ? err.message : 'Não foi possível enviar.');
@@ -77,7 +93,10 @@ export default function SuportePage() {
       <div className="mt-8 flex items-end justify-between">
         <div>
           <p className="label-mono">Conta</p>
-          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Ajuda e suporte</h1>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-white">Conversas com a loja</h1>
+          <p className="mt-1 max-w-[52ch] font-mono text-[11px] text-steel">
+            Reclamações, encomenda em atraso, artigo danificado ou qualquer problema. A loja responde aqui.
+          </p>
         </div>
         <Link to="/conta" className="font-mono text-[11px] text-steel hover:text-acid">
           ← Voltar
@@ -110,6 +129,13 @@ export default function SuportePage() {
           </select>
         </label>
         <Campo id="sup-ass" label="Título" required value={assunto} onChange={(e) => setAssunto(e.target.value)} />
+        <Campo
+          id="sup-ped"
+          label="N.º da encomenda (se for o caso)"
+          value={pedidoRef}
+          onChange={(e) => setPedidoRef(e.target.value)}
+          hint="Opcional. Liga a conversa a uma encomenda desta conta."
+        />
         <label className="block" htmlFor="sup-desc">
           <span className="font-mono text-[10px] tracking-[0.14em] text-steel uppercase">Mensagem</span>
           <textarea
@@ -119,13 +145,14 @@ export default function SuportePage() {
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
             className="mt-1 w-full rounded-lg border border-line bg-panel2 px-3 py-2 text-sm"
+            placeholder="Ex.: a encomenda VT-… ainda não chegou / chegou com a caixa danificada…"
           />
         </label>
         <button
           disabled={busy}
           className="h-10 rounded-lg bg-acid px-5 font-display text-sm font-semibold text-ink disabled:opacity-60"
         >
-          {busy ? 'A enviar…' : 'Enviar'}
+          {busy ? 'A enviar…' : 'Começar conversa'}
         </button>
       </form>
       <div className="mt-8 space-y-3">
@@ -141,7 +168,11 @@ export default function SuportePage() {
                 {ROTULO_TICKET[t.estado] ?? t.estado}
               </span>
             </div>
-            <p className="mt-1 font-mono text-[11px] text-steel">{new Date(t.created_at).toLocaleString('pt-PT')}</p>
+            <p className="mt-1 font-mono text-[11px] text-steel">
+              {ROTULO_CATEGORIA_TICKET[t.categoria] ?? t.categoria}
+              {t.pedidoReferencia ? ` · ${t.pedidoReferencia}` : ''} ·{' '}
+              {new Date(t.updated_at).toLocaleString('pt-PT')}
+            </p>
           </Link>
         ))}
       </div>
