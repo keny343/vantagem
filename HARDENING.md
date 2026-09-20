@@ -6,7 +6,7 @@ Endurecer o que já existe sob condições reais — sem adicionar features de p
 
 | Área | Medida |
 |------|--------|
-| Checkout | Preços e stock da BD; `FOR UPDATE`; `UPDATE … WHERE quantidade >= n` |
+| Checkout | Preços da BD; stock verificado no checkout mas **debitado só na confirmação de pagamento** (`FOR UPDATE` + `UPDATE … WHERE quantidade >= n`) |
 | Idempotência | `idempotencyKey` obrigatória em `POST /api/pedidos` |
 | IDOR | Pedido e comprovativo só para dono ou admin |
 | Upload | Magic bytes (JPEG/PNG/WEBP/GIF), rejeição de path traversal |

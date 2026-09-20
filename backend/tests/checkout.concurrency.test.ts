@@ -21,7 +21,7 @@ const clientePedido = (nome: string) => ({
   city: 'Luanda',
 });
 
-describe('checkout concorrente (Postgres)', () => {
+describe('checkout / stock na confirmação (Postgres)', () => {
   let ativo = false;
 
   beforeAll(async () => {
@@ -42,7 +42,33 @@ describe('checkout concorrente (Postgres)', () => {
     if (ativo) await fecharBaseTeste();
   });
 
-  it('só uma de duas compras paralelas fica com o último stock', async ({ skip }) => {
+  it('checkout não consome stock; confirmação de pagamento consome', async ({ skip }) => {
+    if (!ativo) {
+      skip();
+      return;
+    }
+
+    const slug = `debit-${randomUUID().slice(0, 8)}`;
+    const produto = await criarProdutoComStock({ slug, stock: 3 });
+    const userId = await criarClienteTeste(slug);
+
+    const criado = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+      customer: clientePedido('Debit'),
+      paymentMethod: 'cartao',
+      userId,
+      idempotencyKey: `idem-debit-${slug}`,
+    });
+
+    expect(criado.status).toBe('pendente');
+    expect(await stockDe(produto.produtoId)).toBe(3);
+
+    const pago = await pedidos.alterarEstado(criado.id, 'pago');
+    expect(pago.status).toBe('pago');
+    expect(await stockDe(produto.produtoId)).toBe(2);
+  }, 30_000);
+
+  it('só uma de duas confirmações paralelas fica com o último stock', async ({ skip }) => {
     if (!ativo) {
       skip();
       return;
@@ -53,18 +79,26 @@ describe('checkout concorrente (Postgres)', () => {
     const u1 = await criarClienteTeste(`a-${slug}`);
     const u2 = await criarClienteTeste(`b-${slug}`);
 
-    const compra = (userId: string, chave: string) =>
-      pedidos.criarPedido({
-        items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
-        customer: clientePedido(userId.slice(0, 8)),
-        paymentMethod: 'cartao',
-        userId,
-        idempotencyKey: chave,
-      });
+    const p1 = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+      customer: clientePedido(u1.slice(0, 8)),
+      paymentMethod: 'cartao',
+      userId: u1,
+      idempotencyKey: `idem-${slug}-1`,
+    });
+    const p2 = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+      customer: clientePedido(u2.slice(0, 8)),
+      paymentMethod: 'cartao',
+      userId: u2,
+      idempotencyKey: `idem-${slug}-2`,
+    });
+
+    expect(await stockDe(produto.produtoId)).toBe(1);
 
     const resultados = await Promise.allSettled([
-      compra(u1, `idem-${slug}-1`),
-      compra(u2, `idem-${slug}-2`),
+      pedidos.alterarEstado(p1.id, 'pago'),
+      pedidos.alterarEstado(p2.id, 'pago'),
     ]);
 
     const ok = resultados.filter((r) => r.status === 'fulfilled');
@@ -83,7 +117,7 @@ describe('checkout concorrente (Postgres)', () => {
     expect(await stockDe(produto.produtoId)).toBe(0);
   }, 30_000);
 
-  it('repete a mesma idempotencyKey sem consumir stock outra vez', async ({ skip }) => {
+  it('repete a mesma idempotencyKey sem criar outro pedido nem mexer no stock', async ({ skip }) => {
     if (!ativo) {
       skip();
       return;
@@ -111,31 +145,39 @@ describe('checkout concorrente (Postgres)', () => {
     });
 
     expect(segundo.reference).toBe(primeiro.reference);
-    expect(await stockDe(produto.produtoId)).toBe(1);
+    expect(await stockDe(produto.produtoId)).toBe(2);
   }, 30_000);
 
-  it('marca pendente → pago sem erro de tipos no Postgres', async ({ skip }) => {
+  it('cancelar pendente não repõe stock; cancelar pago repõe', async ({ skip }) => {
     if (!ativo) {
       skip();
       return;
     }
 
-    const slug = `pago-${randomUUID().slice(0, 8)}`;
-    const produto = await criarProdutoComStock({ slug, stock: 3 });
+    const slug = `cancel-${randomUUID().slice(0, 8)}`;
+    const produto = await criarProdutoComStock({ slug, stock: 5 });
     const userId = await criarClienteTeste(slug);
 
-    const criado = await pedidos.criarPedido({
-      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
-      customer: clientePedido('Pago Enum'),
+    const pendente = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 2 }],
+      customer: clientePedido('Cancel Pend'),
       paymentMethod: 'cartao',
       userId,
-      idempotencyKey: `idem-pago-${slug}`,
+      idempotencyKey: `idem-c1-${slug}`,
     });
+    await pedidos.alterarEstado(pendente.id, 'cancelado');
+    expect(await stockDe(produto.produtoId)).toBe(5);
 
-    expect(criado.status).toBe('pendente');
-
-    const actualizado = await pedidos.alterarEstado(criado.id, 'pago');
-    expect(actualizado.status).toBe('pago');
-    expect(actualizado.paidAt).toBeTruthy();
+    const pago = await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 2 }],
+      customer: clientePedido('Cancel Pago'),
+      paymentMethod: 'cartao',
+      userId,
+      idempotencyKey: `idem-c2-${slug}`,
+    });
+    await pedidos.alterarEstado(pago.id, 'pago');
+    expect(await stockDe(produto.produtoId)).toBe(3);
+    await pedidos.alterarEstado(pago.id, 'cancelado');
+    expect(await stockDe(produto.produtoId)).toBe(5);
   }, 30_000);
 });

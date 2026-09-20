@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api, urlMedia } from '../../api/client';
+import { ApiError, api, urlMedia } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
@@ -54,7 +54,7 @@ export function AdminPedidosPage() {
     if (status === 'cancelado') {
       const ok = await confirmar({
         titulo: 'Cancelar encomenda?',
-        mensagem: 'Se ainda não saiu do armazém, o stock volta para o artigo.',
+        mensagem: 'Se o pagamento já tinha sido confirmado e o artigo ainda não saiu, o stock volta.',
         confirmarLabel: 'Cancelar encomenda',
         perigo: true,
       });
@@ -84,10 +84,14 @@ export function AdminPedidosPage() {
     setErro('');
     try {
       await api.adminEstado(o.id, 'pago');
-      avisar('Pagamento confirmado. O cliente já vê o estado actualizado.');
+      avisar('Pagamento confirmado. O stock do artigo foi actualizado.');
       await carregar();
-    } catch {
-      setErro('Não foi possível confirmar o pagamento.');
+    } catch (err) {
+      setErro(
+        err instanceof ApiError
+          ? err.message
+          : 'Não foi possível confirmar o pagamento.',
+      );
     } finally {
       setAConfirmar(null);
     }

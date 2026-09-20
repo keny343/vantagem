@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, urlMedia, type Order } from '../../api/client';
+import { ApiError, api, urlMedia, type Order } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
@@ -32,7 +32,7 @@ export function AdminPedidoPage() {
     if (status === 'cancelado') {
       const ok = await confirmar({
         titulo: 'Cancelar encomenda?',
-        mensagem: 'Se ainda não saiu do armazém, o stock volta para o artigo.',
+        mensagem: 'Se o pagamento já tinha sido confirmado e o artigo ainda não saiu, o stock volta.',
         confirmarLabel: 'Cancelar encomenda',
         perigo: true,
       });
@@ -62,10 +62,14 @@ export function AdminPedidoPage() {
     setErro('');
     try {
       await api.adminEstado(order.id, 'pago');
-      avisar('Encomenda marcada como paga.');
+      avisar('Encomenda marcada como paga. O stock do artigo foi actualizado.');
       await carregar();
-    } catch {
-      setErro('Não foi possível marcar como pago.');
+    } catch (err) {
+      setErro(
+        err instanceof ApiError
+          ? err.message
+          : 'Não foi possível marcar como pago.',
+      );
     } finally {
       setAPagar(false);
     }

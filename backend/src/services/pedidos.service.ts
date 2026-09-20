@@ -104,6 +104,7 @@ const mbReferenciaDe = (pedidoId: string): string => {
   return String(Math.abs(n) % 1_000_000_000).padStart(9, '0');
 };
 
+/** Stock só é debitado na confirmação de pagamento — repor só se já tiver sido debitado. */
 const reporStockSePreciso = async (
   client: { query: typeof query },
   pedido: PedidoRow,
@@ -112,14 +113,16 @@ const reporStockSePreciso = async (
   if (pedido.stock_reposto) return;
   if (pedido.estado === 'enviado' || pedido.estado === 'entregue') return;
 
+  const stockDebitado = pedido.estado !== 'pendente';
+
   for (const item of items) {
     if (item.produto_id === null) continue;
-    await client.query(
-      `UPDATE stock SET quantidade = quantidade + $1, actualizado_em = now()
-       WHERE produto_id = $2`,
-      [item.quantidade, item.produto_id],
-    );
-    if (pedido.estado !== 'pendente') {
+    if (stockDebitado) {
+      await client.query(
+        `UPDATE stock SET quantidade = quantidade + $1, actualizado_em = now()
+         WHERE produto_id = $2`,
+        [item.quantidade, item.produto_id],
+      );
       await client.query(
         `UPDATE produtos SET vendidos = GREATEST(vendidos - $1, 0) WHERE id = $2`,
         [item.quantidade, item.produto_id],
@@ -137,6 +140,53 @@ const reporStockSePreciso = async (
   await client.query(`UPDATE pedidos SET stock_reposto = true, updated_at = now() WHERE id = $1`, [
     pedido.id,
   ]);
+};
+
+/** Debita stock e incrementa vendidos no momento do pagamento confirmado. */
+const debitarStockAoPagar = async (
+  client: { query: typeof query },
+  items: ItemRow[],
+): Promise<void> => {
+  for (const item of items) {
+    if (item.produto_id === null) continue;
+
+    const { rows } = await client.query<{ nome: string; quantidade: number }>(
+      `SELECT p.nome, s.quantidade
+       FROM produtos p
+       INNER JOIN stock s ON s.produto_id = p.id
+       WHERE p.id = $1
+       FOR UPDATE OF s`,
+      [item.produto_id],
+    );
+    const stock = rows[0];
+    if (stock === undefined) {
+      throw new AppError('NOT_FOUND', 'Artigo do pedido já não existe no catálogo.');
+    }
+    if (stock.quantidade < item.quantidade) {
+      throw new AppError(
+        'INSUFFICIENT_STOCK',
+        `Stock insuficiente para confirmar o pagamento de ${stock.nome} (disponível: ${stock.quantidade}, pedido: ${item.quantidade}).`,
+      );
+    }
+
+    const { rowCount } = await client.query(
+      `UPDATE stock
+       SET quantidade = quantidade - $1, actualizado_em = now()
+       WHERE produto_id = $2 AND quantidade >= $1`,
+      [item.quantidade, item.produto_id],
+    );
+    if ((rowCount ?? 0) !== 1) {
+      throw new AppError(
+        'INSUFFICIENT_STOCK',
+        `Stock insuficiente para confirmar o pagamento de ${stock.nome}. Outra confirmação acabou de consumir as unidades.`,
+      );
+    }
+
+    await client.query(`UPDATE produtos SET vendidos = vendidos + $1 WHERE id = $2`, [
+      item.quantidade,
+      item.produto_id,
+    ]);
+  }
 };
 
 const mapearPedido = (pedido: PedidoRow, items: ItemRow[]): PedidoPublico => ({
@@ -247,8 +297,7 @@ export const criarPedido = async (dados: {
           `SELECT p.id, p.sku, p.nome, p.preco_centimos, p.variante_opcoes, p.activo, s.quantidade
            FROM produtos p
            INNER JOIN stock s ON s.produto_id = p.id
-           WHERE p.slug = $1
-           FOR UPDATE OF s`,
+           WHERE p.slug = $1`,
           [item.productId],
         );
         const produto = rows[0];
@@ -265,23 +314,11 @@ export const criarPedido = async (dados: {
           });
         }
 
+        // Verificação indicativa: o stock só é debitado na confirmação de pagamento.
         if (produto.quantidade < item.quantity) {
           throw new AppError(
             'INSUFFICIENT_STOCK',
             `Stock insuficiente para ${produto.nome} (disponível: ${produto.quantidade}).`,
-          );
-        }
-
-        const { rowCount } = await client.query(
-          `UPDATE stock
-           SET quantidade = quantidade - $1, actualizado_em = now()
-           WHERE produto_id = $2 AND quantidade >= $1`,
-          [item.quantity, produto.id],
-        );
-        if ((rowCount ?? 0) !== 1) {
-          throw new AppError(
-            'INSUFFICIENT_STOCK',
-            `Stock insuficiente para ${produto.nome}. Outra compra acabou de reservar as unidades.`,
           );
         }
 
@@ -443,8 +480,12 @@ export const criarPedido = async (dados: {
 
 export const confirmarPagamento = async (referencia: string): Promise<PedidoPublico> => {
   return transaction(async (client) => {
-    const pedido = await obterRowPorReferencia(client, referencia);
-    if (pedido === null) throw notFound('Pedido');
+    const { rows: locked } = await client.query<PedidoRow>(
+      `SELECT * FROM pedidos WHERE referencia = $1 FOR UPDATE`,
+      [referencia],
+    );
+    const pedido = locked[0];
+    if (pedido === undefined) throw notFound('Pedido');
 
     if (pedido.estado !== 'pendente') {
       const items = await carregarItems(client, pedido.id);
@@ -452,13 +493,7 @@ export const confirmarPagamento = async (referencia: string): Promise<PedidoPubl
     }
 
     const items = await carregarItems(client, pedido.id);
-    for (const item of items) {
-      if (item.produto_id === null) continue;
-      await client.query(`UPDATE produtos SET vendidos = vendidos + $1 WHERE id = $2`, [
-        item.quantidade,
-        item.produto_id,
-      ]);
-    }
+    await debitarStockAoPagar(client, items);
 
     const { rows } = await client.query<PedidoRow>(
       `UPDATE pedidos
@@ -495,13 +530,7 @@ export const alterarEstado = async (
     }
 
     if (pedido.estado === 'pendente' && novo === 'pago') {
-      for (const item of items) {
-        if (item.produto_id === null) continue;
-        await client.query(`UPDATE produtos SET vendidos = vendidos + $1 WHERE id = $2`, [
-          item.quantidade,
-          item.produto_id,
-        ]);
-      }
+      await debitarStockAoPagar(client, items);
     }
 
     const { rows: actualizados } = await client.query<PedidoRow>(

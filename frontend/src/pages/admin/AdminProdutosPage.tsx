@@ -25,6 +25,20 @@ export function AdminProdutosPage() {
     void carregar().catch(() => setErro('Não foi possível carregar os artigos.'));
   }, []);
 
+  useEffect(() => {
+    function aoFocar() {
+      if (document.visibilityState === 'visible') {
+        void carregar().catch(() => undefined);
+      }
+    }
+    document.addEventListener('visibilitychange', aoFocar);
+    window.addEventListener('focus', aoFocar);
+    return () => {
+      document.removeEventListener('visibilitychange', aoFocar);
+      window.removeEventListener('focus', aoFocar);
+    };
+  }, []);
+
   async function guardarStock(e: FormEvent<HTMLFormElement>, slug: string) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
@@ -152,6 +166,7 @@ export function AdminProdutosPage() {
                 </div>
               </div>
               <form
+                key={`${p.slug}-${p.stock}`}
                 onSubmit={(e) => void guardarStock(e, p.slug)}
                 onInvalidCapture={onInvalidPt}
                 onInput={onInputPt}
@@ -162,6 +177,7 @@ export function AdminProdutosPage() {
                   type="number"
                   min={0}
                   defaultValue={p.stock}
+                  aria-label={`Stock de ${p.name}`}
                   className="h-9 w-20 rounded-md border border-line bg-panel2 px-2 font-mono text-sm"
                 />
                 <button className="h-9 rounded-md px-3 font-mono text-[10px] text-steel uppercase ring-1 ring-line">
