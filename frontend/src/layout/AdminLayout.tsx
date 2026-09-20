@@ -40,7 +40,7 @@ export function AdminLayout() {
             `relative flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
               isActive
                 ? 'bg-acid/15 font-semibold text-ink before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-[3px] before:rounded-r before:bg-acid'
-                : 'text-ink/70 hover:bg-white/5 hover:text-canvas'
+                : 'text-ink/70 hover:bg-panel2 hover:text-ink'
             }`
           }
         >
@@ -92,7 +92,7 @@ export function AdminLayout() {
           </div>
         </div>
 
-          <div className="mb-3 border-b border-white/10 px-1 pb-3">
+          <div className="mb-3 border-b border-line px-1 pb-3">
           <p className="font-display text-sm text-ink">{user.name}</p>
           <p className="font-mono text-[10px] text-steel">{user.email}</p>
           <p className="mt-1 font-mono text-[10px] tracking-[0.14em] text-acid uppercase">
@@ -102,16 +102,16 @@ export function AdminLayout() {
 
         <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">{nav}</nav>
 
-        <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+        <div className="mt-3 space-y-2 border-t border-line pt-3">
           <Link
             to="/"
-            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-white/5 hover:text-ink"
+            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-panel2 hover:text-ink"
           >
             Ver loja
           </Link>
           <Link
             to="/ajuda"
-            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-white/5 hover:text-ink"
+            className="flex min-h-9 items-center rounded-md px-3 text-sm text-ink/70 hover:bg-panel2 hover:text-ink"
           >
             Ajuda
           </Link>
@@ -120,7 +120,7 @@ export function AdminLayout() {
             onClick={() => {
               void logout().then(() => navigate('/login'));
             }}
-            className="flex min-h-9 w-full items-center rounded-md border border-white/15 px-3 text-sm text-ink/80 hover:bg-white/10"
+            className="flex min-h-9 w-full items-center rounded-md border border-line px-3 text-sm text-ink/80 hover:bg-panel2"
           >
             Sair
           </button>

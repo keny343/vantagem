@@ -1,4 +1,4 @@
-﻿import {
+import {
   createContext,
   useCallback,
   useContext,
@@ -69,7 +69,7 @@ export function ConfirmarProvider({ children }: { children: ReactNode }) {
             <h2 id={tituloId} className="font-display text-lg font-semibold text-ink">
               {pedido.titulo}
             </h2>
-            <p className="mt-2 text-sm text-zinc-400">{pedido.mensagem}</p>
+            <p className="mt-2 text-sm text-steel">{pedido.mensagem}</p>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"

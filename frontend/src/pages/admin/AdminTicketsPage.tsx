@@ -60,7 +60,7 @@ export function AdminTicketsPage() {
           <Link
             key={t.id}
             to={`/admin/tickets/${t.id}`}
-            className="block border-b border-line p-4 last:border-0 hover:bg-white/5"
+            className="block border-b border-line p-4 last:border-0 hover:bg-panel2"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-display text-ink">{t.subject}</h2>

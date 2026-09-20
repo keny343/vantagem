@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, api, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
@@ -21,23 +21,23 @@ export function FacturaPage() {
           void navigate(`/login?seguir=${encodeURIComponent(`/pedido/${referencia}/factura`)}`);
           return;
         }
-        setErro('Encomenda nÃ£o encontrada.');
+        setErro('Encomenda não encontrada.');
       });
   }, [referencia, navigate]);
 
   if (erro || !order) {
     return (
       <div className="mx-auto max-w-xl p-8">
-        <p className="text-steel">{erro || 'A carregarâ€¦'}</p>
+        <p className="text-steel">{erro || 'A carregar…'}</p>
         <Link to="/" className="mt-4 inline-block text-acid">
-          InÃ­cio
+          Início
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-[720px] bg-white p-10 text-zinc-900 print:p-0">
+    <div className="mx-auto max-w-[720px] bg-white p-10 text-ink print:p-0">
       <div className="flex justify-between gap-6">
         <div>
           <p className="font-semibold">{LOJA.nomeLegal}</p>
@@ -85,7 +85,7 @@ export function FacturaPage() {
           <dd>{formatEuro(order.subtotal)}</dd>
         </div>
         <div className="flex justify-between">
-          <dt>IVA incluÃ­do</dt>
+          <dt>IVA incluído</dt>
           <dd>{formatEuro(order.vat)}</dd>
         </div>
         <div className="flex justify-between font-semibold">
@@ -94,18 +94,18 @@ export function FacturaPage() {
         </div>
       </dl>
       <p className="mt-6 text-sm">
-        {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod} Â· {ROTULO_ESTADO[order.status]}
+        {ROTULO_PAGAMENTO[order.paymentMethod] ?? order.paymentMethod} · {ROTULO_ESTADO[order.status]}
       </p>
       <div className="mt-8 flex gap-3 print:hidden">
         <button
           type="button"
           onClick={() => window.print()}
-          className="h-10 rounded-lg bg-black px-4 text-sm text-ink"
+          className="h-10 rounded-lg bg-ink px-4 text-sm text-canvas"
         >
           Imprimir / PDF
         </button>
         <Link to={`/pedido/${order.reference}`} className="grid h-10 place-items-center text-sm">
-          Voltar Ã  encomenda
+          Voltar à encomenda
         </Link>
       </div>
     </div>

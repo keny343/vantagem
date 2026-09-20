@@ -65,9 +65,9 @@ export function Notificacoes() {
                     if (!n.lida) void api.marcarNotificacao(n.id);
                     setAberta(false);
                   }}
-                  className="block rounded-lg p-2 hover:bg-white/5"
+                  className="block rounded-lg p-2 hover:bg-panel2"
                 >
-                  <p className={`text-sm ${n.lida ? 'text-zinc-400' : 'text-ink'}`}>{n.titulo}</p>
+                  <p className={`text-sm ${n.lida ? 'text-steel' : 'text-ink'}`}>{n.titulo}</p>
                   <p className="font-mono text-[10px] text-steel">{n.mensagem}</p>
                 </Link>
               </li>

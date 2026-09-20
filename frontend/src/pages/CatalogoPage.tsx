@@ -131,7 +131,7 @@ export function CatalogoPage() {
                     className={`block w-full rounded px-2 py-1.5 text-left text-sm transition-colors ${
                       categoria === c.slug
                         ? 'bg-acid/15 text-acid'
-                        : 'text-ink/70 hover:bg-panel2 hover:text-canvas'
+                        : 'text-ink/70 hover:bg-panel2 hover:text-ink'
                     }`}
                   >
                     {c.name}
@@ -169,7 +169,7 @@ export function CatalogoPage() {
                     className={`block w-full rounded px-2 py-1.5 text-left text-sm transition-colors ${
                       marca === m
                         ? 'bg-acid/15 text-acid'
-                        : 'text-ink/70 hover:bg-panel2 hover:text-canvas'
+                        : 'text-ink/70 hover:bg-panel2 hover:text-ink'
                     }`}
                   >
                     {m}

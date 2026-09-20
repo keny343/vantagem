@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export function ErroBloco({
   titulo = 'Algo correu mal',
@@ -18,7 +18,7 @@ export function ErroBloco({
       className="rounded-[14px] border border-destructive/40 bg-panel p-6"
     >
       <h2 className="font-display text-lg text-ink">{titulo}</h2>
-      <p className="mt-2 text-sm text-zinc-400">{mensagem}</p>
+      <p className="mt-2 text-sm text-steel">{mensagem}</p>
       <div className="mt-4 flex flex-wrap gap-3">
         {onTentar && (
           <button
