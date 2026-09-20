@@ -17,6 +17,7 @@ const NAV_PUBLIC = [
 const NAV_CLIENTE = [
   { to: '/', label: 'Início', end: true },
   { to: '/catalogo', label: 'Catálogo' },
+  { to: '/conta/suporte', label: 'Mensagens' },
   { to: '/conta', label: 'Conta' },
 ];
 
@@ -28,6 +29,7 @@ const NAV_ADMIN = [
 
 function CartDrawer() {
   const cart = useCart();
+  const { user } = useSession();
   const { avisar } = useAvisos();
 
   function retirar(id: string, variant: string) {
@@ -142,14 +144,14 @@ function CartDrawer() {
             <span>{formatEuro(cart.total)}</span>
           </div>
           <Link
-            to="/checkout"
+            to={user ? '/checkout' : '/login'}
             onClick={() => cart.setOpen(false)}
             className="grid h-11 w-full place-items-center rounded-lg bg-acid font-display text-sm font-semibold text-ink transition-transform hover:brightness-105 active:scale-[0.98]"
           >
-            Finalizar compra
+            {user ? 'Finalizar compra' : 'Entrar para comprar'}
           </Link>
           <Link
-            to="/carrinho"
+            to={user ? '/carrinho' : '/login'}
             onClick={() => cart.setOpen(false)}
             className="mt-2 block text-center font-mono text-[10px] tracking-[0.12em] text-steel uppercase hover:text-acid"
           >

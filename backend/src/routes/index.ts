@@ -22,9 +22,39 @@ const loginLimiter = rateLimit({
     next(
       new AppError(
         'RATE_LIMITED',
-        'Demasiadas tentativas de login a partir deste endereço. Tenta mais tarde.',
+        'Demasiadas tentativas a partir deste endereço. Tenta mais tarde.',
       ),
     );
+  },
+});
+
+const checkoutLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: env.isTest ? 1000 : 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: (_req, _res, next) => {
+    next(new AppError('RATE_LIMITED', 'Demasiadas encomendas. Espera um pouco e tenta outra vez.'));
+  },
+});
+
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: env.isTest ? 1000 : 40,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: (_req, _res, next) => {
+    next(new AppError('RATE_LIMITED', 'Demasiados envios de fotografias. Tenta mais tarde.'));
+  },
+});
+
+const cupaoLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: env.isTest ? 1000 : 40,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: (_req, _res, next) => {
+    next(new AppError('RATE_LIMITED', 'Demasiadas validações de cupão. Tenta dentro de momentos.'));
   },
 });
 
@@ -71,23 +101,21 @@ apiRouter.get('/loja', (req, res, next) => {
     next(erro);
   }
 });
-apiRouter.post('/cupons/validar', bloquearComprasDeAdmin, (req, res, next) => {
+apiRouter.post('/cupons/validar', cupaoLimiter, bloquearComprasDeAdmin, (req, res, next) => {
   void checkout.validarCupao(req, res).catch(next);
 });
-apiRouter.post('/pedidos', bloquearComprasDeAdmin, (req, res, next) => {
+apiRouter.post('/pedidos', checkoutLimiter, bloquearComprasDeAdmin, (req, res, next) => {
   void checkout.criarPedido(req, res).catch(next);
 });
 apiRouter.get('/pedidos/meus', requerAutenticacao, requerPapel('cliente'), (req, res, next) => {
   void checkout.meusPedidos(req, res).catch(next);
-});
-apiRouter.post('/pedidos/:referencia/pagar', bloquearComprasDeAdmin, (req, res, next) => {
-  void checkout.confirmarPagamento(req, res).catch(next);
 });
 apiRouter.get('/pedidos/:referencia', (req, res, next) => {
   void checkout.obterPedido(req, res).catch(next);
 });
 apiRouter.post(
   '/pedidos/:referencia/comprovativo',
+  uploadLimiter,
   bloquearComprasDeAdmin,
   (req, res, next) => {
     upload.uploadFotoProduto(req, res, (erro: unknown) => {
@@ -162,6 +190,7 @@ apiRouter.get('/faq', (req, res, next) => {
 
 apiRouter.post(
   '/admin/upload',
+  uploadLimiter,
   requerAutenticacao,
   requerPapel('admin'),
   (req, res, next) => {
@@ -216,6 +245,21 @@ apiRouter.get('/admin/utilizadores', requerAutenticacao, requerPapel('admin'), (
 apiRouter.get('/admin/tickets', requerAutenticacao, requerPapel('admin'), (req, res, next) => {
   void admin.listarTickets(req, res).catch(next);
 });
+apiRouter.get('/admin/tickets/:id', requerAutenticacao, requerPapel('admin'), (req, res, next) => {
+  void import('../controllers/suporte.controller.js').then((m) =>
+    m.obterTicketAdmin(req, res, next),
+  );
+});
+apiRouter.post(
+  '/admin/tickets/:id/respostas',
+  requerAutenticacao,
+  requerPapel('admin'),
+  (req, res, next) => {
+    void import('../controllers/suporte.controller.js').then((m) =>
+      m.responderTicketAdmin(req, res, next),
+    );
+  },
+);
 apiRouter.patch('/admin/tickets/:id', requerAutenticacao, requerPapel('admin'), (req, res, next) => {
   void admin.actualizarTicket(req, res).catch(next);
 });

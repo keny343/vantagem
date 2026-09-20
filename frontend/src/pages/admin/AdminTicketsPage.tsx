@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
-import { useAvisos } from '../../ui/Avisos';
 import { ErroBloco } from '../../ui/ErroBloco';
-import { ROTULO_TICKET } from '../../utils/format';
+import { ROTULO_CATEGORIA_TICKET, ROTULO_TICKET } from '../../utils/format';
 
 export function AdminTicketsPage() {
-  const { avisar } = useAvisos();
-  useTitulo('Suporte');
+  useTitulo('Mensagens');
   const [tickets, setTickets] = useState<
     {
       id: string;
@@ -15,10 +14,13 @@ export function AdminTicketsPage() {
       subject: string;
       description: string;
       status: string;
-      priority: string;
       createdAt: string;
+      updatedAt: string;
       customerName: string;
       customerEmail: string;
+      pedidoReferencia: string | null;
+      lastMessage: string;
+      lastFrom: 'cliente' | 'admin';
     }[]
   >([]);
   const [erro, setErro] = useState('');
@@ -30,25 +32,19 @@ export function AdminTicketsPage() {
   }
 
   useEffect(() => {
-    void carregar().catch(() => setErro('Não foi possível carregar os pedidos de ajuda.'));
+    void carregar().catch(() => setErro('Não foi possível carregar as conversas.'));
+    const t = window.setInterval(() => {
+      void carregar().catch(() => undefined);
+    }, 12000);
+    return () => window.clearInterval(t);
   }, []);
-
-  async function mudarEstado(id: string, status: string) {
-    try {
-      await api.adminActualizarTicket(id, status);
-      await carregar();
-      avisar(`Pedido marcado como ${ROTULO_TICKET[status] ?? status}.`);
-    } catch {
-      setErro('Não foi possível actualizar o pedido de ajuda.');
-    }
-  }
 
   return (
     <div>
-      <p className="label-mono">Suporte</p>
-      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Pedidos de ajuda</h1>
+      <p className="label-mono">Loja</p>
+      <h1 className="mt-1 font-display text-2xl font-semibold text-white">Mensagens dos clientes</h1>
       <p className="mt-1 font-mono text-[11px] text-steel">
-        Mensagens abertas pelos clientes. Altera o estado quando responderes.
+        Reclamações, encomendas em atraso, artigos danificados. Abre a conversa para responder.
       </p>
       {erro && (
         <div className="mt-4">
@@ -58,33 +54,29 @@ export function AdminTicketsPage() {
 
       <div className="mt-6 overflow-hidden rounded-[14px] border border-line bg-panel">
         {tickets.length === 0 && (
-          <p className="p-6 font-mono text-[11px] text-steel">Não há pedidos de ajuda.</p>
+          <p className="p-6 font-mono text-[11px] text-steel">Ainda não há conversas.</p>
         )}
         {tickets.map((t) => (
-          <article key={t.id} className="border-b border-line p-4 last:border-0">
+          <Link
+            key={t.id}
+            to={`/admin/tickets/${t.id}`}
+            className="block border-b border-line p-4 last:border-0 hover:bg-white/5"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-display text-white">{t.subject}</h2>
-              <label className="font-mono text-[10px] text-steel uppercase">
-                Estado
-                <select
-                  value={t.status}
-                  onChange={(e) => void mudarEstado(t.id, e.target.value)}
-                  className="ml-2 h-8 rounded-md border border-line bg-panel2 px-2 font-mono text-[10px] text-zinc-200"
-                  aria-label={`Estado de ${t.subject}`}
-                >
-                  {Object.entries(ROTULO_TICKET).map(([valor, rotulo]) => (
-                    <option key={valor} value={valor}>
-                      {rotulo}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <span className="font-mono text-[10px] text-steel uppercase">
+                {ROTULO_TICKET[t.status] ?? t.status}
+              </span>
             </div>
             <p className="mt-1 font-mono text-[11px] text-steel">
-              {t.customerName} · {t.customerEmail} · {t.category}
+              {t.customerName} · {t.customerEmail} · {ROTULO_CATEGORIA_TICKET[t.category] ?? t.category}
+              {t.pedidoReferencia ? ` · ${t.pedidoReferencia}` : ''}
             </p>
-            <p className="mt-2 text-sm text-zinc-300">{t.description}</p>
-          </article>
+            <p className="mt-2 line-clamp-2 text-sm text-zinc-300">
+              {t.lastFrom === 'cliente' ? 'Cliente: ' : 'Tu: '}
+              {t.lastMessage}
+            </p>
+          </Link>
         ))}
       </div>
     </div>

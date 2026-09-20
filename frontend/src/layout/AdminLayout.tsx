@@ -9,7 +9,7 @@ const NAV = [
   { to: '/admin/categorias', label: 'Categorias' },
   { to: '/admin/cupons', label: 'Cupons' },
   { to: '/admin/utilizadores', label: 'Utilizadores' },
-  { to: '/admin/tickets', label: 'Suporte' },
+  { to: '/admin/tickets', label: 'Mensagens' },
 ];
 
 export function AdminLayout() {

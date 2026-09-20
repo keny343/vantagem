@@ -37,13 +37,21 @@ export function PedidoPage() {
 
   useEffect(() => {
     void carregar().catch((err) => {
-      setErro(err instanceof ApiError ? err.message : 'Pedido não encontrado.');
+      if (err instanceof ApiError && err.status === 401) {
+        void navigate(`/login?seguir=${encodeURIComponent(`/pedido/${referencia}`)}`);
+        return;
+      }
+      setErro(
+        err instanceof ApiError
+          ? mensagemParaUtilizador(err, 'Pedido não encontrado.')
+          : 'Pedido não encontrado.',
+      );
     });
     void api
       .loja()
       .then((r) => setIban(r.iban))
       .catch(() => undefined);
-  }, [referencia]);
+  }, [referencia, navigate]);
 
   async function falarComLoja() {
     if (!order) return;

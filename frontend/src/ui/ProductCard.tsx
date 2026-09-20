@@ -3,13 +3,11 @@ import type { Product } from '../api/client';
 import { urlMedia } from '../api/client';
 import { eAdmin } from '../auth/papeis';
 import { useSession } from '../auth/SessionContext';
-import { useCart } from '../cart/CartContext';
-import { useAvisos } from './Avisos';
+import { useAdicionarAoCarrinho } from '../cart/useAdicionarAoCarrinho';
 import { formatEuro } from '../utils/format';
 
 export function ProductCard({ product }: { product: Product }) {
-  const cart = useCart();
-  const { avisar } = useAvisos();
+  const adicionar = useAdicionarAoCarrinho();
   const { user } = useSession();
   const admin = eAdmin(user);
   const esgotado = product.stock === 0;
@@ -89,7 +87,7 @@ export function ProductCard({ product }: { product: Product }) {
               type="button"
               disabled={esgotado}
               onClick={() => {
-                cart.add({
+                adicionar({
                   id: product.id,
                   name: product.name,
                   variant: product.variants.options[0] ?? 'Padrão',
@@ -97,11 +95,10 @@ export function ProductCard({ product }: { product: Product }) {
                   image: product.images[0] ?? '',
                   stock: product.stock,
                 });
-                avisar(`${product.name} foi para o carrinho.`);
               }}
               className="h-9 rounded-md bg-acid px-3 font-mono text-[11px] tracking-[0.1em] text-ink uppercase transition-transform hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:bg-panel2 disabled:text-steel"
             >
-              {esgotado ? 'Indisponível' : '+ Carrinho'}
+              {esgotado ? 'Indisponível' : user ? '+ Carrinho' : 'Entrar para comprar'}
             </button>
           )}
         </div>

@@ -54,7 +54,9 @@ export function App() {
               path="/carrinho"
               element={
                 <SemCompraDeAdmin>
-                  <CarrinhoPage />
+                  <ContaDeCliente>
+                    <CarrinhoPage />
+                  </ContaDeCliente>
                 </SemCompraDeAdmin>
               }
             />

@@ -2,11 +2,10 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { lerSessao } from '../middleware/authenticate.js';
 import * as pedidos from '../services/pedidos.service.js';
-import { env } from '../config/env.js';
 import { descontoDeCupao, LOJA } from '../config/loja.js';
 import { eurosDeCentimos } from '../types/domain.js';
 import * as engagement from '../repositories/engagement.repository.js';
-import { emailEncomenda, emailEstadoPedido } from '../services/email.service.js';
+import { emailEncomenda } from '../services/email.service.js';
 import { guardarFicheiro } from '../services/storage.service.js';
 import { AppError } from '../utils/errors.js';
 
@@ -30,11 +29,15 @@ const checkoutSchema = z.object({
     city: z.string().trim().min(2, 'Indica a cidade ou município.').max(100),
     nif: z.string().trim().max(10).optional(),
   }),
-  paymentMethod: z.enum(['cartao', 'mbway', 'multibanco'], {
-    errorMap: () => ({ message: 'Escolhe uma forma de pagamento.' }),
+  paymentMethod: z.literal('cartao', {
+    errorMap: () => ({ message: 'De momento só aceitamos transferência bancária.' }),
   }),
   couponCode: z.string().trim().max(40).optional(),
-  idempotencyKey: z.string().trim().min(8).max(80).optional(),
+  idempotencyKey: z
+    .string()
+    .trim()
+    .min(8, 'Chave de idempotência em falta.')
+    .max(80),
 });
 
 export const criarPedido = async (req: Request, res: Response): Promise<void> => {
@@ -46,9 +49,6 @@ export const criarPedido = async (req: Request, res: Response): Promise<void> =>
       details: [{ field: 'phone', message: phone }],
     });
   }
-  if (dados.paymentMethod === 'mbway' && !telefoneAo.test(phone)) {
-    throw new AppError('VALIDATION_ERROR', 'O Express exige um telemóvel angolano válido.');
-  }
   const nif = dados.customer.nif?.replace(/\s/g, '');
   if (nif !== undefined && nif.length > 0 && !nifAo.test(nif)) {
     throw new AppError('VALIDATION_ERROR', 'O NIF deve ter 9 ou 10 dígitos.', {
@@ -57,7 +57,10 @@ export const criarPedido = async (req: Request, res: Response): Promise<void> =>
   }
 
   const sessao = await lerSessao(req);
-  if (sessao?.perfil === 'admin') {
+  if (!sessao) {
+    throw new AppError('UNAUTHENTICATED', 'Entra na tua conta para concluir a encomenda.');
+  }
+  if (sessao.perfil === 'admin') {
     throw new AppError(
       'FORBIDDEN',
       'A conta de administrador não faz compras. Entra com uma conta de cliente para encomendar.',
@@ -79,7 +82,7 @@ export const criarPedido = async (req: Request, res: Response): Promise<void> =>
     ...(dados.couponCode !== undefined && dados.couponCode.length > 0
       ? { couponCode: dados.couponCode }
       : {}),
-    ...(dados.idempotencyKey !== undefined ? { idempotencyKey: dados.idempotencyKey } : {}),
+    idempotencyKey: dados.idempotencyKey,
   });
   const totalTxt = `${pedido.total.toLocaleString('pt-AO')} Kz`;
   void emailEncomenda(pedido.customer.email, pedido.customer.name, pedido.reference, totalTxt);
@@ -95,24 +98,17 @@ export const criarPedido = async (req: Request, res: Response): Promise<void> =>
   res.status(201).json({ order: pedido });
 };
 
-export const confirmarPagamento = async (req: Request, res: Response): Promise<void> => {
-  if (env.PAGAMENTO_MODO === 'producao') {
-    throw new AppError(
-      'FORBIDDEN',
-      'Em produção o pagamento é confirmado pelo operador ou pelo administrador.',
-    );
-  }
-  const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
-  const pedido = await pedidos.confirmarPagamento(referencia);
-  void emailEstadoPedido(pedido.customer.email, pedido.customer.name, pedido.reference, 'Pago');
-  res.json({ order: pedido });
-};
-
 export const enviarComprovativo = async (req: Request, res: Response): Promise<void> => {
   const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
+  const sessao = await lerSessao(req);
+  if (!sessao) {
+    throw new AppError('UNAUTHENTICATED', 'Entra na tua conta para enviar o comprovativo.');
+  }
   if (req.file === undefined || !req.file.buffer) {
     throw new AppError('VALIDATION_ERROR', 'Envia a fotografia do comprovativo.');
   }
+  const { validarUploadImagem } = await import('./upload.controller.js');
+  validarUploadImagem(req);
   const url = await guardarFicheiro(
     {
       buffer: req.file.buffer,
@@ -121,7 +117,10 @@ export const enviarComprovativo = async (req: Request, res: Response): Promise<v
     },
     'comprovativos',
   );
-  const pedido = await pedidos.guardarComprovativo(referencia, url);
+  const pedido = await pedidos.guardarComprovativo(referencia, url, {
+    userId: sessao.userId,
+    perfil: sessao.perfil,
+  });
   res.json({ order: pedido });
 };
 
@@ -136,7 +135,13 @@ export const meusPedidos = async (req: Request, res: Response): Promise<void> =>
 
 export const obterPedido = async (req: Request, res: Response): Promise<void> => {
   const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
-  const pedido = await pedidos.obterPorReferencia(referencia);
+  const sessao = await lerSessao(req);
+  const pedido = await pedidos.obterPorReferenciaAutorizado(
+    referencia,
+    sessao
+      ? { userId: sessao.userId, perfil: sessao.perfil }
+      : null,
+  );
   res.json({ order: pedido });
 };
 

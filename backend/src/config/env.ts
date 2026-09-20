@@ -26,7 +26,7 @@ const schema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().optional().default('artigos'),
   ADMIN_EMAIL: z.string().optional().default(''),
   ADMIN_PASSWORD: z.string().optional().default(''),
-  PAGAMENTO_MODO: z.enum(['demo', 'producao']).default('demo'),
+  PAGAMENTO_MODO: z.enum(['demo', 'producao']).default('producao'),
   PAGAMENTO_WEBHOOK_SECRET: z.string().optional().default(''),
   LOJA_NIF: z.string().optional().default(''),
   LOJA_IBAN: z.string().optional().default(''),

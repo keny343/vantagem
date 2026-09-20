@@ -272,11 +272,18 @@ export const criarPedido = async (dados: {
           );
         }
 
-        await client.query(
-          `UPDATE stock SET quantidade = quantidade - $1, actualizado_em = now()
-           WHERE produto_id = $2`,
+        const { rowCount } = await client.query(
+          `UPDATE stock
+           SET quantidade = quantidade - $1, actualizado_em = now()
+           WHERE produto_id = $2 AND quantidade >= $1`,
           [item.quantity, produto.id],
         );
+        if ((rowCount ?? 0) !== 1) {
+          throw new AppError(
+            'INSUFFICIENT_STOCK',
+            `Stock insuficiente para ${produto.nome}. Outra compra acabou de reservar as unidades.`,
+          );
+        }
 
         const totalLinha = produto.preco_centimos * item.quantity;
         subtotal += totalLinha;
@@ -537,12 +544,32 @@ export const obterPorId = async (id: string): Promise<PedidoPublico> => {
   return mapearPedido(pedido, await carregarItems({ query }, pedido.id));
 };
 
-export const guardarComprovativo = async (
+/** Evita IDOR: só o dono ou um admin vê/altera a encomenda. */
+export const obterPorReferenciaAutorizado = async (
   referencia: string,
-  url: string,
+  auth: { userId: string; perfil: string } | null,
 ): Promise<PedidoPublico> => {
   const pedido = await obterRowPorReferencia({ query }, referencia);
   if (pedido === null) throw notFound('Pedido');
+  if (auth === null) {
+    throw new AppError('UNAUTHENTICATED', 'Entra na tua conta para ver esta encomenda.');
+  }
+  if (auth.perfil !== 'admin' && pedido.utilizador_id !== auth.userId) {
+    throw notFound('Pedido');
+  }
+  return mapearPedido(pedido, await carregarItems({ query }, pedido.id));
+};
+
+export const guardarComprovativo = async (
+  referencia: string,
+  url: string,
+  auth: { userId: string; perfil: string },
+): Promise<PedidoPublico> => {
+  const pedido = await obterRowPorReferencia({ query }, referencia);
+  if (pedido === null) throw notFound('Pedido');
+  if (auth.perfil !== 'admin' && pedido.utilizador_id !== auth.userId) {
+    throw notFound('Pedido');
+  }
   if (pedido.estado !== 'pendente') {
     throw new AppError('VALIDATION_ERROR', 'Esta encomenda já não espera comprovativo.');
   }

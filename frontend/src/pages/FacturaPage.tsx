@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { api, type Order } from '../api/client';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ApiError, api, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { formatEuro, ROTULO_ESTADO, ROTULO_PAGAMENTO } from '../utils/format';
 
 export function FacturaPage() {
   const { referencia = '' } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [erro, setErro] = useState('');
   useTitulo(order ? `Factura ${order.reference}` : 'Factura');
@@ -15,8 +16,14 @@ export function FacturaPage() {
     void api
       .pedido(referencia)
       .then((r) => setOrder(r.order))
-      .catch(() => setErro('Encomenda não encontrada.'));
-  }, [referencia]);
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) {
+          void navigate(`/login?seguir=${encodeURIComponent(`/pedido/${referencia}/factura`)}`);
+          return;
+        }
+        setErro('Encomenda não encontrada.');
+      });
+  }, [referencia, navigate]);
 
   if (erro || !order) {
     return (

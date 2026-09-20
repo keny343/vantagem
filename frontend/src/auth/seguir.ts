@@ -5,9 +5,9 @@ export function caminhoSeguro(valor: string | null): string | null {
   return valor;
 }
 
-export function destinoAposLogin(search: string, papel: string): string {
+export function destinoAposLogin(_search: string, papel: string): string {
   if (papel === 'admin') return '/admin';
-  return caminhoSeguro(new URLSearchParams(search).get('seguir')) ?? '/conta';
+  return '/conta';
 }
 
 export function urlComSeguir(base: '/login' | '/registo', search: string): string {

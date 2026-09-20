@@ -54,11 +54,21 @@ export const getProduto = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const getHealth = (_req: Request, res: Response): void => {
-  res.json({ ok: true, service: 'vantagem-api' });
+  res.json({
+    ok: true,
+    service: 'vantagem-api',
+    uptimeSec: Math.round(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 };
 
 export const getReady = async (_req: Request, res: Response): Promise<void> => {
+  const inicio = Date.now();
   const { query } = await import('../config/database.js');
   await query('SELECT 1');
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    database: 'up',
+    latencyMs: Date.now() - inicio,
+  });
 };
