@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { urlMedia } from '../api/client';
 import { useCart } from '../cart/CartContext';
+import { useSession } from '../auth/SessionContext';
 import { LOJA, faltaParaEnvioGratis, ivaIncluidoDe } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
@@ -9,6 +10,7 @@ import { formatEuro } from '../utils/format';
 
 export function CarrinhoPage() {
   const cart = useCart();
+  const { user } = useSession();
   const { avisar } = useAvisos();
   useTitulo('Carrinho');
 
@@ -133,7 +135,9 @@ export function CarrinhoPage() {
               Continuar a ver artigos
             </Link>
             <p className="mt-2 text-center font-mono text-[10px] text-steel">
-              IVA {Math.round(LOJA.taxaIva * 100)}% incluído · Envio em Angola
+              {user
+                ? `IVA ${Math.round(LOJA.taxaIva * 100)}% incluído · Envio em Angola`
+                : 'Para concluir precisas de entrar ou criar conta.'}
             </p>
           </aside>
         </div>

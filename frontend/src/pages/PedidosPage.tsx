@@ -5,7 +5,7 @@ import { useSession } from '../auth/SessionContext';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
 import { ErroBloco } from '../ui/ErroBloco';
-import { formatEuro, ROTULO_ESTADO } from '../utils/format';
+import { formatEuro, estadoEncomenda } from '../utils/format';
 
 export default function PedidosPage() {
   const { user, loading: sessionLoading } = useSession();
@@ -89,7 +89,7 @@ export default function PedidosPage() {
                   <div className="font-mono text-[11px] text-acid">{o.reference}</div>
                   <div className="mt-1 font-display text-white">{formatEuro(o.total)}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">
-                    {new Date(o.createdAt).toLocaleString('pt-PT')} · {ROTULO_ESTADO[o.status] ?? o.status}
+                    {new Date(o.createdAt).toLocaleString('pt-PT')} · {estadoEncomenda(o)}
                   </div>
                 </div>
                 <Link

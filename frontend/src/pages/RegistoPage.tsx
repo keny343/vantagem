@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
+import { destinoAposLogin, urlComSeguir } from '../auth/seguir';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
 import { Campo } from '../ui/Campo';
@@ -10,6 +11,7 @@ import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 export function RegistoPage() {
   const { user, registo } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -23,7 +25,7 @@ export function RegistoPage() {
     if (erro) alertaRef.current?.focus();
   }, [erro]);
 
-  if (user) return <Navigate to="/conta" replace />;
+  if (user) return <Navigate to={destinoAposLogin(location.search, user.role)} replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -36,7 +38,7 @@ export function RegistoPage() {
         password,
         ...(telefone.trim() ? { telefone } : {}),
       });
-      void navigate('/conta');
+      void navigate(destinoAposLogin(location.search, 'cliente'));
     } catch (err) {
       setErro(err instanceof ApiError ? err.message : 'Não foi possível criar a conta.');
     } finally {
@@ -49,7 +51,9 @@ export function RegistoPage() {
       <div className="mx-auto mt-16 max-w-md rounded-[14px] border border-line bg-panel p-8">
         <div className="label-mono">Conta</div>
         <h1 className="mt-2 font-display text-2xl font-semibold text-white">Criar conta</h1>
-        <p className="mt-2 text-sm text-zinc-400">Para comprar, guardar moradas e seguir encomendas.</p>
+        <p className="mt-2 text-sm text-zinc-400">
+          Com a conta acompanhas a encomenda e vês quando a loja confirmar o pagamento.
+        </p>
         <form
           className="mt-6 space-y-4"
           onSubmit={(e) => void onSubmit(e)}
@@ -101,12 +105,12 @@ export function RegistoPage() {
             {busy ? 'A criar…' : 'Criar conta'}
           </button>
         </form>
-        <p className="mt-4 font-mono text-[11px] text-steel">
-          Já tens conta?{' '}
-          <Link to="/login" className="text-acid">
-            Entrar
-          </Link>
-        </p>
+        <Link
+          to={urlComSeguir('/login', location.search)}
+          className="mt-4 grid h-11 place-items-center rounded-lg font-display text-sm font-semibold text-acid ring-1 ring-acid/40 hover:bg-acid/10"
+        >
+          Já tenho conta — entrar
+        </Link>
       </div>
     </StoreShell>
   );

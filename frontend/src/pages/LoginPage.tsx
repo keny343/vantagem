@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useSession } from '../auth/SessionContext';
+import { destinoAposLogin, urlComSeguir } from '../auth/seguir';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
 import { Campo } from '../ui/Campo';
@@ -10,6 +11,7 @@ import { onInputPt, onInvalidPt } from '../utils/validacaoPt';
 export function LoginPage() {
   const { user, login } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mostrar, setMostrar] = useState(false);
@@ -17,12 +19,13 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
   const alertaRef = useRef<HTMLDivElement>(null);
   useTitulo('Entrar');
+  const destino = (papel: string) => destinoAposLogin(location.search, papel);
 
   useEffect(() => {
     if (erro) alertaRef.current?.focus();
   }, [erro]);
 
-  if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/conta'} replace />;
+  if (user) return <Navigate to={destino(user.role)} replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,7 +34,7 @@ export function LoginPage() {
     try {
       await login(email, password);
       const sessao = await api.me();
-      void navigate(sessao.user?.role === 'admin' ? '/admin' : '/conta');
+      void navigate(destino(sessao.user?.role ?? 'cliente'));
     } catch (err) {
       setErro(
         err instanceof ApiError
@@ -49,7 +52,7 @@ export function LoginPage() {
         <div className="label-mono">Sessão</div>
         <h1 className="mt-2 font-display text-2xl font-semibold text-white">Entrar</h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Cliente: compras e encomendas. Administrador: gere a loja e não compra.
+          Entra para concluir a compra e acompanhar se a loja já confirmou o pagamento.
         </p>
         <form
           className="mt-6 space-y-4"
@@ -102,17 +105,15 @@ export function LoginPage() {
             {busy ? 'A autenticar…' : 'Entrar'}
           </button>
         </form>
+        <Link
+          to={urlComSeguir('/registo', location.search)}
+          className="mt-4 grid h-11 place-items-center rounded-lg font-display text-sm font-semibold text-acid ring-1 ring-acid/40 hover:bg-acid/10"
+        >
+          Não tenho conta — criar conta
+        </Link>
         <div className="mt-4 flex flex-wrap justify-between gap-2 font-mono text-[11px] text-steel">
-          <Link to="/registo" className="text-acid hover:underline">
-            Criar conta
-          </Link>
           <Link to="/recuperar" className="hover:text-acid">
             Recuperar palavra-passe
-          </Link>
-        </div>
-        <div className="mt-3 flex justify-between font-mono text-[11px] text-steel">
-          <Link to="/" className="hover:text-acid">
-            Voltar ao início
           </Link>
           <Link to="/ajuda" className="hover:text-acid">
             Ajuda

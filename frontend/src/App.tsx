@@ -24,6 +24,7 @@ import { AdminCuponsPage } from './pages/admin/AdminCuponsPage';
 import { AdminPedidosPage } from './pages/admin/AdminPedidosPage';
 import { AdminUtilizadoresPage } from './pages/admin/AdminUtilizadoresPage';
 import { AdminTicketsPage } from './pages/admin/AdminTicketsPage';
+import { AdminTicketPage } from './pages/admin/AdminTicketPage';
 import { AdminPedidoPage } from './pages/admin/AdminPedidoPage';
 import { LegalPage } from './pages/LegalPage';
 import { ContaDeCliente, SemCompraDeAdmin } from './auth/papeis';
@@ -61,7 +62,9 @@ export function App() {
               path="/checkout"
               element={
                 <SemCompraDeAdmin>
-                  <CheckoutPage />
+                  <ContaDeCliente>
+                    <CheckoutPage />
+                  </ContaDeCliente>
                 </SemCompraDeAdmin>
               }
             />
@@ -159,6 +162,7 @@ export function App() {
               <Route path="pedidos/:id" element={<AdminPedidoPage />} />
               <Route path="utilizadores" element={<AdminUtilizadoresPage />} />
               <Route path="tickets" element={<AdminTicketsPage />} />
+              <Route path="tickets/:id" element={<AdminTicketPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

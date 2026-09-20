@@ -24,14 +24,16 @@ export function AjudaPage() {
           <ol className="list-decimal space-y-2 pl-5">
             <li>Abre o catálogo e escolhe o artigo.</li>
             <li>Adiciona ao carrinho. Podes alterar quantidades ou anular a remoção.</li>
-            <li>Em Finalizar compra, indica a morada em Angola e a forma de pagamento.</li>
-            <li>O pedido fica pendente até confirmares o pagamento na página da encomenda.</li>
+            <li>Entra na tua conta ou cria uma, se ainda não tiveres.</li>
+            <li>Em Finalizar compra, indica a morada em Angola.</li>
+            <li>No pagamento, transfere o valor, anexa a fotografia do comprovativo e confirma a encomenda.</li>
           </ol>
         </Seccao>
         <Seccao titulo="Pagamento e envio">
           <p>
-            Multicaixa Express, referência Multicaixa ou transferência. Os preços já incluem IVA de{' '}
-            {Math.round(LOJA.taxaIva * 100)}%. Envio em Angola; grátis a partir de 50 000 Kz.
+            Transferência bancária para a conta da loja. Os preços já incluem IVA de{' '}
+            {Math.round(LOJA.taxaIva * 100)}%. Envio em Angola; grátis a partir de 50 000 Kz. Express
+            e referência Multicaixa vêm numa fase seguinte.
           </p>
           <p className="mt-2">
             Devolução em {LOJA.diasDevolucao} dias.{' '}
@@ -74,11 +76,15 @@ export function AjudaPage() {
         </Seccao>
         <Seccao titulo="Ainda precisas de ajuda?">
           <p>
-            Escreve para {LOJA.email} ou liga {LOJA.telefone}.
+            Abre uma conversa com a loja na tua conta — encomenda em atraso, artigo danificado ou
+            outro problema.
           </p>
-          <Link to="/catalogo" className="mt-3 inline-block font-mono text-[11px] text-acid uppercase">
-            Ir ao catálogo
+          <Link to="/conta/suporte" className="mt-3 inline-block font-mono text-[11px] text-acid uppercase">
+            Falar com a loja
           </Link>
+          <p className="mt-3">
+            Ou escreve para {LOJA.email} / {LOJA.telefone}.
+          </p>
         </Seccao>
         {faq.length > 0 && (
           <Seccao titulo="Perguntas frequentes">

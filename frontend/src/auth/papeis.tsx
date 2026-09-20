@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useSession } from './SessionContext';
 import type { User } from '../api/client';
@@ -7,6 +7,7 @@ export const eAdmin = (user: User | null | undefined): boolean => user?.role ===
 
 export function ContaDeCliente({ children }: { children: ReactNode }) {
   const { user, loading } = useSession();
+  const location = useLocation();
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-ink font-mono text-steel">
@@ -14,7 +15,10 @@ export function ContaDeCliente({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    const seguir = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?seguir=${seguir}`} replace />;
+  }
   if (eAdmin(user)) return <Navigate to="/admin" replace />;
   return children;
 }
