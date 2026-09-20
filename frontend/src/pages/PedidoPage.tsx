@@ -156,7 +156,8 @@ export function PedidoPage() {
           <section className="mt-6 rounded-[14px] border border-acid/40 bg-panel p-5">
             <h2 className="font-display text-ink">Pagamento confirmado</h2>
             <p className="mt-2 text-sm text-steel">
-              A loja verificou o comprovativo e marcou a encomenda como paga.
+              A loja verificou o comprovativo e marcou a encomenda como paga. O entregador vai entrar
+              em contacto e receberá a encomenda ainda hoje.
             </p>
             <Link
               to="/conta/pedidos"

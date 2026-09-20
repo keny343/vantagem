@@ -15,7 +15,7 @@ export const ROTULO_PAGAMENTO: Record<string, string> = {
 
 export const ROTULO_ESTADO: Record<string, string> = {
   pendente: 'À espera da loja',
-  pago: 'Pago — a loja confirmou',
+  pago: 'Pago — a loja confirmou. O entregador vai entrar em contacto e receberá a encomenda ainda hoje',
   em_preparacao: 'Em preparação',
   enviado: 'Enviado',
   entregue: 'Entregue',
