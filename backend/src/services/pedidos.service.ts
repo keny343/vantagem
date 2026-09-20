@@ -506,8 +506,11 @@ export const alterarEstado = async (
 
     const { rows: actualizados } = await client.query<PedidoRow>(
       `UPDATE pedidos
-       SET estado = $1,
-           pago_em = CASE WHEN $1 = 'pago' AND pago_em IS NULL THEN now() ELSE pago_em END,
+       SET estado = $1::estado_pedido,
+           pago_em = CASE
+             WHEN ($1::text = 'pago') AND pago_em IS NULL THEN now()
+             ELSE pago_em
+           END,
            updated_at = now()
        WHERE id = $2
        RETURNING *`,
