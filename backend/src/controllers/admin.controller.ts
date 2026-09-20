@@ -5,11 +5,13 @@ import { eurosDeCentimos, type EstadoPedido } from '../types/domain.js';
 import { AppError, notFound } from '../utils/errors.js';
 import * as catalogo from '../services/adminCatalog.service.js';
 import * as pedidos from '../services/pedidos.service.js';
+import * as suporte from '../repositories/suporte.repository.js';
 import { emailEstadoPedido } from '../services/email.service.js';
+import * as engagement from '../repositories/engagement.repository.js';
 
 const ROTULO_ESTADO: Record<string, string> = {
-  pendente: 'Aguardar pagamento',
-  pago: 'Pago',
+  pendente: 'À espera da loja',
+  pago: 'Pago — a loja confirmou',
   em_preparacao: 'Em preparação',
   enviado: 'Enviado',
   entregue: 'Entregue',
@@ -25,6 +27,7 @@ export const resumo = async (_req: Request, res: Response): Promise<void> => {
     { rows: pendentes },
     { rows: clientes },
     { rows: ticketsAbertos },
+    { rows: comprovativos },
   ] = await Promise.all([
     query<{ count: string }>(`SELECT count(*)::text AS count FROM produtos WHERE activo`),
     query<{ count: string }>(`SELECT count(*)::text AS count FROM pedidos`),
@@ -43,6 +46,10 @@ export const resumo = async (_req: Request, res: Response): Promise<void> => {
     ),
     query<{ count: string }>(
       `SELECT count(*)::text AS count FROM tickets WHERE estado IN ('aberto', 'em_analise')`,
+    ),
+    query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM pedidos
+       WHERE estado = 'pendente' AND comprovativo_url IS NOT NULL`,
     ),
   ]);
 
@@ -67,6 +74,7 @@ export const resumo = async (_req: Request, res: Response): Promise<void> => {
     pendingOrders: Number(pendentes[0]?.count ?? 0),
     customers: Number(clientes[0]?.count ?? 0),
     openTickets: Number(ticketsAbertos[0]?.count ?? 0),
+    pendingProofs: Number(comprovativos[0]?.count ?? 0),
     lowStockItems: artigosBaixos.map((a) => ({
       name: a.nome,
       slug: a.slug,
@@ -95,8 +103,11 @@ export const listarPedidos = async (_req: Request, res: Response): Promise<void>
     cliente_email: string;
     total_centimos: number;
     created_at: Date;
+    metodo_pagamento: string;
+    comprovativo_url: string | null;
   }>(
-    `SELECT id, referencia, estado, cliente_nome, cliente_email, total_centimos, created_at
+    `SELECT id, referencia, estado, cliente_nome, cliente_email, total_centimos, created_at,
+            metodo_pagamento, comprovativo_url
      FROM pedidos
      ORDER BY created_at DESC
      LIMIT 100`,
@@ -110,6 +121,9 @@ export const listarPedidos = async (_req: Request, res: Response): Promise<void>
       customerEmail: r.cliente_email,
       total: eurosDeCentimos(r.total_centimos),
       createdAt: r.created_at.toISOString(),
+      paymentMethod: r.metodo_pagamento,
+      hasProof: r.comprovativo_url !== null,
+      comprovativoUrl: r.comprovativo_url,
     })),
   });
 };
@@ -132,12 +146,33 @@ export const actualizarEstado = async (req: Request, res: Response): Promise<voi
     tracking !== undefined && tracking.length > 0
       ? await pedidos.alterarEstado(id, status, tracking)
       : await pedidos.alterarEstado(id, status);
-  void emailEstadoPedido(
-    order.customer.email,
-    order.customer.name,
-    order.reference,
-    ROTULO_ESTADO[order.status] ?? order.status,
+
+  const rotulo = ROTULO_ESTADO[order.status] ?? order.status;
+  void emailEstadoPedido(order.customer.email, order.customer.name, order.reference, rotulo);
+
+  const { rows: donos } = await query<{ utilizador_id: string | null }>(
+    `SELECT utilizador_id FROM pedidos WHERE id = $1`,
+    [id],
   );
+  const clienteId = donos[0]?.utilizador_id;
+  if (clienteId) {
+    const titulo =
+      order.status === 'pago'
+        ? 'Pagamento confirmado'
+        : `Encomenda: ${rotulo}`;
+    const mensagem =
+      order.status === 'pago'
+        ? `A loja confirmou o pagamento de ${order.reference}. Já podes acompanhar a preparação na tua conta.`
+        : `A encomenda ${order.reference} passou a «${rotulo}».`;
+    void engagement.criarNotificacao(
+      clienteId,
+      'pedido',
+      titulo,
+      mensagem,
+      `/pedido/${order.reference}`,
+    );
+  }
+
   res.json({ ok: true, status: order.status, order });
 };
 
@@ -190,35 +225,22 @@ export const listarUtilizadores = async (_req: Request, res: Response): Promise<
 };
 
 export const listarTickets = async (_req: Request, res: Response): Promise<void> => {
-  const { rows } = await query<{
-    id: string;
-    categoria: string;
-    assunto: string;
-    descricao: string;
-    estado: string;
-    prioridade: string;
-    created_at: Date;
-    nome: string;
-    email: string;
-  }>(
-    `SELECT t.id, t.categoria, t.assunto, t.descricao, t.estado, t.prioridade, t.created_at,
-            u.nome, u.email
-     FROM tickets t
-     INNER JOIN utilizadores u ON u.id = t.utilizador_id
-     ORDER BY t.created_at DESC
-     LIMIT 100`,
-  );
+  const lista = await suporte.listarTicketsAdmin();
   res.json({
-    tickets: rows.map((r) => ({
+    tickets: lista.map((r) => ({
       id: r.id,
       category: r.categoria,
       subject: r.assunto,
       description: r.descricao,
       status: r.estado,
       priority: r.prioridade,
-      createdAt: r.created_at.toISOString(),
-      customerName: r.nome,
-      customerEmail: r.email,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      customerName: r.cliente_nome,
+      customerEmail: r.cliente_email,
+      pedidoReferencia: r.pedido_referencia,
+      lastMessage: r.ultima_mensagem ?? r.descricao,
+      lastFrom: r.ultima_papel ?? 'cliente',
     })),
   });
 };

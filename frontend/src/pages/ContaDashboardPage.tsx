@@ -5,7 +5,7 @@ import { useSession } from '../auth/SessionContext';
 import { StoreShell } from '../layout/StoreShell';
 import { useTitulo } from '../hooks/useTitulo';
 import { ErroBloco } from '../ui/ErroBloco';
-import { formatEuro, ROTULO_ESTADO } from '../utils/format';
+import { formatEuro, estadoEncomenda } from '../utils/format';
 
 interface DashboardData {
   utilizador: { nome: string; email: string };
@@ -14,11 +14,10 @@ interface DashboardData {
     referencia: string;
     total: number;
     estado: string;
+    comprovativoUrl?: string | null;
     data: string;
   }>;
 }
-
-const ESTADO = ROTULO_ESTADO;
 
 export default function ContaDashboardPage() {
   useTitulo('Conta');
@@ -109,7 +108,12 @@ export default function ContaDashboardPage() {
       </div>
 
       <section className="mt-8 rounded-[14px] border border-line bg-panel p-6">
-        <h2 className="font-display text-lg text-white">Pedidos recentes</h2>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="font-display text-lg text-white">Pedidos recentes</h2>
+          <Link to="/conta/pedidos" className="font-mono text-[11px] text-acid uppercase">
+            Ver todos
+          </Link>
+        </div>
         {!data || data.pedidosRecentes.length === 0 ? (
           <p className="mt-4 font-mono text-[11px] text-steel">Ainda não tens pedidos.</p>
         ) : (
@@ -117,14 +121,19 @@ export default function ContaDashboardPage() {
             {data.pedidosRecentes.map((pedido) => (
               <Link
                 key={pedido.referencia}
-                to={`/conta/pedidos`}
+                to={`/pedido/${encodeURIComponent(pedido.referencia)}`}
                 className="flex flex-wrap items-center justify-between gap-3 py-4 hover:text-acid"
               >
                 <div>
-                  <div className="font-mono text-[11px] text-acid">#{pedido.referencia}</div>
+                  <div className="font-mono text-[11px] text-acid">{pedido.referencia}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">
-                    {new Date(pedido.data).toLocaleDateString('pt-PT')} ·{' '}
-                    {ESTADO[pedido.estado] ?? pedido.estado}
+                    {new Date(pedido.data).toLocaleDateString('pt-PT')}
+                  </div>
+                  <div className="mt-1 inline-flex rounded-md bg-panel2 px-2 py-1 font-mono text-[10px] text-zinc-200 ring-1 ring-line">
+                    {estadoEncomenda({
+                      status: pedido.estado,
+                      comprovativoUrl: pedido.comprovativoUrl ?? null,
+                    })}
                   </div>
                 </div>
                 <div className="font-display text-white">{formatEuro(pedido.total)}</div>
@@ -153,8 +162,10 @@ export default function ContaDashboardPage() {
           to="/conta/suporte"
           className="rounded-[14px] border border-line bg-panel p-5 transition-colors hover:border-acid/40"
         >
-          <p className="font-display text-white">Ajuda e suporte</p>
-          <p className="mt-1 font-mono text-[11px] text-steel">Abre um pedido de ajuda</p>
+          <p className="font-display text-white">Conversas com a loja</p>
+          <p className="mt-1 font-mono text-[11px] text-steel">
+            Encomenda em atraso, danificada ou outro problema
+          </p>
         </Link>
         <Link
           to="/conta/devolucoes"

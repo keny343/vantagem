@@ -38,12 +38,13 @@ export const obterDashboard = async (
       total_centimos: number;
       estado: string;
       created_at: string;
+      comprovativo_url: string | null;
     }>(
-      `SELECT referencia, total_centimos, estado, created_at
+      `SELECT referencia, total_centimos, estado, created_at, comprovativo_url
        FROM pedidos
        WHERE utilizador_id = $1
        ORDER BY created_at DESC
-       LIMIT 3`,
+       LIMIT 5`,
       [utilizadorId],
     );
 
@@ -61,6 +62,7 @@ export const obterDashboard = async (
         referencia: p.referencia,
         total: p.total_centimos / 100,
         estado: p.estado,
+        comprovativoUrl: p.comprovativo_url,
         data: p.created_at,
       })),
     });

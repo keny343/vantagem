@@ -24,6 +24,7 @@ export function AdminDashboardPage() {
     pendingOrders: number;
     customers: number;
     openTickets: number;
+    pendingProofs: number;
     lowStockItems?: { name: string; slug: string; quantity: number }[];
   } | null>(null);
   const [capa, setCapa] = useState<{ name: string; slug: string } | null>(null);
@@ -82,10 +83,17 @@ export function AdminDashboardPage() {
         </div>
       )}
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-3">
-        <Kpi tom="warn" label="Pedidos em curso" valor={resumo?.pendingOrders} />
+      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link to="/admin/pedidos">
+          <Kpi tom="warn" label="Pedidos em curso" valor={resumo?.pendingOrders} />
+        </Link>
+        <Link to="/admin/pedidos?filtro=comprovativos">
+          <Kpi tom="acid" label="Comprovativos por ver" valor={resumo?.pendingProofs} />
+        </Link>
         <Kpi tom="acid" label="Stock baixo" valor={resumo?.lowStock} />
-        <Kpi tom="acid" label="Tickets abertos" valor={resumo?.openTickets} />
+        <Link to="/admin/tickets">
+          <Kpi tom="acid" label="Conversas abertas" valor={resumo?.openTickets} />
+        </Link>
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -151,10 +159,10 @@ export function AdminDashboardPage() {
           Gerir pedidos
         </Link>
         <Link
-          to="/admin/cupons"
+          to="/admin/tickets"
           className="grid h-10 place-items-center rounded-lg px-4 font-display text-sm text-white ring-1 ring-line"
         >
-          Cupons
+          Mensagens
         </Link>
       </div>
     </div>

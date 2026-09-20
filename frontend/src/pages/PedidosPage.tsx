@@ -89,7 +89,10 @@ export default function PedidosPage() {
                   <div className="font-mono text-[11px] text-acid">{o.reference}</div>
                   <div className="mt-1 font-display text-white">{formatEuro(o.total)}</div>
                   <div className="mt-0.5 font-mono text-[10px] text-steel">
-                    {new Date(o.createdAt).toLocaleString('pt-PT')} · {estadoEncomenda(o)}
+                    {new Date(o.createdAt).toLocaleString('pt-PT')}
+                  </div>
+                  <div className="mt-2 inline-flex rounded-md bg-panel2 px-2 py-1 font-mono text-[10px] text-zinc-200 ring-1 ring-line">
+                    {estadoEncomenda(o)}
                   </div>
                 </div>
                 <Link

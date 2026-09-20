@@ -616,6 +616,7 @@ export const api = {
         createdAt: string;
         paymentMethod: string;
         hasProof: boolean;
+        comprovativoUrl: string | null;
       }[];
     }>('/api/admin/pedidos'),
   adminEstado: (id: string, status: string, tracking?: string) =>
