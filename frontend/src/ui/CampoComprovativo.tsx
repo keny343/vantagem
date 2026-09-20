@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { urlMedia } from '../api/client';
 
 const ACEITES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -40,7 +40,6 @@ export function CampoComprovativo({
 }) {
   const autoId = useId();
   const inputId = id ?? autoId;
-  const inputRef = useRef<HTMLInputElement>(null);
   const [localUrl, setLocalUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,12 +54,11 @@ export function CampoComprovativo({
 
   const preview = localUrl ?? (urlEnviada ? urlMedia(urlEnviada) : null);
   const obrigatorio = required && !urlEnviada;
-
-  function abrirSelector() {
-    // Clique programático a partir do botão (gesto do utilizador) — fiável em
-    // telemóvel; label + input sr-only falha em vários browsers.
-    inputRef.current?.click();
-  }
+  const rotulo = aEnviar
+    ? 'A enviar…'
+    : ficheiro || urlEnviada
+      ? 'Trocar fotografia'
+      : 'Escolher fotografia';
 
   return (
     <div className="rounded-lg border border-dashed border-acid/50 bg-panel2 p-4">
@@ -70,34 +68,34 @@ export function CampoComprovativo({
       <p className="mt-1 text-sm text-zinc-300">
         Anexa o comprovativo da transferência. JPG, PNG ou WEBP até 5 MB.
       </p>
-      <button
-        type="button"
-        disabled={aEnviar}
-        onClick={abrirSelector}
-        className="mt-3 inline-flex h-10 cursor-pointer items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink hover:brightness-95 disabled:cursor-wait disabled:opacity-60"
-      >
-        {aEnviar
-          ? 'A enviar…'
-          : ficheiro || urlEnviada
-            ? 'Trocar fotografia'
-            : 'Escolher fotografia'}
-      </button>
-      <input
-        ref={inputRef}
-        id={inputId}
-        name="comprovativo"
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,image/*"
-        className="hidden"
-        tabIndex={-1}
-        aria-hidden
-        onChange={(e) => {
-          const escolhido = e.target.files?.[0] ?? null;
-          // Permite voltar a escolher o mesmo ficheiro a seguir.
-          e.target.value = '';
-          onChange(escolhido);
-        }}
-      />
+      {/*
+        O input fica por cima do botão (opacidade 0). O clique é nativo no
+        <input type="file"> — display:none + .click() falha no desktop em Chromium.
+      */}
+      <div className="relative mt-3 inline-block">
+        <span
+          aria-hidden
+          className={`inline-flex h-10 items-center rounded-lg bg-acid px-4 font-display text-sm font-semibold text-ink ${
+            aEnviar ? 'opacity-60' : ''
+          }`}
+        >
+          {rotulo}
+        </span>
+        <input
+          id={inputId}
+          name="comprovativo"
+          type="file"
+          disabled={aEnviar}
+          accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif"
+          aria-label={rotulo}
+          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-wait"
+          onChange={(e) => {
+            const escolhido = e.target.files?.[0] ?? null;
+            e.target.value = '';
+            onChange(escolhido);
+          }}
+        />
+      </div>
       {ficheiro && (
         <p className="mt-2 font-mono text-[11px] text-acid">{ficheiro.name}</p>
       )}
