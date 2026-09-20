@@ -312,10 +312,6 @@ export const api = {
   me: () => request<{ user: User | null }>('/api/auth/me'),
   criarPedido: (body: unknown) =>
     request<{ order: Order }>('/api/pedidos', { method: 'POST', body: JSON.stringify(body) }),
-  pagarPedido: (referencia: string) =>
-    request<{ order: Order }>(`/api/pedidos/${encodeURIComponent(referencia)}/pagar`, {
-      method: 'POST',
-    }),
   enviarComprovativo: (referencia: string, ficheiro: File) => {
     const data = new FormData();
     data.append('fotografia', ficheiro);
@@ -358,21 +354,50 @@ export const api = {
         assunto: string;
         descricao: string;
         estado: string;
+        pedidoReferencia: string | null;
         created_at: string;
+        updated_at: string;
       }[];
     }>('/api/conta/tickets'),
-  criarTicket: (body: { categoria: string; assunto: string; descricao: string }) =>
-    request<{ ticket: { id: string } }>('/api/conta/tickets', {
+  criarTicket: (body: {
+    categoria: string;
+    assunto: string;
+    descricao: string;
+    pedidoReferencia?: string;
+  }) =>
+    request<{ ticket: { id: string }; existente?: boolean }>('/api/conta/tickets', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
   ticket: (id: string) =>
     request<{
-      ticket: { id: string; categoria: string; assunto: string; descricao: string; estado: string };
-      respostas: { id: string; mensagem: string; created_at: string; utilizador_id: string }[];
+      ticket: {
+        id: string;
+        categoria: string;
+        assunto: string;
+        descricao: string;
+        estado: string;
+        pedidoReferencia: string | null;
+        created_at: string;
+      };
+      mensagens: {
+        id: string;
+        texto: string;
+        createdAt: string;
+        autorNome: string;
+        papel: 'cliente' | 'admin';
+      }[];
     }>(`/api/conta/tickets/${encodeURIComponent(id)}`),
   responderTicket: (id: string, mensagem: string) =>
-    request<{ resposta: { id: string } }>(`/api/conta/tickets/${encodeURIComponent(id)}/respostas`, {
+    request<{
+      mensagem: {
+        id: string;
+        texto: string;
+        createdAt: string;
+        autorNome: string;
+        papel: 'cliente' | 'admin';
+      };
+    }>(`/api/conta/tickets/${encodeURIComponent(id)}/respostas`, {
       method: 'POST',
       body: JSON.stringify({ mensagem }),
     }),
@@ -455,6 +480,7 @@ export const api = {
       pendingOrders: number;
       customers: number;
       openTickets: number;
+      pendingProofs: number;
       lowStockItems?: { name: string; slug: string; quantity: number }[];
     }>('/api/admin/resumo'),
   adminProdutos: () => request<{ products: AdminProduct[] }>('/api/admin/produtos'),
@@ -524,6 +550,8 @@ export const api = {
         customerEmail: string;
         total: number;
         createdAt: string;
+        paymentMethod: string;
+        hasProof: boolean;
       }[];
     }>('/api/admin/pedidos'),
   adminEstado: (id: string, status: string, tracking?: string) =>
@@ -569,8 +597,47 @@ export const api = {
         status: string;
         priority: string;
         createdAt: string;
+        updatedAt: string;
         customerName: string;
         customerEmail: string;
+        pedidoReferencia: string | null;
+        lastMessage: string;
+        lastFrom: 'cliente' | 'admin';
       }[];
     }>('/api/admin/tickets'),
+  adminTicket: (id: string) =>
+    request<{
+      ticket: {
+        id: string;
+        category: string;
+        subject: string;
+        description: string;
+        status: string;
+        pedidoReferencia: string | null;
+        createdAt: string;
+        customerName: string;
+        customerEmail: string;
+        customerId: string;
+      };
+      mensagens: {
+        id: string;
+        texto: string;
+        createdAt: string;
+        autorNome: string;
+        papel: 'cliente' | 'admin';
+      }[];
+    }>(`/api/admin/tickets/${encodeURIComponent(id)}`),
+  adminResponderTicket: (id: string, mensagem: string) =>
+    request<{
+      mensagem: {
+        id: string;
+        texto: string;
+        createdAt: string;
+        autorNome: string;
+        papel: 'cliente' | 'admin';
+      };
+    }>(`/api/admin/tickets/${encodeURIComponent(id)}/respostas`, {
+      method: 'POST',
+      body: JSON.stringify({ mensagem }),
+    }),
 };
