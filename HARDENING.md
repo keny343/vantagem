@@ -16,7 +16,7 @@ Endurecer o que já existe sob condições reais — sem adicionar features de p
 | Testes unitários | Cupões/envio/IVA, MIME, CSRF assinado, códigos de erro |
 | CI | GitHub Actions: typecheck + test + build |
 
-## v2 (feito / em curso)
+## v2 (feito)
 
 | Área | Medida |
 |------|--------|
@@ -25,12 +25,18 @@ Endurecer o que já existe sob condições reais — sem adicionar features de p
 | Error webhook | `ERROR_WEBHOOK_URL` para 5xx (Sentry Relay ou equivalente) |
 | Catálogo | [docs/catalogo-explain.md](docs/catalogo-explain.md) — EXPLAIN e índices |
 
+## v3 (feito)
+
+| Área | Medida |
+|------|--------|
+| E2E Playwright | Registo → checkout + comprovativo → admin confirma pagamento |
+| CI E2E | Job com Postgres + API + Vite + Chromium ([docs/e2e.md](docs/e2e.md)) |
+
 ## Fora de âmbito (de propósito)
 
 - Redis / filas / microserviços
 - Rastreio de transportadora (removido)
 - Redesign visual completo (fase seguinte: identidade própria)
-- E2E Playwright completo (próximo quando o fluxo admin/cliente estabilizar)
 
 ## Como correr localmente
 
@@ -40,12 +46,4 @@ npm test
 npm run typecheck
 ```
 
-Integração com Postgres local (opcional):
-
-```bash
-# Postgres a escutar em 5432 com user/pass/db vantagem/vantagem/vantagem_test
-# ou define DATABASE_URL e:
-npm test
-```
-
-Em CI o serviço Postgres é provisionado automaticamente.
+E2E: ver [docs/e2e.md](docs/e2e.md).
