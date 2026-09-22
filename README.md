@@ -110,7 +110,8 @@ Testes de concorrência de stock correm quando há Postgres (`DATABASE_URL`); em
 
 1. **Postgres + API** — blueprint `render.yaml` (`vantagem-api`, `vantagem-db`)
 2. **Frontend** — projecto Vercel `vantagem` → domínio `vantagem-one.vercel.app`
-3. Env críticos: `DATABASE_URL`, `CORS_ORIGINS`, `FRONTEND_URL`, `SESSION`/`CSRF`, Supabase, `ADMIN_*`, `LOJA_IBAN`, `PAGAMENTO_MODO=producao`
+3. Env críticos: `DATABASE_URL`, `CORS_ORIGINS`, `FRONTEND_URL`, `SESSION`/`CSRF`, Supabase, `ADMIN_*`, `LOJA_IBAN`, `PAGAMENTO_MODO=producao`  
+   Pagamento actual: **só transferência** + PDF do comprovativo + confirmação no admin (sem API do banco / referência Multibanco).
 
 Detalhes: `docs/deploy.md`, `DEPLOY_STEPS.md`, `HARDENING.md`.
 
