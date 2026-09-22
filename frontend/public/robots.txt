@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Conta e admin não devem ser indexados
+Disallow: /admin
+Disallow: /conta
+Disallow: /login
+Disallow: /registo
+Disallow: /recuperar
+Disallow: /redefinir
+Disallow: /checkout
+Disallow: /carrinho
+
+Sitemap: https://vantagem-one.vercel.app/sitemap.xml
