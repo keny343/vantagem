@@ -40,7 +40,13 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: PAGAMENTO_MODO
-        value: demo
+        value: producao
+      - key: LOJA_IBAN
+        sync: false
+      - key: LOJA_NIF
+        sync: false
+      - key: LOJA_NOME_LEGAL
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY

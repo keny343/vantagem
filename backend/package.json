@@ -14,7 +14,8 @@
     "seed:e2e": "node scripts/seed-e2e.mjs",
     "start:e2e": "node dist/server.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.typecheck.json"
+    "typecheck": "tsc -p tsconfig.typecheck.json",
+    "apagar-clientes": "node scripts/apagar-clientes.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1136.0",
