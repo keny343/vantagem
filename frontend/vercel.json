@@ -16,6 +16,9 @@
       "source": "/uploads/:path*",
       "destination": "https://vantagem-api.onrender.com/uploads/:path*"
     },
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!assets/|robots\\.txt$|sitemap\\.xml$|google.*\\.html$).*)",
+      "destination": "/index.html"
+    }
   ]
 }
