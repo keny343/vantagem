@@ -5,6 +5,7 @@ import type { EstadoPedido, MetodoPagamento } from '../types/domain.js';
 import { eurosDeCentimos } from '../types/domain.js';
 import { AppError, notFound } from '../utils/errors.js';
 import { isUniqueViolation } from '../utils/postgres.js';
+import { assertTransicaoPedido } from './transicoesPedido.js';
 
 interface ItemInput {
   productId: string;
@@ -140,6 +141,19 @@ const reporStockSePreciso = async (
   await client.query(`UPDATE pedidos SET stock_reposto = true, updated_at = now() WHERE id = $1`, [
     pedido.id,
   ]);
+};
+
+const registarHistoricoEstado = async (
+  client: { query: typeof query },
+  pedidoId: string,
+  estado: EstadoPedido,
+  descricao: string,
+): Promise<void> => {
+  await client.query(
+    `INSERT INTO historico_estado_pedido (pedido_id, estado, descricao)
+     VALUES ($1, $2::estado_pedido, $3)`,
+    [pedidoId, estado, descricao],
+  );
 };
 
 /** Debita stock e incrementa vendidos no momento do pagamento confirmado. */
@@ -460,6 +474,8 @@ export const criarPedido = async (dados: {
         await client.query(`UPDATE cupons SET utilizacoes = utilizacoes + 1 WHERE id = $1`, [cupaoId]);
       }
 
+      await registarHistoricoEstado(client, pedido.id, 'pendente', 'Encomenda criada — a aguardar pagamento.');
+
       const items = await carregarItems(client, pedido.id);
       return mapearPedido(pedido, items);
     });
@@ -492,6 +508,8 @@ export const confirmarPagamento = async (referencia: string): Promise<PedidoPubl
       return mapearPedido(pedido, items);
     }
 
+    assertTransicaoPedido(pedido.estado, 'pago');
+
     const items = await carregarItems(client, pedido.id);
     await debitarStockAoPagar(client, items);
 
@@ -504,6 +522,7 @@ export const confirmarPagamento = async (referencia: string): Promise<PedidoPubl
     );
     const actualizado = rows[0];
     if (actualizado === undefined) throw new AppError('INTERNAL_ERROR', 'Falha ao confirmar pagamento.');
+    await registarHistoricoEstado(client, actualizado.id, 'pago', 'Pagamento confirmado.');
     return mapearPedido(actualizado, items);
   });
 };
@@ -519,8 +538,12 @@ export const alterarEstado = async (
     );
     const pedido = rows[0];
     if (pedido === undefined) throw notFound('Pedido');
-    if (pedido.estado === 'cancelado' && novo !== 'cancelado') {
-      throw new AppError('VALIDATION_ERROR', 'Um pedido cancelado não pode voltar a abrir.');
+
+    assertTransicaoPedido(pedido.estado, novo);
+
+    if (pedido.estado === novo) {
+      const items = await carregarItems(client, pedido.id);
+      return mapearPedido(pedido, items);
     }
 
     const items = await carregarItems(client, pedido.id);
@@ -547,6 +570,17 @@ export const alterarEstado = async (
     );
     const actualizado = actualizados[0];
     if (actualizado === undefined) throw notFound('Pedido');
+
+    const descricoes: Record<EstadoPedido, string> = {
+      pendente: 'Estado: pendente de pagamento.',
+      pago: 'Pagamento confirmado.',
+      em_preparacao: 'Em preparação.',
+      enviado: 'Enviado.',
+      entregue: 'Entregue.',
+      cancelado: 'Encomenda cancelada.',
+    };
+    await registarHistoricoEstado(client, actualizado.id, novo, descricoes[novo]);
+
     return mapearPedido(actualizado, items);
   });
 };

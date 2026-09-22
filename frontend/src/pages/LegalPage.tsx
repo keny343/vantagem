@@ -38,7 +38,7 @@ const PAGINAS: Record<string, { titulo: string; corpo: string[] }> = {
     titulo: 'Privacidade',
     corpo: [
       'Tratamos nome, email, telemóvel, morada e NIF para cumprir o contrato de compra e as obrigações fiscais.',
-      'A sessão usa cookie httpOnly. Não vendemos listas a terceiros. O acesso à página da encomenda pela referência revela os dados dessa encomenda — não partilhes a ligação.',
+      'A sessão usa cookie httpOnly. Só o dono da conta (ou um administrador) vê a encomenda. Não partilhes a sessão do teu dispositivo.',
       `Para aceder, rectificar ou apagar dados, escreve para ${LOJA.email}.`,
     ],
   },

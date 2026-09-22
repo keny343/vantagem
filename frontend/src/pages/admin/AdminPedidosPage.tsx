@@ -6,8 +6,7 @@ import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
 import { ErroBloco } from '../../ui/ErroBloco';
 import { formatEuro, estadoEncomenda, ROTULO_ESTADO, ROTULO_PAGAMENTO } from '../../utils/format';
-
-const ESTADOS = ['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue', 'cancelado'] as const;
+import { opcoesEstadoPedido } from '../../utils/transicoesPedido';
 
 type PedidoLista = {
   id: string;
@@ -67,8 +66,8 @@ export function AdminPedidosPage() {
       await api.adminEstado(id, status);
       avisar(`Pedido actualizado: ${ROTULO_ESTADO[status] ?? status}.`);
       await carregar();
-    } catch {
-      setErro('Não foi possível actualizar o pedido.');
+    } catch (err) {
+      setErro(err instanceof ApiError ? err.message : 'Não foi possível actualizar o pedido.');
       await carregar();
     }
   }
@@ -231,9 +230,9 @@ export function AdminPedidosPage() {
                 className="ml-2 h-9 rounded-md border border-line bg-panel2 px-2 font-mono text-[11px] text-ink/80"
                 aria-label={`Estado de ${o.reference}`}
               >
-                {ESTADOS.map((s) => (
+                {opcoesEstadoPedido(o.status).map((s) => (
                   <option key={s} value={s}>
-                    {ROTULO_ESTADO[s]}
+                    {ROTULO_ESTADO[s] ?? s}
                   </option>
                 ))}
               </select>

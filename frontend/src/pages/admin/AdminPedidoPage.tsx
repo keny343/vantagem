@@ -6,8 +6,7 @@ import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
 import { ErroBloco } from '../../ui/ErroBloco';
 import { formatEuro, ROTULO_ESTADO, ROTULO_PAGAMENTO } from '../../utils/format';
-
-const ESTADOS = ['pendente', 'pago', 'em_preparacao', 'enviado', 'entregue', 'cancelado'] as const;
+import { opcoesEstadoPedido } from '../../utils/transicoesPedido';
 
 export function AdminPedidoPage() {
   const { id = '' } = useParams();
@@ -43,8 +42,8 @@ export function AdminPedidoPage() {
       await api.adminEstado(order.id, status);
       avisar(`Pedido actualizado: ${ROTULO_ESTADO[status] ?? status}.`);
       await carregar();
-    } catch {
-      setErro('Não foi possível actualizar.');
+    } catch (err) {
+      setErro(err instanceof ApiError ? err.message : 'Não foi possível actualizar.');
     }
   }
 
@@ -180,16 +179,19 @@ export function AdminPedidoPage() {
           não gera códigos de rastreio — a entrega é tratada fora do sistema.
         </p>
         <div className="flex flex-wrap gap-2">
-          {ESTADOS.map((s) => (
+          {opcoesEstadoPedido(order.status).map((s) => (
             <button
               key={s}
               type="button"
+              disabled={s === order.status}
               onClick={() => void mudar(s)}
               className={`h-9 rounded-md px-3 font-mono text-[10px] uppercase ${
-                order.status === s ? 'bg-acid text-canvas' : 'text-canvas/70 ring-1 ring-line'
-              }`}
+                order.status === s
+                  ? 'bg-acid text-canvas'
+                  : 'text-canvas/70 ring-1 ring-line hover:border-acid/40'
+              } disabled:cursor-default`}
             >
-              {ROTULO_ESTADO[s]}
+              {ROTULO_ESTADO[s] ?? s}
             </button>
           ))}
         </div>
