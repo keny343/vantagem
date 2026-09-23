@@ -1,16 +1,114 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0e0f12" />
+    <meta name="application-name" content="Vantagem" />
+    <meta name="author" content="Vantagem Electrónica, Lda." />
     <meta
       name="description"
-      content="Vantagem — loja de electrónica em Angola. Portáteis, telemóveis e periféricos com preços em Kwanzas, IVA incluído, transferência bancária e confirmação pela loja."
+      content="Vantagem (vantagem-one) — loja de electrónica em Angola. Portáteis, telemóveis e periféricos com preços em Kwanzas, IVA incluído, transferência bancária e confirmação pela loja."
     />
-    <meta name="robots" content="index, follow" />
+    <meta
+      name="keywords"
+      content="Vantagem, vantagem-one, Vantagem Electrónica, loja electrónica Angola, portáteis Luanda, telemóveis Angola"
+    />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta name="googlebot" content="index, follow" />
     <link rel="canonical" href="https://vantagem-one.vercel.app/" />
-    <title>Vantagem · Electrónica em Angola</title>
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <title>Vantagem | Electrónica em Angola — vantagem-one</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_AO" />
+    <meta property="og:site_name" content="Vantagem" />
+    <meta property="og:title" content="Vantagem | Electrónica em Angola" />
+    <meta
+      property="og:description"
+      content="Loja online Vantagem (vantagem-one): portáteis, telemóveis e periféricos em Angola. Preços em Kwanzas, IVA incluído."
+    />
+    <meta property="og:url" content="https://vantagem-one.vercel.app/" />
+    <meta property="og:image" content="https://vantagem-one.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Vantagem — electrónica em Angola" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vantagem | Electrónica em Angola" />
+    <meta
+      name="twitter:description"
+      content="Loja online Vantagem (vantagem-one): portáteis, telemóveis e periféricos em Angola."
+    />
+    <meta name="twitter:image" content="https://vantagem-one.vercel.app/og.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://vantagem-one.vercel.app/#organizacao",
+            "name": "Vantagem",
+            "legalName": "Vantagem Electrónica, Lda.",
+            "alternateName": ["vantagem-one", "Vantagem Electrónica", "Vantagem Angola"],
+            "url": "https://vantagem-one.vercel.app/",
+            "email": "encomendas@vantagem.ao",
+            "telephone": "+244-923-000-000",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Rua Rainha Ginga, Ingombota",
+              "addressLocality": "Luanda",
+              "addressCountry": "AO"
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Angola"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://vantagem-one.vercel.app/#website",
+            "name": "Vantagem",
+            "alternateName": ["vantagem-one", "Vantagem Electrónica"],
+            "url": "https://vantagem-one.vercel.app/",
+            "inLanguage": "pt-AO",
+            "publisher": {
+              "@id": "https://vantagem-one.vercel.app/#organizacao"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://vantagem-one.vercel.app/catalogo?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "OnlineStore",
+            "@id": "https://vantagem-one.vercel.app/#loja",
+            "name": "Vantagem",
+            "alternateName": "vantagem-one",
+            "url": "https://vantagem-one.vercel.app/",
+            "description": "Loja de electrónica em Angola com preços em Kwanzas e IVA incluído.",
+            "priceRange": "$$",
+            "currenciesAccepted": "AOA",
+            "paymentAccepted": "Bank Transfer",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Rua Rainha Ginga, Ingombota",
+              "addressLocality": "Luanda",
+              "addressCountry": "AO"
+            }
+          }
+        ]
+      }
+    </script>
+
     <script>
       (function () {
         try {
@@ -31,6 +129,20 @@
     />
   </head>
   <body>
+    <noscript>
+      <main style="font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem">
+        <h1>Vantagem</h1>
+        <p>
+          Loja de electrónica em Angola — também conhecida como
+          <strong>vantagem-one</strong>. Portáteis, telemóveis e periféricos com
+          preços em Kwanzas e IVA incluído.
+        </p>
+        <p>
+          Site oficial:
+          <a href="https://vantagem-one.vercel.app/">https://vantagem-one.vercel.app/</a>
+        </p>
+      </main>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

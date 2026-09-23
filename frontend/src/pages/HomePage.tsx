@@ -17,7 +17,7 @@ function stockTexto(stock: number): string {
 }
 
 export function HomePage() {
-  useTitulo('Início');
+  useTitulo('Vantagem', { marca: true });
   const { user } = useSession();
   const admin = eAdmin(user);
   const [capa, setCapa] = useState<Product | null>(null);
@@ -79,14 +79,14 @@ export function HomePage() {
         />
         <div className="relative mx-auto grid min-h-[min(92vh,820px)] max-w-[1400px] lg:grid-cols-[1.05fr_0.95fr]">
           <div className="flex flex-col justify-end px-5 pt-28 pb-12 sm:px-8 sm:pb-16 lg:pb-20">
-            <p className="brand-in font-display text-[clamp(3rem,12vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.03em] text-ink">
+            <h1 className="brand-in font-display text-[clamp(3rem,12vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.03em] text-ink">
               Vantagem
-            </p>
-            <h1 className="rise mt-6 max-w-[18ch] font-display text-2xl leading-tight font-medium text-balance text-ink sm:text-3xl">
+            </h1>
+            <p className="rise mt-6 max-w-[18ch] font-display text-2xl leading-tight font-medium text-balance text-ink sm:text-3xl">
               {capa
                 ? capa.name
                 : 'Electrónica com factura e garantia, em Kwanzas.'}
-            </h1>
+            </p>
             <p className="rise mt-4 max-w-[40ch] text-pretty text-lg text-ink/70">
               {capa
                 ? `${capa.brand} · ${formatEuro(capa.price)} com IVA incluído`

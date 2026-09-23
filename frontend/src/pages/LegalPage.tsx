@@ -10,8 +10,8 @@ const PAGINAS: Record<string, { titulo: string; corpo: string[] }> = {
   '/empresa': {
     titulo: 'A empresa',
     corpo: [
-      `${LOJA.nomeLegal} opera a loja online ${LOJA.nome}, com sede em ${LOJA.morada}.`,
-      `NIF ${LOJA.nif} (demonstração). Contacto: ${LOJA.email} · ${LOJA.telefone}.`,
+      `${LOJA.nomeLegal} opera a loja online ${LOJA.nome} (também conhecida como vantagem-one), com sede em ${LOJA.morada}.`,
+      `O site oficial é https://vantagem-one.vercel.app/. NIF ${LOJA.nif} (demonstração). Contacto: ${LOJA.email} · ${LOJA.telefone}.`,
       'Vendemos electrónica de consumo e profissional a particulares e empresas em Angola. Preços apresentados em Kwanzas, com IVA (14%) incluído.',
       'Não somos um marketplace: o catálogo, o stock e a factura são da mesma empresa.',
     ],
