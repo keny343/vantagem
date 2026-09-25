@@ -119,7 +119,7 @@ export default function SuportePage() {
             id="sup-cat"
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
-            className="mt-1 h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm"
+            className="mt-1 h-11 w-full rounded-lg border border-line bg-panel2 px-3 text-sm text-ink"
           >
             {CATS.map((c) => (
               <option key={c.id} value={c.id}>
@@ -144,7 +144,7 @@ export default function SuportePage() {
             rows={4}
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-line bg-panel2 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-line bg-panel2 px-3 py-2 text-sm text-ink placeholder:text-steel"
             placeholder="Ex.: a encomenda VT-… ainda não chegou / chegou com a caixa danificada…"
           />
         </label>

@@ -72,8 +72,8 @@ export function AdminTicketsPage() {
               {t.customerName} · {t.customerEmail} · {ROTULO_CATEGORIA_TICKET[t.category] ?? t.category}
               {t.pedidoReferencia ? ` · ${t.pedidoReferencia}` : ''}
             </p>
-            <p className="mt-2 line-clamp-2 text-sm text-ink/70">
-              {t.lastFrom === 'cliente' ? 'Cliente: ' : 'Tu: '}
+            <p className="mt-2 line-clamp-2 text-sm text-ink">
+              <span className="text-steel">{t.lastFrom === 'cliente' ? 'Cliente: ' : 'Tu: '}</span>
               {t.lastMessage}
             </p>
           </Link>

@@ -91,7 +91,9 @@ export function AdminTicketPage() {
             type="button"
             onClick={() => void mudarEstado(valor)}
             className={`h-8 rounded-md px-3 font-mono text-[10px] uppercase ${
-              ticket.status === valor ? 'bg-acid text-canvas' : 'text-canvas/70 ring-1 ring-line'
+              ticket.status === valor
+                ? 'bg-acid text-canvas'
+                : 'text-ink/80 ring-1 ring-line hover:bg-panel2'
             }`}
           >
             {rotulo}
