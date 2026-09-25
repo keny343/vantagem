@@ -26,6 +26,10 @@ const supabaseActivo = (): boolean =>
 
 const sanitizarPasta = (pasta: string): string => pasta.replace(/[^a-z0-9_-]/gi, '');
 
+const bucketPublico = (): string => env.SUPABASE_STORAGE_BUCKET || 'artigos';
+const bucketComprovativos = (): string =>
+  env.SUPABASE_STORAGE_BUCKET_COMPROVATIVOS || 'comprovativos';
+
 /** Extrai a chave de objecto a partir de URLs legadas ou chaves já normalizadas. */
 export const chaveDeArmazenamento = (valor: string): string => {
   const v = valor.trim();
@@ -46,11 +50,11 @@ export const chaveDeArmazenamento = (valor: string): string => {
 
 const guardarNoSupabase = async (
   ficheiro: { buffer: Buffer; mimetype: string },
-  chave: string,
+  bucket: string,
+  objectKey: string,
 ): Promise<void> => {
   const base = env.SUPABASE_URL.replace(/\/+$/, '');
-  const bucket = env.SUPABASE_STORAGE_BUCKET;
-  const endpoint = `${base}/storage/v1/object/${bucket}/${chave}`;
+  const endpoint = `${base}/storage/v1/object/${bucket}/${objectKey}`;
   const resposta = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -72,10 +76,9 @@ const guardarNoSupabase = async (
   }
 };
 
-const lerDoSupabase = async (chave: string): Promise<Buffer> => {
+const lerDoSupabase = async (bucket: string, objectKey: string): Promise<Buffer | null> => {
   const base = env.SUPABASE_URL.replace(/\/+$/, '');
-  const bucket = env.SUPABASE_STORAGE_BUCKET;
-  const endpoint = `${base}/storage/v1/object/${bucket}/${chave}`;
+  const endpoint = `${base}/storage/v1/object/${bucket}/${objectKey}`;
   const resposta = await fetch(endpoint, {
     method: 'GET',
     headers: {
@@ -83,9 +86,7 @@ const lerDoSupabase = async (chave: string): Promise<Buffer> => {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
     },
   });
-  if (!resposta.ok) {
-    throw new AppError('NOT_FOUND', 'Ficheiro não encontrado.');
-  }
+  if (!resposta.ok) return null;
   return Buffer.from(await resposta.arrayBuffer());
 };
 
@@ -96,8 +97,8 @@ const pastaLocalDe = (chave: string): string => {
 
 /**
  * Grava ficheiro.
- * Pastas privadas (`comprovativos`) devolvem só a chave interna — nunca URL pública.
- * Pastas públicas (`produtos`) continuam com URL pública / path estático.
+ * Comprovativos → bucket privado `comprovativos` (chave lógica `comprovativos/…`).
+ * Produtos → bucket público `artigos` com URL pública.
  */
 export const guardarFicheiro = async (
   ficheiro: {
@@ -111,13 +112,17 @@ export const guardarFicheiro = async (
   const privada = PASTAS_PRIVADAS.has(pastaLimpa);
   const ext = extensaoDe(ficheiro.mimetype, ficheiro.originalname);
   const nome = `${Date.now()}-${randomBytes(6).toString('hex')}${ext}`;
-  const chave = `${pastaLimpa}/${nome}`;
+  const chaveLogica = `${pastaLimpa}/${nome}`;
 
   if (supabaseActivo()) {
-    await guardarNoSupabase(ficheiro, chave);
-    if (privada) return chave;
+    if (privada) {
+      // Object key no bucket privado = só o ficheiro (bucket já é "comprovativos").
+      await guardarNoSupabase(ficheiro, bucketComprovativos(), nome);
+      return chaveLogica;
+    }
+    await guardarNoSupabase(ficheiro, bucketPublico(), chaveLogica);
     const base = env.SUPABASE_URL.replace(/\/+$/, '');
-    return `${base}/storage/v1/object/public/${env.SUPABASE_STORAGE_BUCKET}/${chave}`;
+    return `${base}/storage/v1/object/public/${bucketPublico()}/${chaveLogica}`;
   }
 
   if (env.isProduction) {
@@ -128,9 +133,9 @@ export const guardarFicheiro = async (
   }
 
   garantirPastasUpload();
-  const destino = path.join(pastaLocalDe(chave), nome);
+  const destino = path.join(pastaLocalDe(chaveLogica), nome);
   await writeFile(destino, ficheiro.buffer);
-  if (privada) return chave;
+  if (privada) return chaveLogica;
   return `/uploads/produtos/${nome}`;
 };
 
@@ -145,9 +150,29 @@ export const lerFicheiroPrivado = async (valorArmazenado: string): Promise<{
     throw new AppError('NOT_FOUND', 'Ficheiro não encontrado.');
   }
 
-  const buffer = supabaseActivo()
-    ? await lerDoSupabase(chave)
-    : await readFile(path.join(pastaLocalDe(chave), path.basename(chave)));
+  let buffer: Buffer | null = null;
+  if (supabaseActivo()) {
+    if (chave.startsWith('comprovativos/')) {
+      const nome = path.basename(chave);
+      // 1) bucket privado novo
+      buffer = await lerDoSupabase(bucketComprovativos(), nome);
+      // 2) legado: pasta comprovativos/ no bucket artigos
+      if (buffer === null) {
+        buffer = await lerDoSupabase(bucketPublico(), chave);
+      }
+      // 3) legado: object key sem prefixo no bucket artigos
+      if (buffer === null) {
+        buffer = await lerDoSupabase(bucketPublico(), nome);
+      }
+    } else {
+      buffer = await lerDoSupabase(bucketPublico(), chave);
+    }
+    if (buffer === null) {
+      throw new AppError('NOT_FOUND', 'Ficheiro não encontrado.');
+    }
+  } else {
+    buffer = await readFile(path.join(pastaLocalDe(chave), path.basename(chave)));
+  }
 
   const ext = path.extname(chave).toLowerCase();
   const contentType =

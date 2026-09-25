@@ -26,6 +26,8 @@ const schema = z.object({
   SUPABASE_URL: z.string().optional().default(''),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional().default(''),
   SUPABASE_STORAGE_BUCKET: z.string().optional().default('artigos'),
+  /** Bucket privado para PDFs de comprovativo (sem URL pública). */
+  SUPABASE_STORAGE_BUCKET_COMPROVATIVOS: z.string().optional().default('comprovativos'),
   ADMIN_EMAIL: z.string().optional().default(''),
   ADMIN_PASSWORD: z.string().optional().default(''),
   PAGAMENTO_MODO: z.enum(['demo', 'producao']).default('producao'),
