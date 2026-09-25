@@ -1,4 +1,5 @@
 import { query } from '../config/database.js';
+import { AppError } from '../utils/errors.js';
 
 export interface Devolucao {
   id: string;
@@ -23,6 +24,14 @@ export const criarDevolucao = async (
     fotos?: string[];
   },
 ): Promise<Devolucao> => {
+  const { rows: pedidos } = await query<{ id: string }>(
+    `SELECT id FROM pedidos WHERE id = $1 AND utilizador_id = $2 LIMIT 1`,
+    [pedidoId, utilizadorId],
+  );
+  if (pedidos[0] === undefined) {
+    throw new AppError('NOT_FOUND', 'Pedido não encontrado.');
+  }
+
   const { rows } = await query<Devolucao>(
     `INSERT INTO devolucoes (
       utilizador_id, pedido_id, produto_id, motivo, descricao, fotos

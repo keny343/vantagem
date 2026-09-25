@@ -15,16 +15,17 @@
 - Tentativas falhadas persistidas em `tentativas_login` (5 por email / 20 por IP na janela).
 
 ## CSRF
-- Cookie `vantagem_csrf` (legível pelo JS) + header `X-CSRF-Token` (double-submit).
-- Emitido em `GET /api/auth/csrf` e em qualquer pedido `/api` sem cookie.
-- Mutações (POST/PATCH/DELETE) sem o par cookie+header → 403.
+- Cookie `vantagem_csrf` (legível pelo JS) + header `X-CSRF-Token` (HMAC assinado ou double-submit).
+- Emitido em `GET /api/auth/csrf` e em qualquer pedido `/api` seguro sem cookie.
+- Mutações (POST/PATCH/DELETE) sem token válido → 403.
+- Em **produção**, `CSRF_SECRET` (≥16 caracteres) é obrigatório no boot.
 
 ## Cookies cross-origin (Vercel → Render)
 - Em produção: `SameSite=None; Secure` na sessão e no CSRF.
 - Em desenvolvimento: `SameSite=Lax` (HTTP local).
 
 ## Validação e injecção
-- Input validado com **Zod** no servidor.
+- Input validado com **Zod** (schemas `.strict()` em registo/perfil público).
 - Queries só com parâmetros (`$1…`) via `pg` — sem SQL concatenado.
 - Helmet + CORS restrito a origens em `CORS_ORIGINS`.
 - Respostas de erro sem stack em produção.
@@ -32,10 +33,15 @@
 ## Autorização
 - Rotas `/api/admin/*` exigem sessão + perfil `admin`.
 - Pedido e comprovativo por referência: só o **dono** (utilizador do pedido) ou **admin** (anti-IDOR).
+- Devoluções: `pedido_id` tem de pertencer ao cliente autenticado.
+- `idempotencyKey` de outro utilizador → 404 (não vaza o pedido).
 
 ## Uploads
-- Content-Type do browser não basta: validação por **magic bytes** (JPEG/PNG/WEBP/GIF).
+- Content-Type do browser não basta: validação por **magic bytes** (imagens e PDF).
 - Nomes com `..` / `/` / `\` rejeitados.
+- **Comprovativos** guardados como objectos privados (chave `comprovativos/…`); nunca URL `object/public`.
+- Download só via `GET /api/pedidos/:referencia/comprovativo` (sessão + ownership).
+- Fotos de produto podem continuar públicas em `/uploads/produtos` ou bucket público.
 
 ## Observabilidade
 - `X-Request-Id` em cada pedido; erros 5xx podem ir para `ERROR_WEBHOOK_URL` (opcional).

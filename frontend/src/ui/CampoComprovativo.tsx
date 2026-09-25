@@ -1,5 +1,5 @@
-﻿import { useId } from 'react';
-import { urlMedia } from '../api/client';
+import { useId } from 'react';
+import { abrirComprovativo } from '../api/client';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const MIN_BYTES = 512;
@@ -27,6 +27,7 @@ export function CampoComprovativo({
   onChange,
   required = false,
   urlEnviada = null,
+  referenciaPedido = null,
   erro,
   aEnviar = false,
 }: {
@@ -35,6 +36,8 @@ export function CampoComprovativo({
   onChange: (ficheiro: File | null) => void;
   required?: boolean;
   urlEnviada?: string | null;
+  /** Referência da encomenda para abrir o PDF autenticado. */
+  referenciaPedido?: string | null;
   erro?: string;
   aEnviar?: boolean;
 }) {
@@ -88,14 +91,17 @@ export function CampoComprovativo({
       {urlEnviada && !ficheiro && (
         <p className="mt-2 font-mono text-[11px] text-acid">
           Comprovativo já enviado.{' '}
-          <a
-            href={urlMedia(urlEnviada)}
-            target="_blank"
-            rel="noreferrer"
-            className="underline hover:text-ink"
-          >
-            Abrir PDF
-          </a>
+          {referenciaPedido || urlEnviada.includes('/comprovativo') ? (
+            <button
+              type="button"
+              onClick={() => {
+                void abrirComprovativo(referenciaPedido ?? urlEnviada);
+              }}
+              className="underline hover:text-ink"
+            >
+              Abrir PDF
+            </button>
+          ) : null}
         </p>
       )}
       {erro && (

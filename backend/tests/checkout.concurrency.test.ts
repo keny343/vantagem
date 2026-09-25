@@ -68,6 +68,56 @@ describe('checkout / stock na confirmação (Postgres)', () => {
     expect(await stockDe(produto.produtoId)).toBe(2);
   }, 30_000);
 
+  it('só um de dois checkouts paralelos reserva a última unidade', async ({ skip }) => {
+    if (!ativo) {
+      skip();
+      return;
+    }
+
+    const slug = `soft-${randomUUID().slice(0, 8)}`;
+    const produto = await criarProdutoComStock({ slug, stock: 1 });
+    const u1 = await criarClienteTeste(`a-${slug}`);
+    const u2 = await criarClienteTeste(`b-${slug}`);
+
+    const resultados = await Promise.allSettled([
+      pedidos.criarPedido({
+        items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+        customer: clientePedido(u1.slice(0, 8)),
+        paymentMethod: 'cartao',
+        userId: u1,
+        idempotencyKey: `idem-${slug}-1`,
+      }),
+      pedidos.criarPedido({
+        items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+        customer: clientePedido(u2.slice(0, 8)),
+        paymentMethod: 'cartao',
+        userId: u2,
+        idempotencyKey: `idem-${slug}-2`,
+      }),
+    ]);
+
+    const ok = resultados.filter((r) => r.status === 'fulfilled');
+    const falhas = resultados.filter((r) => r.status === 'rejected');
+
+    expect(ok).toHaveLength(1);
+    expect(falhas).toHaveLength(1);
+    expect(await stockDe(produto.produtoId)).toBe(1);
+
+    const rejeitado = falhas[0];
+    expect(rejeitado?.status).toBe('rejected');
+    if (rejeitado?.status === 'rejected') {
+      expect(rejeitado.reason).toBeInstanceOf(AppError);
+      expect((rejeitado.reason as AppError).code).toBe('INSUFFICIENT_STOCK');
+    }
+
+    const criado = ok[0];
+    expect(criado?.status).toBe('fulfilled');
+    if (criado?.status === 'fulfilled') {
+      await pedidos.alterarEstado(criado.value.id, 'pago');
+      expect(await stockDe(produto.produtoId)).toBe(0);
+    }
+  }, 30_000);
+
   it('só uma de duas confirmações paralelas fica com o último stock', async ({ skip }) => {
     if (!ativo) {
       skip();
@@ -86,6 +136,11 @@ describe('checkout / stock na confirmação (Postgres)', () => {
       userId: u1,
       idempotencyKey: `idem-${slug}-1`,
     });
+
+    // Simula oversell legado: segunda encomenda criada após elevar stock e voltar a 1
+    // sem soft-count — aqui elevamos stock, criamos p2, e forçamos stock físico a 1.
+    const { query } = await import('../src/config/database.js');
+    await query(`UPDATE stock SET quantidade = 2 WHERE produto_id = $1`, [produto.produtoId]);
     const p2 = await pedidos.criarPedido({
       items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
       customer: clientePedido(u2.slice(0, 8)),
@@ -93,6 +148,7 @@ describe('checkout / stock na confirmação (Postgres)', () => {
       userId: u2,
       idempotencyKey: `idem-${slug}-2`,
     });
+    await query(`UPDATE stock SET quantidade = 1 WHERE produto_id = $1`, [produto.produtoId]);
 
     expect(await stockDe(produto.produtoId)).toBe(1);
 
@@ -115,6 +171,37 @@ describe('checkout / stock na confirmação (Postgres)', () => {
     }
 
     expect(await stockDe(produto.produtoId)).toBe(0);
+  }, 30_000);
+
+  it('idempotencyKey de outro utilizador não devolve o pedido', async ({ skip }) => {
+    if (!ativo) {
+      skip();
+      return;
+    }
+
+    const slug = `idem-own-${randomUUID().slice(0, 8)}`;
+    const produto = await criarProdutoComStock({ slug, stock: 3 });
+    const u1 = await criarClienteTeste(`a-${slug}`);
+    const u2 = await criarClienteTeste(`b-${slug}`);
+    const chave = `idem-own-key-${slug}`;
+
+    await pedidos.criarPedido({
+      items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+      customer: clientePedido('Owner A'),
+      paymentMethod: 'cartao',
+      userId: u1,
+      idempotencyKey: chave,
+    });
+
+    await expect(
+      pedidos.criarPedido({
+        items: [{ productId: produto.slug, variant: produto.variante, quantity: 1 }],
+        customer: clientePedido('Owner B'),
+        paymentMethod: 'cartao',
+        userId: u2,
+        idempotencyKey: chave,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
   }, 30_000);
 
   it('repete a mesma idempotencyKey sem criar outro pedido nem mexer no stock', async ({ skip }) => {

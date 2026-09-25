@@ -1,3 +1,4 @@
+import path from 'node:path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -49,7 +50,11 @@ export const createApp = (): Express => {
   app.use(express.json({ limit: '256kb' }));
   app.use(express.urlencoded({ extended: false, limit: '256kb' }));
   app.use(cookieParser());
-  app.use('/uploads', express.static(PASTA_UPLOADS, { maxAge: '7d', index: false }));
+  // Só fotos de produto são públicas. Comprovativos nunca passam por static.
+  app.use(
+    '/uploads/produtos',
+    express.static(path.join(PASTA_UPLOADS, 'produtos'), { maxAge: '7d', index: false }),
+  );
 
   app.use(
     '/api',

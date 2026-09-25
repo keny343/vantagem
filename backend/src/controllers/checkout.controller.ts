@@ -109,7 +109,7 @@ export const enviarComprovativo = async (req: Request, res: Response): Promise<v
   }
   const { validarUploadComprovativo } = await import('./upload.controller.js');
   validarUploadComprovativo(req);
-  const url = await guardarFicheiro(
+  const chave = await guardarFicheiro(
     {
       buffer: req.file.buffer,
       mimetype: req.file.mimetype,
@@ -117,11 +117,29 @@ export const enviarComprovativo = async (req: Request, res: Response): Promise<v
     },
     'comprovativos',
   );
-  const pedido = await pedidos.guardarComprovativo(referencia, url, {
+  const pedido = await pedidos.guardarComprovativo(referencia, chave, {
     userId: sessao.userId,
     perfil: sessao.perfil,
   });
   res.json({ order: pedido });
+};
+
+export const descarregarComprovativo = async (req: Request, res: Response): Promise<void> => {
+  const referencia = z.string().trim().min(3).max(40).parse(req.params.referencia);
+  const sessao = await lerSessao(req);
+  if (!sessao) {
+    throw new AppError('UNAUTHENTICATED', 'Entra na tua conta para ver o comprovativo.');
+  }
+  const chave = await pedidos.chaveComprovativoAutorizado(referencia, {
+    userId: sessao.userId,
+    perfil: sessao.perfil,
+  });
+  const { lerFicheiroPrivado } = await import('../services/storage.service.js');
+  const ficheiro = await lerFicheiroPrivado(chave);
+  res.setHeader('Content-Type', ficheiro.contentType);
+  res.setHeader('Content-Disposition', `inline; filename="${ficheiro.filename}"`);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.send(ficheiro.buffer);
 };
 
 export const meusPedidos = async (req: Request, res: Response): Promise<void> => {

@@ -123,7 +123,9 @@ export const listarPedidos = async (_req: Request, res: Response): Promise<void>
       createdAt: r.created_at.toISOString(),
       paymentMethod: r.metodo_pagamento,
       hasProof: r.comprovativo_url !== null,
-      comprovativoUrl: r.comprovativo_url,
+      comprovativoUrl: r.comprovativo_url
+        ? `/api/pedidos/${encodeURIComponent(r.referencia)}/comprovativo`
+        : null,
     })),
   });
 };

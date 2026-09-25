@@ -62,7 +62,9 @@ export const obterDashboard = async (
         referencia: p.referencia,
         total: p.total_centimos / 100,
         estado: p.estado,
-        comprovativoUrl: p.comprovativo_url,
+        comprovativoUrl: p.comprovativo_url
+          ? `/api/pedidos/${encodeURIComponent(p.referencia)}/comprovativo`
+          : null,
         data: p.created_at,
       })),
     });
@@ -110,31 +112,40 @@ export const actualizarPerfil = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { nome, telefone, morada, codigo_postal, cidade } = req.body;
+    const dados = z
+      .object({
+        nome: z.string().trim().min(2).max(160).optional(),
+        telefone: z.string().trim().max(40).optional(),
+        morada: z.string().trim().max(300).optional(),
+        codigo_postal: z.string().trim().max(40).optional(),
+        cidade: z.string().trim().max(100).optional(),
+      })
+      .strict()
+      .parse(req.body);
 
     const campos: string[] = [];
     const valores: unknown[] = [req.auth!.userId];
     let i = 2;
 
-    if (nome !== undefined) {
+    if (dados.nome !== undefined) {
       campos.push(`nome = $${i++}`);
-      valores.push(nome);
+      valores.push(dados.nome);
     }
-    if (telefone !== undefined) {
+    if (dados.telefone !== undefined) {
       campos.push(`telefone = $${i++}`);
-      valores.push(telefone || null);
+      valores.push(dados.telefone || null);
     }
-    if (morada !== undefined) {
+    if (dados.morada !== undefined) {
       campos.push(`morada = $${i++}`);
-      valores.push(morada || null);
+      valores.push(dados.morada || null);
     }
-    if (codigo_postal !== undefined) {
+    if (dados.codigo_postal !== undefined) {
       campos.push(`codigo_postal = $${i++}`);
-      valores.push(codigo_postal || null);
+      valores.push(dados.codigo_postal || null);
     }
-    if (cidade !== undefined) {
+    if (dados.cidade !== undefined) {
       campos.push(`cidade = $${i++}`);
-      valores.push(cidade || null);
+      valores.push(dados.cidade || null);
     }
 
     if (campos.length === 0) {

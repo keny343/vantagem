@@ -113,6 +113,9 @@ apiRouter.get('/pedidos/meus', requerAutenticacao, requerPapel('cliente'), (req,
 apiRouter.get('/pedidos/:referencia', (req, res, next) => {
   void checkout.obterPedido(req, res).catch(next);
 });
+apiRouter.get('/pedidos/:referencia/comprovativo', (req, res, next) => {
+  void checkout.descarregarComprovativo(req, res).catch(next);
+});
 apiRouter.post(
   '/pedidos/:referencia/comprovativo',
   uploadLimiter,

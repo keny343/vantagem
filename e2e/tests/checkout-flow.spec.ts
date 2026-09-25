@@ -51,12 +51,14 @@ test('registo → checkout com comprovativo → admin confirma pagamento', async
   await expect(page).toHaveURL(/\/admin/, { timeout: 20_000 });
 
   await page.goto('/admin/pedidos?filtro=comprovativos');
-  await expect(page.getByRole('button', { name: 'Confirmar pagamento' }).first()).toBeVisible({
-    timeout: 20_000,
-  });
-  await page.getByRole('button', { name: 'Confirmar pagamento' }).first().click();
+  const cartaoCliente = page
+    .locator('div.flex.flex-wrap')
+    .filter({ hasText: email })
+    .filter({ has: page.getByRole('button', { name: 'Confirmar pagamento' }) });
+  await expect(cartaoCliente).toBeVisible({ timeout: 20_000 });
+  await cartaoCliente.getByRole('button', { name: 'Confirmar pagamento' }).click();
   await page.getByRole('button', { name: 'Sim, pagamento confirmado' }).click();
-  await expect(page.getByText('Não há comprovativos à espera')).toBeVisible({ timeout: 15_000 });
+  await expect(cartaoCliente).toHaveCount(0, { timeout: 15_000 });
 
   await page.getByRole('button', { name: 'Sair' }).first().click();
   await page.goto('/login');

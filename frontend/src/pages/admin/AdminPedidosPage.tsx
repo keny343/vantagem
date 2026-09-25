@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ApiError, api, urlMedia } from '../../api/client';
+import { ApiError, api, abrirComprovativo } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
@@ -143,14 +143,15 @@ export function AdminPedidosPage() {
                 className="flex flex-wrap gap-4 rounded-lg border border-acid/30 bg-panel2 p-4"
               >
                 {o.comprovativoUrl ? (
-                  <a
-                    href={urlMedia(o.comprovativoUrl)}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void abrirComprovativo(o.reference);
+                    }}
                     className="grid h-28 w-28 shrink-0 place-items-center rounded-md border border-line bg-panel font-mono text-[10px] tracking-[0.12em] text-acid uppercase"
                   >
                     Ver PDF
-                  </a>
+                  </button>
                 ) : null}
                 <div className="min-w-[180px] flex-1">
                   <Link

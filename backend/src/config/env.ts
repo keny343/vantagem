@@ -49,6 +49,12 @@ if (!parsed.success) {
 
 const raw = parsed.data;
 
+if (raw.NODE_ENV === 'production' && (!raw.CSRF_SECRET || raw.CSRF_SECRET.length < 16)) {
+  throw new Error(
+    'Invalid environment configuration -> CSRF_SECRET: obrigatório em produção (mínimo 16 caracteres).',
+  );
+}
+
 export const env = {
   ...raw,
   isProduction: raw.NODE_ENV === 'production',

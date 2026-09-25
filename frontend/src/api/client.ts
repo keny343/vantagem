@@ -140,6 +140,33 @@ export const urlMedia = (caminho: string | undefined): string => {
   return caminho;
 };
 
+/** Abre comprovativo privado com a sessão (cookies) — nunca URL pública de storage. */
+export const abrirComprovativo = async (referenciaOuUrl: string): Promise<void> => {
+  const caminho = referenciaOuUrl.includes('/comprovativo')
+    ? referenciaOuUrl.startsWith('http')
+      ? new URL(referenciaOuUrl).pathname
+      : referenciaOuUrl
+    : `/api/pedidos/${encodeURIComponent(referenciaOuUrl)}/comprovativo`;
+
+  const res = await fetch(urlAbsoluto(caminho), {
+    method: 'GET',
+    credentials: 'include',
+    headers: { Accept: 'application/pdf,*/*' },
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, {
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Não foi possível abrir o comprovativo. Entra na conta e tenta outra vez.',
+      },
+    });
+  }
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  window.open(objectUrl, '_blank', 'noopener,noreferrer');
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+};
+
 const executarPedido = async <T>(
   caminho: string,
   init: RequestInit,

@@ -10,33 +10,31 @@ Cobre o fluxo crítico da loja sem dependências externas (Supabase opcional —
 
 ## Local
 
-Precisas de Postgres (ex. na porta 5432) e:
+Precisas de Postgres via Docker Compose (porta **5434**) e:
 
 ```bash
-# terminal 1 — API
+# Postgres
+docker compose up postgres -d
+
+# Seed E2E (limpa pedidos de teste e garante o artigo Cabo USB-C E2E)
 cd backend
-export DATABASE_URL=postgres://vantagem:vantagem@127.0.0.1:5432/vantagem_e2e
+cp .env.example .env   # DATABASE_URL=...@localhost:5434/vantagem
+export DATABASE_URL=postgresql://vantagem:vantagem_dev@127.0.0.1:5434/vantagem
 export ADMIN_EMAIL=admin@e2e.vantagem.test
 export ADMIN_PASSWORD=E2eAdminPass99
-export CSRF_SECRET=e2e-csrf
-export NODE_ENV=development
+export CSRF_SECRET=e2e-csrf-secret-hardening
 npm ci && npm run build
 node dist/db/prestart.js
 npm run seed:e2e
-npm run start:e2e
 
-# terminal 2 — loja (proxy /api → API)
-cd frontend
-VANTAGEM_API_TARGET=http://127.0.0.1:4200 npm run dev -- --host 127.0.0.1 --port 5174
-
-# terminal 3 — testes
-cd e2e
+# Playwright arranca API + Vite sozinho
+cd ../e2e
 npm install
 npx playwright install chromium
 npm test
 ```
 
-O `playwright.config.ts` também pode arrancar API + Vite sozinho se a BD já estiver migrada/seedada e `start:e2e` estiver buildado.
+O `playwright.config.ts` força `CORS_ORIGINS` com `127.0.0.1` e `localhost`, e `reuseExistingServer: false` para não reutilizar um backend antigo.
 
 ## CI
 

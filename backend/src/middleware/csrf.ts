@@ -15,6 +15,9 @@ const SAFE = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 const segredoCsrf = (): string => {
   if (env.CSRF_SECRET.length > 0) return env.CSRF_SECRET;
+  if (env.isProduction) {
+    throw new AppError('INTERNAL_ERROR', 'CSRF_SECRET em falta.');
+  }
   return env.DATABASE_URL || 'vantagem-csrf-dev';
 };
 

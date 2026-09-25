@@ -1,6 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ApiError, api, mensagemParaUtilizador, urlMedia, type Order } from '../api/client';
+import { ApiError, api, mensagemParaUtilizador, abrirComprovativo, type Order } from '../api/client';
 import { LOJA } from '../config/loja';
 import { useTitulo } from '../hooks/useTitulo';
 import { StoreShell } from '../layout/StoreShell';
@@ -135,14 +135,17 @@ export function PedidoPage() {
               A loja está a verificar a transferência. Quando confirmar, o estado passa a pago —
               acompanhas isso na tua conta, em Os meus pedidos.
             </p>
-            <a
-              href={urlMedia(order.comprovativoUrl)}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                void abrirComprovativo(order.reference).catch(() => {
+                  /* feedback já na página via estado se necessário */
+                });
+              }}
               className="mt-4 inline-flex h-11 items-center rounded-lg bg-panel2 px-4 font-mono text-[11px] tracking-[0.12em] text-acid uppercase ring-1 ring-line"
             >
               Abrir PDF enviado
-            </a>
+            </button>
             <Link
               to="/conta/pedidos"
               className="mt-4 inline-grid h-11 place-items-center rounded-lg bg-acid px-5 font-display text-sm font-semibold text-canvas"
@@ -188,6 +191,7 @@ export function PedidoPage() {
                 id="pedido-comprovativo"
                 ficheiro={ficheiro}
                 required
+                referenciaPedido={order.reference}
                 aEnviar={aEnviarFoto}
                 erro={erro}
                 onChange={(f) => {

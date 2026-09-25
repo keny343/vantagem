@@ -57,6 +57,37 @@ try {
     [produtoId],
   );
 
+  // Remove encomendas de integração que deixam comprovativos na fila do admin.
+  await pool.query(`
+    DELETE FROM itens_de_pedido
+    WHERE pedido_id IN (
+      SELECT id FROM pedidos
+      WHERE cliente_email LIKE '%@vantagem.test'
+         OR cliente_email LIKE '%@e2e.vantagem.test'
+    )
+  `);
+  await pool.query(`
+    DELETE FROM cupons_utilizador
+    WHERE pedido_id IN (
+      SELECT id FROM pedidos
+      WHERE cliente_email LIKE '%@vantagem.test'
+         OR cliente_email LIKE '%@e2e.vantagem.test'
+    )
+  `);
+  await pool.query(`
+    DELETE FROM historico_estado_pedido
+    WHERE pedido_id IN (
+      SELECT id FROM pedidos
+      WHERE cliente_email LIKE '%@vantagem.test'
+         OR cliente_email LIKE '%@e2e.vantagem.test'
+    )
+  `);
+  await pool.query(`
+    DELETE FROM pedidos
+    WHERE cliente_email LIKE '%@vantagem.test'
+       OR cliente_email LIKE '%@e2e.vantagem.test'
+  `);
+
   const hash = await bcrypt.hash(adminPass, 10);
   await pool.query(
     `INSERT INTO utilizadores (email, password_hash, nome, perfil, cidade)

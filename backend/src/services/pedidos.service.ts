@@ -131,7 +131,8 @@ const reporStockSePreciso = async (
     }
   }
 
-  if (pedido.cupao_id !== null) {
+  // Cupão só é consumido no pagamento — só repõe se já tiver sido debitado.
+  if (pedido.cupao_id !== null && stockDebitado) {
     await client.query(
       `UPDATE cupons SET utilizacoes = GREATEST(utilizacoes - 1, 0) WHERE id = $1`,
       [pedido.cupao_id],
@@ -154,6 +155,38 @@ const registarHistoricoEstado = async (
      VALUES ($1, $2::estado_pedido, $3)`,
     [pedidoId, estado, descricao],
   );
+};
+
+/** Consome cupão na mesma transacção do pagamento (não na criação do pedido). */
+const consumirCupaoAoPagar = async (
+  client: { query: typeof query },
+  pedido: PedidoRow,
+): Promise<void> => {
+  if (pedido.cupao_id === null) return;
+
+  const { rows } = await client.query<{
+    id: string;
+    maximo_utilizacoes: number | null;
+    utilizacoes: number;
+  }>(
+    `SELECT id, maximo_utilizacoes, utilizacoes FROM cupons WHERE id = $1 FOR UPDATE`,
+    [pedido.cupao_id],
+  );
+  const cupao = rows[0];
+  if (cupao === undefined) return;
+  if (cupao.maximo_utilizacoes !== null && cupao.utilizacoes >= cupao.maximo_utilizacoes) {
+    throw new AppError(
+      'VALIDATION_ERROR',
+      'Este cupão esgotou as utilizações antes de confirmares o pagamento.',
+    );
+  }
+
+  await client.query(
+    `INSERT INTO cupons_utilizador (cupao_id, utilizador_id, pedido_id)
+     VALUES ($1, $2, $3)`,
+    [pedido.cupao_id, pedido.utilizador_id, pedido.id],
+  );
+  await client.query(`UPDATE cupons SET utilizacoes = utilizacoes + 1 WHERE id = $1`, [pedido.cupao_id]);
 };
 
 /** Debita stock e incrementa vendidos no momento do pagamento confirmado. */
@@ -203,6 +236,12 @@ const debitarStockAoPagar = async (
   }
 };
 
+/** URL pública do comprovativo: sempre via proxy autenticado — nunca storage directo. */
+const urlComprovativoApi = (pedido: PedidoRow): string | null =>
+  pedido.comprovativo_url
+    ? `/api/pedidos/${encodeURIComponent(pedido.referencia)}/comprovativo`
+    : null;
+
 const mapearPedido = (pedido: PedidoRow, items: ItemRow[]): PedidoPublico => ({
   id: pedido.id,
   reference: pedido.referencia,
@@ -215,7 +254,7 @@ const mapearPedido = (pedido: PedidoRow, items: ItemRow[]): PedidoPublico => ({
   mbEntity: pedido.mb_entidade,
   mbReference: pedido.mb_referencia,
   paidAt: pedido.pago_em === null ? null : pedido.pago_em.toISOString(),
-  comprovativoUrl: pedido.comprovativo_url ?? null,
+  comprovativoUrl: urlComprovativoApi(pedido),
   customer: {
     name: pedido.cliente_nome,
     email: pedido.cliente_email,
@@ -280,6 +319,13 @@ export const criarPedido = async (dados: {
       [dados.idempotencyKey],
     );
     if (rows[0] !== undefined) {
+      if (
+        dados.userId !== null &&
+        rows[0].utilizador_id !== null &&
+        rows[0].utilizador_id !== dados.userId
+      ) {
+        throw notFound('Pedido');
+      }
       const items = await carregarItems({ query }, rows[0].id);
       return mapearPedido(rows[0], items);
     }
@@ -311,7 +357,8 @@ export const criarPedido = async (dados: {
           `SELECT p.id, p.sku, p.nome, p.preco_centimos, p.variante_opcoes, p.activo, s.quantidade
            FROM produtos p
            INNER JOIN stock s ON s.produto_id = p.id
-           WHERE p.slug = $1`,
+           WHERE p.slug = $1
+           FOR UPDATE OF s`,
           [item.productId],
         );
         const produto = rows[0];
@@ -328,11 +375,21 @@ export const criarPedido = async (dados: {
           });
         }
 
-        // Verificação indicativa: o stock só é debitado na confirmação de pagamento.
-        if (produto.quantidade < item.quantity) {
+        // Reserva soft: stock físico só debita em `pago`, mas pedidos pendentes
+        // contam para não oversell operacional.
+        const { rows: pendentes } = await client.query<{ reserved: string }>(
+          `SELECT COALESCE(SUM(i.quantidade), 0)::text AS reserved
+           FROM itens_de_pedido i
+           INNER JOIN pedidos ped ON ped.id = i.pedido_id
+           WHERE i.produto_id = $1 AND ped.estado = 'pendente'`,
+          [produto.id],
+        );
+        const reservado = Number(pendentes[0]?.reserved ?? 0);
+        const disponivel = produto.quantidade - reservado;
+        if (disponivel < item.quantity) {
           throw new AppError(
             'INSUFFICIENT_STOCK',
-            `Stock insuficiente para ${produto.nome} (disponível: ${produto.quantidade}).`,
+            `Stock insuficiente para ${produto.nome} (disponível: ${Math.max(disponivel, 0)}).`,
           );
         }
 
@@ -360,13 +417,14 @@ export const criarPedido = async (dados: {
           tipo: 'percentual' | 'fixo';
           valor: number;
           minimo_centimos: number;
+          maximo_utilizacoes: number | null;
+          utilizacoes: number;
         }>(
-          `SELECT id, codigo, tipo, valor, minimo_centimos
+          `SELECT id, codigo, tipo, valor, minimo_centimos, maximo_utilizacoes, utilizacoes
            FROM cupons
            WHERE lower(codigo) = lower($1)
              AND activo = true
              AND now() BETWEEN valido_de AND valido_ate
-             AND (maximo_utilizacoes IS NULL OR utilizacoes < maximo_utilizacoes)
            FOR UPDATE`,
           [codigo],
         );
@@ -381,6 +439,21 @@ export const criarPedido = async (dados: {
             'VALIDATION_ERROR',
             `Este cupão exige um subtotal mínimo de ${eurosDeCentimos(cupao.minimo_centimos).toLocaleString('pt-AO')} Kz.`,
           );
+        }
+        // Soft reserve: utilizações + pedidos pendentes com este cupão.
+        const { rows: pendentesCupao } = await client.query<{ n: string }>(
+          `SELECT COUNT(*)::text AS n FROM pedidos
+           WHERE cupao_id = $1 AND estado = 'pendente'`,
+          [cupao.id],
+        );
+        const reservados = Number(pendentesCupao[0]?.n ?? 0);
+        if (
+          cupao.maximo_utilizacoes !== null &&
+          cupao.utilizacoes + reservados >= cupao.maximo_utilizacoes
+        ) {
+          throw new AppError('VALIDATION_ERROR', 'Cupão inválido ou expirado.', {
+            details: [{ field: 'couponCode', message: codigo }],
+          });
         }
         desconto = descontoDeCupao(cupao.tipo, cupao.valor, subtotal);
         cupaoId = cupao.id;
@@ -465,14 +538,7 @@ export const criarPedido = async (dados: {
         );
       }
 
-      if (cupaoId !== null) {
-        await client.query(
-          `INSERT INTO cupons_utilizador (cupao_id, utilizador_id, pedido_id)
-           VALUES ($1, $2, $3)`,
-          [cupaoId, dados.userId, pedido.id],
-        );
-        await client.query(`UPDATE cupons SET utilizacoes = utilizacoes + 1 WHERE id = $1`, [cupaoId]);
-      }
+      // Cupão fica associado ao pedido; consumo (utilizacoes + cupons_utilizador) só em `pago`.
 
       await registarHistoricoEstado(client, pedido.id, 'pendente', 'Encomenda criada — a aguardar pagamento.');
 
@@ -486,6 +552,13 @@ export const criarPedido = async (dados: {
         [dados.idempotencyKey],
       );
       if (rows[0] !== undefined) {
+        if (
+          dados.userId !== null &&
+          rows[0].utilizador_id !== null &&
+          rows[0].utilizador_id !== dados.userId
+        ) {
+          throw notFound('Pedido');
+        }
         const items = await carregarItems({ query }, rows[0].id);
         return mapearPedido(rows[0], items);
       }
@@ -512,6 +585,7 @@ export const confirmarPagamento = async (referencia: string): Promise<PedidoPubl
 
     const items = await carregarItems(client, pedido.id);
     await debitarStockAoPagar(client, items);
+    await consumirCupaoAoPagar(client, pedido);
 
     const { rows } = await client.query<PedidoRow>(
       `UPDATE pedidos
@@ -554,6 +628,7 @@ export const alterarEstado = async (
 
     if (pedido.estado === 'pendente' && novo === 'pago') {
       await debitarStockAoPagar(client, items);
+      await consumirCupaoAoPagar(client, pedido);
     }
 
     const { rows: actualizados } = await client.query<PedidoRow>(
@@ -650,4 +725,18 @@ export const guardarComprovativo = async (
   const actualizado = rows[0];
   if (actualizado === undefined) throw notFound('Pedido');
   return mapearPedido(actualizado, await carregarItems({ query }, actualizado.id));
+};
+
+/** Chave/URL interna do comprovativo — só após autorização (dono ou admin). */
+export const chaveComprovativoAutorizado = async (
+  referencia: string,
+  auth: { userId: string; perfil: string },
+): Promise<string> => {
+  const pedido = await obterRowPorReferencia({ query }, referencia);
+  if (pedido === null) throw notFound('Pedido');
+  if (auth.perfil !== 'admin' && pedido.utilizador_id !== auth.userId) {
+    throw notFound('Pedido');
+  }
+  if (!pedido.comprovativo_url) throw notFound('Comprovativo');
+  return pedido.comprovativo_url;
 };

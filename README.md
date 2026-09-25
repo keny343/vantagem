@@ -31,18 +31,21 @@ Compradores em Angola precisam de comprar electrónica online com preços em Kwa
 
 - Estados: `pendente` → `pago` → `em_preparacao` → `enviado` → `entregue` (ou `cancelado`)
 - Stock **só é debitado** quando o admin confirma o pagamento (`FOR UPDATE` + update condicional)
+- Na criação do pedido: **reserva soft** (pedidos `pendente` contam contra o stock disponível — sem oversell)
 - Cancelamento após pagamento repõe stock (exceto após saída/entrega, conforme regras)
-- Idempotência no checkout (`idempotencyKey`)
+- Cupões: associados na criação; **consumidos só no pagamento**
+- Idempotência no checkout (`idempotencyKey`) com ownership (chave de outro cliente → 404)
 - Histórico em `historico_estado_pedido`
 
 ### Segurança
 
-- Sessões com cookie httpOnly; CSRF (HMAC / double-submit)
+- Sessões com cookie httpOnly; CSRF (HMAC / double-submit; `CSRF_SECRET` obrigatório em produção)
 - RBAC `cliente` | `admin` no backend
-- Proteção IDOR em pedidos, endereços, favoritos, tickets, etc.
+- Proteção IDOR em pedidos, comprovativos, endereços, favoritos, tickets, devoluções
+- Comprovativos PDF em storage **privado**, servidos só via `GET /api/pedidos/:ref/comprovativo` (dono ou admin)
 - Rate limit (login, checkout, upload, cupão, API global)
 - Uploads com magic bytes; comprovativos só PDF
-- Zod em inputs; preços nunca confiados do frontend
+- Zod estrito em inputs públicos; preços nunca confiados do frontend
 - Helmet, CORS por origem, logs sem secrets, `/health` e `/ready`
 
 ## Arquitectura
@@ -50,10 +53,10 @@ Compradores em Angola precisam de comprar electrónica online com preços em Kwa
 ```
 Browser (React/Vite)  →  API Express (Render)  →  PostgreSQL
                               ↓
-                       Supabase Storage (fotos / comprovativos)
+                       Supabase Storage (fotos públicas / comprovativos privados)
 ```
 
-Frontend: Vercel · Backend: Render · Base de dados: Postgres gerido (Render)
+Frontend: Vercel (`vantagem-one.vercel.app`) · Backend: Render (`vantagem-api`) · Base de dados: Postgres gerido (Render)
 
 ## Stack
 

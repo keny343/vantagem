@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ApiError, api, urlMedia, type Order } from '../../api/client';
+import { ApiError, api, abrirComprovativo, type Order } from '../../api/client';
 import { useTitulo } from '../../hooks/useTitulo';
 import { useAvisos } from '../../ui/Avisos';
 import { useConfirmar } from '../../ui/Confirmar';
@@ -113,14 +113,15 @@ export function AdminPedidoPage() {
           <div className="label-mono mb-3">Comprovativo de transferência</div>
           {order.comprovativoUrl ? (
             <>
-              <a
-                href={urlMedia(order.comprovativoUrl)}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => {
+                  void abrirComprovativo(order.reference);
+                }}
                 className="inline-flex h-11 items-center rounded-lg bg-panel2 px-4 font-mono text-[11px] tracking-[0.12em] text-acid uppercase ring-1 ring-line hover:bg-acid hover:text-canvas"
               >
                 Abrir PDF do comprovativo
-              </a>
+              </button>
               <p className="mt-2 font-mono text-[11px] text-steel">Abre o PDF noutro separador para verificar.</p>
             </>
           ) : (

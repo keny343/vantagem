@@ -22,8 +22,9 @@ export const limparPedidosEStock = async (): Promise<void> => {
   await query('DELETE FROM itens_de_pedido');
   await query('DELETE FROM cupons_utilizador');
   await query('DELETE FROM pedidos');
-  await query('DELETE FROM stock');
-  await query('DELETE FROM produtos');
+  // Só remove artigos criados pelos testes de integração — preserva seed/E2E.
+  await query(`DELETE FROM stock WHERE produto_id IN (SELECT id FROM produtos WHERE sku LIKE 'SKU-%')`);
+  await query(`DELETE FROM produtos WHERE sku LIKE 'SKU-%'`);
   await query(`DELETE FROM categorias WHERE slug LIKE 'test-%'`);
   await query(`DELETE FROM utilizadores WHERE email LIKE 'test-%@vantagem.test'`);
 };

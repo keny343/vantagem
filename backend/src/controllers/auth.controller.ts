@@ -77,17 +77,19 @@ export const me = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-const esquemaRegisto = z.object({
-  nome: z.string().trim().min(2, 'Indica o teu nome.').max(160),
-  email: z.string().trim().min(3).max(200).email('Email inválido.'),
-  password: z
-    .string()
-    .min(8, 'A palavra-passe precisa de pelo menos 8 caracteres.')
-    .max(200)
-    .regex(/[A-Za-z]/, 'A palavra-passe precisa de uma letra.')
-    .regex(/\d/, 'A palavra-passe precisa de um número.'),
-  telefone: z.string().trim().max(40).optional(),
-});
+const esquemaRegisto = z
+  .object({
+    nome: z.string().trim().min(2, 'Indica o teu nome.').max(160),
+    email: z.string().trim().min(3).max(200).email('Email inválido.'),
+    password: z
+      .string()
+      .min(8, 'A palavra-passe precisa de pelo menos 8 caracteres.')
+      .max(200)
+      .regex(/[A-Za-z]/, 'A palavra-passe precisa de uma letra.')
+      .regex(/\d/, 'A palavra-passe precisa de um número.'),
+    telefone: z.string().trim().max(40).optional(),
+  })
+  .strict();
 
 export const registo = async (req: Request, res: Response): Promise<void> => {
   const dados = esquemaRegisto.parse(req.body);
