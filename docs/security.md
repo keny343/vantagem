@@ -39,9 +39,9 @@
 ## Uploads
 - Content-Type do browser não basta: validação por **magic bytes** (imagens e PDF).
 - Nomes com `..` / `/` / `\` rejeitados.
-- **Comprovativos** guardados como objectos privados (chave `comprovativos/…`); nunca URL `object/public`.
-- Download só via `GET /api/pedidos/:referencia/comprovativo` (sessão + ownership).
-- Fotos de produto podem continuar públicas em `/uploads/produtos` ou bucket público.
+- **Fotos de produto:** bucket Supabase público `artigos` (pasta `produtos/`).
+- **Comprovativos:** bucket Supabase **privado** `comprovativos`; download só via `GET /api/pedidos/:referencia/comprovativo` (sessão + ownership).
+- Em desenvolvimento sem Supabase: disco local (`uploads/produtos`, `uploads/comprovativos`) — comprovativos nunca servidos por static.
 
 ## Observabilidade
 - `X-Request-Id` em cada pedido; erros 5xx podem ir para `ERROR_WEBHOOK_URL` (opcional).
